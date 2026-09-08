@@ -62,29 +62,87 @@ export const SignUpForm = () => {
   };
 
   return (
-    <form onSubmit={handleSignUp} className="mt-8 space-y-6">
-      <div className="space-y-4">
+    <form onSubmit={handleSignUp} className="space-y-4 sm:space-y-5">
+      <div className="grid gap-3.5 sm:grid-cols-2 sm:gap-4">
         {/* email */}
         <div className="space-y-2">
-          <Label htmlFor="signup-email">Email</Label>
+          <Label
+            htmlFor="signup-email"
+            className="text-sm font-medium text-slate-700"
+          >
+            Email address
+          </Label>
           <div className="relative">
             <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               id="signup-email"
               type="email"
+              autoComplete="email"
+              required
               value={signupForm.email}
               onChange={(e) =>
                 setSignupForm({ ...signupForm, email: e.target.value })
               }
-              className="pl-10"
+              className="h-11 bg-slate-50 pl-10 focus-visible:bg-white"
               placeholder="your@email.com"
             />
           </div>
         </div>
 
+        {signupForm.role === 'DEVELOPER' || signupForm.role === '' ? (
+          <div className="space-y-2">
+            <Label
+              htmlFor="name"
+              className="text-sm font-medium text-slate-700"
+            >
+              Full name
+            </Label>
+            <Input
+              id="name"
+              type="text"
+              autoComplete="name"
+              value={signupForm.name}
+              onChange={(e) =>
+                setSignupForm({ ...signupForm, name: e.target.value })
+              }
+              placeholder="John Doe"
+              className="h-11 bg-slate-50 focus-visible:bg-white"
+            />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label
+              htmlFor="company-name"
+              className="text-sm font-medium text-slate-700"
+            >
+              Company name
+            </Label>
+            <Input
+              id="company-name"
+              type="text"
+              autoComplete="organization"
+              required
+              value={signupForm.companyName}
+              onChange={(e) =>
+                setSignupForm({
+                  ...signupForm,
+                  companyName: e.target.value,
+                })
+              }
+              placeholder="Your Company Inc."
+              className="h-11 bg-slate-50 focus-visible:bg-white"
+            />
+          </div>
+        )}
+
         {/* role */}
-        <div className="space-y-2">
-          <Label htmlFor="signup-role">Role</Label>
+        <div className="space-y-2 sm:col-span-2">
+          <Label
+            htmlFor="signup-role"
+            className="text-sm font-medium text-slate-700"
+          >
+            Account type
+          </Label>
           <Select
             value={signupForm.role}
             onValueChange={(value) =>
@@ -94,7 +152,7 @@ export const SignUpForm = () => {
               })
             }
           >
-            <SelectTrigger id="signup-role" className="w-full">
+            <SelectTrigger id="signup-role" className="h-11 w-full bg-slate-50">
               <SelectValue placeholder="Select your role" />
             </SelectTrigger>
 
@@ -108,52 +166,26 @@ export const SignUpForm = () => {
           </Select>
         </div>
 
-        {signupForm.role === 'DEVELOPER' || signupForm.role === '' ? (
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              type="text"
-              value={signupForm.name}
-              onChange={(e) =>
-                setSignupForm({ ...signupForm, name: e.target.value })
-              }
-              placeholder="John Doe"
-            />
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <Label htmlFor="company-name">Company Name</Label>
-            <Input
-              id="company-name"
-              type="text"
-              required
-              value={signupForm.companyName}
-              onChange={(e) =>
-                setSignupForm({
-                  ...signupForm,
-                  companyName: e.target.value,
-                })
-              }
-              placeholder="Your Company Inc."
-            />
-          </div>
-        )}
-
         {/* password */}
         <div className="space-y-2">
-          <Label htmlFor="signup-password">Password</Label>
+          <Label
+            htmlFor="signup-password"
+            className="text-sm font-medium text-slate-700"
+          >
+            Password
+          </Label>
           <div className="relative">
             <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               id="signup-password"
               type={showPassword ? 'text' : 'password'}
               required
+              autoComplete="new-password"
               value={signupForm.password}
               onChange={(e) =>
                 setSignupForm({ ...signupForm, password: e.target.value })
               }
-              className="pr-10 pl-10"
+              className="h-11 bg-slate-50 pr-10 pl-10 focus-visible:bg-white"
               placeholder="••••••••"
             />
             <button
@@ -173,13 +205,19 @@ export const SignUpForm = () => {
 
         {/* confirm password */}
         <div className="space-y-2">
-          <Label htmlFor="confirm-password">Confirm Password</Label>
+          <Label
+            htmlFor="confirm-password"
+            className="text-sm font-medium text-slate-700"
+          >
+            Confirm password
+          </Label>
           <div className="relative">
             <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               id="confirm-password"
               type={showConfirmPassword ? 'text' : 'password'}
               required
+              autoComplete="new-password"
               value={signupForm.confirmPassword}
               onChange={(e) =>
                 setSignupForm({
@@ -187,7 +225,7 @@ export const SignUpForm = () => {
                   confirmPassword: e.target.value,
                 })
               }
-              className="pr-10 pl-10"
+              className="h-11 bg-slate-50 pr-10 pl-10 focus-visible:bg-white"
               placeholder="••••••••"
             />
             <button
@@ -210,16 +248,19 @@ export const SignUpForm = () => {
 
       <Button
         type="submit"
-        className="w-full"
+        className="h-11 w-full bg-orange-600 font-semibold hover:bg-orange-700"
         size="lg"
         disabled={signUpMutation.isPending}
       >
         {signUpMutation.isPending ? 'Creating account...' : 'Create Account'}
       </Button>
 
-      <div className="flex items-center justify-center gap-1 text-center text-sm">
-        <p className="text-muted-foreground">Already have an account?</p>
-        <Link to="/login" className="text-primary font-medium hover:underline">
+      <div className="flex items-center justify-center gap-1.5 border-t border-slate-100 pt-4 text-center text-sm sm:pt-5">
+        <p className="text-slate-500">Already have an account?</p>
+        <Link
+          to="/login"
+          className="font-semibold text-orange-600 hover:text-orange-700"
+        >
           Sign in
         </Link>
       </div>

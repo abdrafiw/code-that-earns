@@ -1,0 +1,130 @@
+import type { ReactNode } from 'react';
+import { ArrowLeft, Bitcoin, Check, Code2, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+type AuthPageLayoutProps = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  children: ReactNode;
+  wide?: boolean;
+};
+
+const benefits = [
+  'Clear coding challenges',
+  'GitHub-based submissions',
+  'Transparent Bitcoin rewards',
+];
+
+export function AuthPageLayout({
+  eyebrow,
+  title,
+  description,
+  children,
+  wide = false,
+}: AuthPageLayoutProps) {
+  return (
+    <main className="auth-page min-h-screen bg-[#f7f7f5] lg:grid lg:grid-cols-[0.9fr_1.1fr]">
+      <section className="relative hidden overflow-hidden bg-slate-950 px-6 py-8 text-white sm:px-10 lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:px-14 lg:py-12">
+        <div
+          aria-hidden="true"
+          className="absolute -right-16 -bottom-20 size-64 rounded-full border-[38px] border-orange-500/10"
+        />
+
+        <Link
+          to="/"
+          className="relative inline-flex items-center gap-3 text-base font-semibold"
+        >
+          <span className="flex size-10 items-center justify-center rounded-xl bg-orange-500">
+            <Code2 className="size-5" />
+          </span>
+          <span>
+            CTE
+            <span className="ml-2 font-normal text-slate-400">
+              Code That Earns
+            </span>
+          </span>
+        </Link>
+
+        <div className="relative mt-14 max-w-lg lg:my-auto">
+          <p className="text-sm font-semibold text-orange-400">
+            Build. Submit. Earn.
+          </p>
+          <h1 className="mt-4 text-4xl leading-tight font-semibold tracking-[-0.04em] sm:text-5xl">
+            Great code should open real opportunities.
+          </h1>
+          <p className="mt-5 max-w-md text-base leading-7 text-slate-300">
+            Join companies and developers working together through focused
+            challenges and transparent rewards.
+          </p>
+
+          <ul className="mt-8 grid gap-3 text-sm text-slate-300 sm:grid-cols-3 lg:grid-cols-1">
+            {benefits.map((benefit) => (
+              <li key={benefit} className="flex items-center gap-3">
+                <span className="flex size-6 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-400">
+                  <Check className="size-3.5" />
+                </span>
+                {benefit}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="relative mt-12 hidden items-center gap-4 border-t border-white/10 pt-6 text-xs text-slate-400 lg:flex">
+          <span className="inline-flex items-center gap-2">
+            <ShieldCheck className="size-4 text-emerald-400" />
+            Secure Firebase authentication
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <Bitcoin className="size-4 text-orange-400" />
+            BTC rewards
+          </span>
+        </div>
+      </section>
+
+      <section className="flex min-h-screen items-center justify-center px-4 py-5 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
+        <div className={`w-full ${wide ? 'max-w-2xl' : 'max-w-md'}`}>
+          <nav className="mb-5 flex items-center justify-between sm:mb-7">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-950"
+            >
+              <ArrowLeft className="size-4" />
+              Back to home
+            </Link>
+
+            <Link
+              to="/"
+              aria-label="CTE home"
+              className="inline-flex items-center gap-2 font-semibold text-slate-950 lg:hidden"
+            >
+              <span className="flex size-8 items-center justify-center rounded-lg bg-orange-600 text-white">
+                <Code2 className="size-4" />
+              </span>
+              CTE
+            </Link>
+          </nav>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] sm:p-8 sm:shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <header>
+              <p className="text-sm font-semibold text-orange-600">{eyebrow}</p>
+              <h2 className="mt-1.5 text-2xl font-semibold tracking-[-0.035em] text-slate-950 sm:mt-2 sm:text-3xl">
+                {title}
+              </h2>
+              <p className="mt-1.5 text-sm leading-5 text-slate-500 sm:mt-2 sm:leading-6">
+                {description}
+              </p>
+            </header>
+
+            <div className="mt-5 sm:mt-7">{children}</div>
+          </div>
+
+          <p className="mt-5 hidden text-center text-xs leading-5 text-slate-400 sm:block">
+            By continuing, you agree to use CTE responsibly and submit work you
+            are authorized to share.
+          </p>
+        </div>
+      </section>
+    </main>
+  );
+}
