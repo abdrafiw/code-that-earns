@@ -1,10 +1,10 @@
 import { PageSkeleton } from '../../../components/common/PageSkeleton';
 import { PageEmptyState } from '../../../components/common/PageEmptyState';
 import { PageErrorState } from '../../../components/common/PageErrorState';
-import { useDeveloperSubmissions } from '../hooks/useDeveloperSubmissions';
+import { useGetDeveloperSubmissions } from '../hooks/useSubmissions';
 
 export function DeveloperSubmissionsPage() {
-  const { submissions, loading, error } = useDeveloperSubmissions();
+  const { submissions, loading, error } = useGetDeveloperSubmissions();
 
   if (loading) return <PageSkeleton variant="submissions" />;
   if (error) return <PageErrorState message={error} />;

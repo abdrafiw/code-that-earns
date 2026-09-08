@@ -27,7 +27,7 @@ const mockBounty = {
   difficulty: 'Easy',
 } as TBounty;
 
-jest.mock('../hooks/useSubmitSolution', () => ({
+jest.mock('../hooks/useSubmissions', () => ({
   useSubmitSolution: jest.fn(() => ({
     mutate: mockMutate,
     isPending: false,

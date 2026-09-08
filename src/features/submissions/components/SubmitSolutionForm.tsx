@@ -5,7 +5,7 @@ import { SiGithub } from 'react-icons/si';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
-import { useSubmitSolution } from '../hooks/useSubmitSolution';
+import { useSubmitSolution } from '../hooks/useSubmissions';
 import type { TBounty } from '../../bounties/types';
 import { formatDeadline } from '../utils/formatDeadline';
 
