@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { LoadingState } from '../../../components/common/LoadingState';
+import { PageSkeleton } from '../../../components/common/PageSkeleton';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { BountyCard } from '../components/BountyCard';
-import { useGetBounties } from '../hooks/useBounties';
+import { useGetBounty } from '../hooks/useBounties';
 
 import {
   Select,
@@ -18,18 +18,12 @@ export const DevBountiesPage = () => {
   const [difficulty, setDifficulty] = useState<string>('all');
 
   const { user } = useAppContext();
-  const { data: bounties = [], isLoading: loading, error } = useGetBounties();
+  const { data: bounties = [], isLoading: loading, error } = useGetBounty();
 
   if (!user?.success) return <Navigate to="/" />;
 
   if (loading) {
-    return (
-      <LoadingState
-        message="Loading bounties..."
-        fullscreen={false}
-        className="py-12"
-      />
-    );
+    return <PageSkeleton variant="dev-bounties" />;
   }
 
   if (error) {

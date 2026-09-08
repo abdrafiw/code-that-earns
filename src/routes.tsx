@@ -4,7 +4,6 @@ import { HomePage } from './features/home/pages/HomePage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { SignUpPage } from './features/auth/pages/SignUpPage';
 import { CompanyBountiesPage } from './features/bounties/pages/CompanyBountiesPage';
-import { CreateBountyPage } from './features/bounties/pages/CreateBountyPage';
 import { DevBountiesPage } from './features/bounties/pages/DevBountiesPage';
 import { CompanySubmissionsPage } from './features/submissions/pages/CompanySubmissionsPage';
 import { DeveloperSubmissionsPage } from './features/submissions/pages/DeveloperSubmissionsPage';
@@ -47,7 +46,6 @@ export const router = createBrowserRouter([
             index: true,
             element: <CompanyBountiesPage />,
           },
-          { path: 'create', element: <CreateBountyPage /> },
         ],
       },
 

@@ -11,7 +11,7 @@ const mockBounty = {
   description: 'Test Bounty Description',
   category: 'Test Category',
   difficulty: 'Easy',
-  company: 'BitSpenda',
+  company: 'Acme Labs',
 } as TBounty;
 
 const renderBountyCard = (bounty: TBounty = mockBounty) => {

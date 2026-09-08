@@ -26,6 +26,7 @@ type Result<T extends object = object> =
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (typeof error === 'string') return error;
+
   return 'An unknown error occurred';
 }
 
@@ -42,12 +43,24 @@ class BountyService {
     if (!user) return { success: false, error: 'User not authenticated' };
 
     try {
-      const tokenResult = await user.getIdTokenResult();
-      if (tokenResult.claims.role !== 'COMPANY') {
+      // The user's role is stored in Firestore during signup. Do not rely on
+      // custom auth claims here because the client never creates those claims.
+      const userSnapshot = await getDoc(doc(db, COLLECTIONS.USERS, user.uid));
+
+      if (!userSnapshot.exists()) {
+        return {
+          success: false,
+          error: 'Company profile not found. Please sign in again.',
+        };
+      }
+
+      const userData = userSnapshot.data();
+
+      if (userData.role !== 'COMPANY') {
         return { success: false, error: 'Only companies can create bounties' };
       }
 
-      const companyName = tokenResult.claims.companyName as string | undefined;
+      const companyName = userData.companyName as string | undefined;
 
       const bountyData = {
         title,
