@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { authService } from '../../../services/auth/authService';
 import type { SignInPayload, SignUpPayload } from '../types';
 import { useMutation } from '@tanstack/react-query';
+import { getErrorMessage } from '../../../utils/getErrorMessage';
 
 async function login(payload: SignInPayload) {
   const user = await authService.signIn(payload);
@@ -16,7 +17,7 @@ export const useLogin = () => {
     mutationFn: login,
     onSuccess: (data) => {
       if (!data.success) {
-        toast.error(data.error);
+        toast.error(getErrorMessage(data.error));
         return;
       }
 
@@ -31,7 +32,7 @@ export const useLogin = () => {
       }
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Login unsuccessful');
+      toast.error(getErrorMessage(error));
     },
   });
 };
@@ -48,7 +49,7 @@ export const useSignUp = () => {
     mutationFn: signUp,
     onSuccess: (data) => {
       if (!data.success) {
-        toast.error(data.error);
+        toast.error(getErrorMessage(data.error));
         return;
       }
 
@@ -61,7 +62,7 @@ export const useSignUp = () => {
       }
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Signup failed');
+      toast.error(getErrorMessage(error));
     },
   });
 };

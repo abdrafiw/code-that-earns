@@ -13,6 +13,7 @@ import {
 
 import { auth, db } from '../../config/firebase';
 import { COLLECTIONS } from '../firestore-structure';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import { bountyService } from '../bounties/bountyService';
 import type { SubmitSolutionPayload } from '../../features/submissions/types';
 
@@ -21,12 +22,6 @@ type Failure = { success: false; error: string };
 type Result<T extends object = object> = Success<T> | Failure;
 
 type Developer = { id: string } & DocumentData;
-
-function toErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  if (typeof error === 'string') return error;
-  return 'An unknown error occurred';
-}
 
 function chunk<T>(arr: T[], size = 30): T[][] {
   const out: T[][] = [];
@@ -66,7 +61,7 @@ class SubmissionService {
 
       return { success: true };
     } catch (error: unknown) {
-      return { success: false, error: toErrorMessage(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 
@@ -89,7 +84,7 @@ class SubmissionService {
         submissions,
       };
     } catch (error: unknown) {
-      return { success: false, error: toErrorMessage(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 
@@ -123,7 +118,7 @@ class SubmissionService {
         },
       };
     } catch (error: unknown) {
-      return { success: false, error: toErrorMessage(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 
@@ -160,7 +155,7 @@ class SubmissionService {
 
       return { success: true, developers };
     } catch (error: unknown) {
-      return { success: false, error: toErrorMessage(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 
@@ -233,7 +228,7 @@ class SubmissionService {
         submissions: submissionsWithDetails,
       };
     } catch (error: unknown) {
-      return { success: false, error: toErrorMessage(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 }

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { PageSkeleton } from '../../../components/common/PageSkeleton';
+import { PageErrorState } from '../../../components/common/PageErrorState';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { BountyCard } from '../components/BountyCard';
 import { useGetBounty } from '../hooks/useBounties';
+import { getErrorMessage } from '../../../utils/getErrorMessage';
 
 import {
   Select,
@@ -18,7 +20,13 @@ export const DevBountiesPage = () => {
   const [difficulty, setDifficulty] = useState<string>('all');
 
   const { user } = useAppContext();
-  const { data: bounties = [], isLoading: loading, error } = useGetBounty();
+  const {
+    data: bounties = [],
+    isLoading: loading,
+    isFetching,
+    error,
+    refetch,
+  } = useGetBounty();
 
   if (!user?.success) return <Navigate to="/" />;
 
@@ -28,9 +36,13 @@ export const DevBountiesPage = () => {
 
   if (error) {
     return (
-      <p className="text-destructive text-center">
-        {error.message || 'Failed to load bounties'}
-      </p>
+      <div className="mx-auto max-w-2xl px-4 py-10">
+        <PageErrorState
+          message={getErrorMessage(error)}
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      </div>
     );
   }
 

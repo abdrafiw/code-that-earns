@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { Bitcoin, CalendarDays, ChevronDownIcon, Plus } from 'lucide-react';
 
 import { toast } from 'sonner';
+import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { useCreateBounty } from '../hooks/useBounties';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
@@ -85,7 +86,7 @@ export const CreateBountyDialog = () => {
           setOpen(false);
         },
         onError: (error) => {
-          toast.error(error.message || 'Something went wrong');
+          toast.error(getErrorMessage(error));
         },
       },
     );
@@ -100,7 +101,7 @@ export const CreateBountyDialog = () => {
       }}
     >
       <DialogTrigger asChild>
-        <Button>
+        <Button className="cursor-pointer">
           <Plus className="size-4" />
           Create bounty
         </Button>
@@ -127,7 +128,7 @@ export const CreateBountyDialog = () => {
                   title: event.target.value,
                 }))
               }
-              placeholder="Build a React todo app"
+              placeholder="build a React todo app"
             />
           </div>
 
