@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react';
+import { Skeleton } from '../ui/skeleton';
 import { twMerge } from 'tailwind-merge';
 
 type LoadingStateProps = {
@@ -22,8 +22,9 @@ export const LoadingState = ({
       )}
     >
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="text-primary h-8 w-8 animate-spin" />
-        <p className="text-muted-foreground text-sm">{message}</p>
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-4 w-64" />
+        <p className="sr-only">{message}</p>
       </div>
     </div>
   );

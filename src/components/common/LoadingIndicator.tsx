@@ -1,4 +1,4 @@
-import { FiLoader } from 'react-icons/fi';
+import { Skeleton } from '../ui/skeleton';
 import { twMerge } from 'tailwind-merge';
 
 const loaderSize = {
@@ -33,7 +33,7 @@ export default function LoadingIndicator({
         className,
       )}
     >
-      <FiLoader aria-hidden="true" className="animate-spin" />
+      <Skeleton className="h-4 w-24" />
       <p className={'sr-only'}>{loadingText}</p>
     </div>
   );

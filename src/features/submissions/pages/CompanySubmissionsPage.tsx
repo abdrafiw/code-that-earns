@@ -1,7 +1,7 @@
 import { User, DollarSign, ExternalLink } from 'lucide-react';
 import { useCompanySubmissions } from '../hooks/useCompanySubmissions';
 import { AccessDeniedState } from '../../../components/common/AccessDeniedState';
-import { LoadingState } from '../../../components/common/LoadingState';
+import { PageSkeleton } from '../../../components/common/PageSkeleton';
 import { PageEmptyState } from '../../../components/common/PageEmptyState';
 import { PageErrorState } from '../../../components/common/PageErrorState';
 import {
@@ -13,8 +13,7 @@ export function CompanySubmissionsPage() {
   const { submissions, loading, error, accessMessage } =
     useCompanySubmissions();
 
-  if (loading)
-    return <LoadingState message="Loading submissions..." fullscreen={false} />;
+  if (loading) return <PageSkeleton variant="company-submissions" />;
   if (accessMessage) return <AccessDeniedState message={accessMessage} />;
   if (error) return <PageErrorState message={error} />;
   if (submissions.length === 0)

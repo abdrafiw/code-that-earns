@@ -1,4 +1,4 @@
-import { LoadingState } from '../../../components/common/LoadingState';
+import { PageSkeleton } from '../../../components/common/PageSkeleton';
 import { PageEmptyState } from '../../../components/common/PageEmptyState';
 import { PageErrorState } from '../../../components/common/PageErrorState';
 import { useDeveloperSubmissions } from '../hooks/useDeveloperSubmissions';
@@ -6,8 +6,7 @@ import { useDeveloperSubmissions } from '../hooks/useDeveloperSubmissions';
 export function DeveloperSubmissionsPage() {
   const { submissions, loading, error } = useDeveloperSubmissions();
 
-  if (loading)
-    return <LoadingState message="Loading submissions..." fullscreen={false} />;
+  if (loading) return <PageSkeleton variant="submissions" />;
   if (error) return <PageErrorState message={error} />;
   if (submissions.length === 0)
     return (

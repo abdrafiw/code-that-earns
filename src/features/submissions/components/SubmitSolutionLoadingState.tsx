@@ -1,5 +1,5 @@
-import { LoadingState } from '../../../components/common/LoadingState';
+import { PageSkeleton } from '../../../components/common/PageSkeleton';
 
 export const SubmitSolutionLoadingState = () => {
-  return <LoadingState className="bg-background" />;
+  return <PageSkeleton variant="solution" />;
 };
