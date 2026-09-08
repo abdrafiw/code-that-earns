@@ -69,7 +69,7 @@ export const HomePage = () => {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-3 py-1.5 text-xs font-semibold text-orange-700 shadow-sm">
               <Sparkles className="size-3.5" />
-              Code that earns
+              CTE · Code That Earns
             </div>
 
             <h1 className="mt-7 text-5xl leading-[1.02] font-semibold tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-7xl">
@@ -80,7 +80,7 @@ export const HomePage = () => {
             </h1>
 
             <p className="mt-7 max-w-xl text-lg leading-8 text-slate-600">
-              Code Bounty connects skilled developers with companies that need
+              CTE connects skilled developers with companies that need
               ideas shipped. Pick a challenge, submit your solution, and get
               rewarded for excellent work.
             </p>
