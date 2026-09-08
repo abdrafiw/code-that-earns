@@ -5,7 +5,7 @@ type AccessDeniedStateProps = {
 export const AccessDeniedState = ({ message }: AccessDeniedStateProps) => {
   return (
     <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-      <div className="text-yellow-800">Access denied: {message}</div>
+      <p className="text-yellow-800">Access denied: {message}</p>
     </div>
   );
 };

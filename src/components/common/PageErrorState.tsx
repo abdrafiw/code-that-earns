@@ -5,7 +5,7 @@ type PageErrorStateProps = {
 export const PageErrorState = ({ message }: PageErrorStateProps) => {
   return (
     <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-      <div className="text-red-600">Error: {message}</div>
+      <p className="text-red-600">Error: {message}</p>
     </div>
   );
 };

@@ -1,3 +1,8 @@
+import {
+  ArrowLeftRight,
+  BriefcaseBusiness,
+  ClipboardCheck,
+} from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppContext } from '../../../hooks/useAppContext';
 
@@ -17,87 +22,71 @@ export const NavigationLinks = ({
   const isCompany = userRole === 'COMPANY';
 
   const pathname = location.pathname;
-  const isCreateBounty = pathname === '/company-bounties/create';
   const isCompanyBounties = pathname === '/company-bounties';
   const isDevBounties = pathname === '/dev-bounties';
   const isSubmissions = pathname === '/submissions';
   const isCompanySubmissions = pathname === '/company-submissions';
   const isTransactions = pathname === '/transactions';
 
-  return (
-    <ul
-      className={`flex ${mobile ? 'flex-col space-y-4' : 'items-center gap-6'}`}
-    >
-      {isCompany ? (
-        <>
-          <li className="">
-            <Link
-              to="/company-bounties/create"
-              onClick={onLinkClick}
-              className={`text-sm font-medium transition-colors ${
-                isCreateBounty
-                  ? 'text-primary'
-                  : 'hover:text-primary text-gray-700'
-              } ${mobile ? 'block py-2' : ''}`}
-            >
-              Create Bounty
-            </Link>
-          </li>
+  const linkClass = (active: boolean) =>
+    `flex items-center gap-3 rounded-lg text-sm font-medium transition-colors ${
+      mobile ? 'w-full px-3 py-3' : 'px-3 py-2'
+    } ${
+      active
+        ? 'bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-200/60 shadow-sm'
+        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950'
+    }`;
 
-          <li className="">
-            <Link
-              to="/company-bounties"
-              onClick={onLinkClick}
-              className={`text-sm font-medium transition-colors ${
-                isCompanyBounties
-                  ? 'text-primary'
-                  : 'hover:text-primary text-gray-700'
-              } ${mobile ? 'block py-2' : ''}`}
-            >
-              Bounties
-            </Link>
-          </li>
-        </>
+  return (
+    <ul className={`flex ${mobile ? 'flex-col gap-1' : 'items-center gap-2'}`}>
+      {isCompany ? (
+        <li>
+          <Link
+            to="/company-bounties"
+            onClick={onLinkClick}
+            aria-current={isCompanyBounties ? 'page' : undefined}
+            className={linkClass(isCompanyBounties)}
+          >
+            <BriefcaseBusiness className="size-4" />
+            Bounties
+          </Link>
+        </li>
       ) : (
-        <li className="">
+        <li>
           <Link
             to="/dev-bounties"
             onClick={onLinkClick}
-            className={`text-sm font-medium transition-colors ${
-              isDevBounties
-                ? 'text-primary'
-                : 'hover:text-primary text-gray-700'
-            } ${mobile ? 'block py-2' : ''}`}
+            aria-current={isDevBounties ? 'page' : undefined}
+            className={linkClass(isDevBounties)}
           >
+            <BriefcaseBusiness className="size-4" />
             Bounties
           </Link>
         </li>
       )}
 
-      <li className="">
+      <li>
         <Link
           to={userRole == 'DEVELOPER' ? '/submissions' : '/company-submissions'}
           onClick={onLinkClick}
-          className={`text-sm font-medium transition-colors ${
-            isSubmissions || isCompanySubmissions
-              ? 'text-orange-600'
-              : 'text-gray-700 hover:text-orange-600'
-          } ${mobile ? 'block py-2' : ''}`}
+          aria-current={
+            isSubmissions || isCompanySubmissions ? 'page' : undefined
+          }
+          className={linkClass(isSubmissions || isCompanySubmissions)}
         >
+          <ClipboardCheck className="size-4" />
           Submissions
         </Link>
       </li>
 
-      <li className="">
+      <li>
         <Link
           to="/transactions"
           onClick={onLinkClick}
-          className={`text-sm font-medium transition-colors ${
-            isTransactions
-              ? 'text-orange-600'
-              : 'text-gray-700 hover:text-orange-600'
-          } ${mobile ? 'block py-2' : ''}`}
+          aria-current={isTransactions ? 'page' : undefined}
+          className={linkClass(isTransactions)}
         >
+          <ArrowLeftRight className="size-4" />
           Transactions
         </Link>
       </li>

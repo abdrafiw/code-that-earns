@@ -1,4 +1,4 @@
-import { Menu } from 'lucide-react';
+import { Menu, Code2 } from 'lucide-react';
 import { useAppContext } from '../../hooks/useAppContext';
 import { useState } from 'react';
 
@@ -65,23 +65,30 @@ export const Header = () => {
   }, [user]);
 
   return (
-    <header className="relative z-50">
-      <div className="flex h-16 items-center justify-between px-4">
+    <header
+      className={`relative z-40 border-b ${
+        user?.success
+          ? 'border-gray-200 bg-white'
+          : 'border-slate-200/80 bg-[#fbfaf8]'
+      }`}
+    >
+      <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* logo */}
         <Link
           to="/"
-          className="text-primary hover:text-primary-hover block text-xl font-bold transition-colors"
+          className="flex min-w-0 items-center gap-3 text-lg font-semibold tracking-tight text-gray-950"
         >
-          CB
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-orange-600 text-white shadow-sm">
+            <Code2 className="size-5" aria-hidden="true" />
+          </span>
+          <span className="max-w-[45vw] truncate lg:max-w-md">
+            {user?.success && user.user.role === 'COMPANY'
+              ? user.user.companyName || 'CTE'
+              : 'CTE'}
+          </span>
         </Link>
 
         {/* desktop navigation */}
-        {user && (
-          <nav className="hidden md:block">
-            <NavigationLinks />
-          </nav>
-        )}
-
         <RoleIndicator mobile />
 
         {/* right side - auth/user */}
@@ -104,7 +111,7 @@ export const Header = () => {
             </div>
           ) : (
             <>
-              <div className="hidden md:block">
+              <div className="hidden lg:block">
                 <div className="flex items-center gap-3">
                   <RoleIndicator />
 
@@ -113,7 +120,7 @@ export const Header = () => {
                       asChild
                       className="flex cursor-pointer items-center gap-5"
                     >
-                      <Avatar className="size-[43px] bg-slate-950 text-slate-50">
+                      <Avatar className="size-9 bg-orange-50 text-orange-700 ring-1 ring-orange-200">
                         <AvatarFallback className="bg-transparent">
                           {name && name[0].toUpperCase()}
                         </AvatarFallback>
@@ -158,7 +165,7 @@ export const Header = () => {
               </div>
 
               {/* mobile menu button */}
-              <div className="flex items-center gap-3 md:hidden">
+              <div className="flex items-center gap-3 lg:hidden">
                 <Avatar className="hidden size-[35px] bg-slate-950 text-slate-50">
                   <AvatarFallback className="bg-transparent text-sm">
                     {name && name[0].toUpperCase()}

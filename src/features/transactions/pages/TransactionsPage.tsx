@@ -1,17 +1,14 @@
 import { useState } from 'react';
 import {
   Bitcoin,
-  ArrowUpRight,
   CheckCircle,
-  ExternalLink,
-  Hash,
+  Clock,
+  Search,
+  ArrowLeftRight,
 } from 'lucide-react';
-import {
-  formatTimeAgo,
-  formatTxHash,
-  getTransactionStatusColor,
-  getTransactionStatusIcon,
-} from '../utils/transactionUtils';
+import { Input } from '../../../components/ui/input';
+import { Button } from '../../../components/ui/button';
+import { formatTxHash } from '../utils/transactionUtils';
 
 const sampleTransactions = [
   {
@@ -97,211 +94,261 @@ const sampleTransactions = [
 ];
 
 export function TransactionsPage() {
-  const [transactions] = useState(sampleTransactions);
-
-  const totalSent = transactions
-    .filter((tx) => tx.status === 'confirmed')
-    .reduce((sum, tx) => sum + tx.amount, 0);
-
-  const totalUsdSent = transactions
-    .filter((tx) => tx.status === 'confirmed')
-    .reduce((sum, tx) => sum + tx.usdValue, 0);
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
+  const [sort, setSort] = useState('newest');
+  const confirmed = sampleTransactions.filter(
+    (tx) => tx.status === 'confirmed',
+  );
+  const pending = sampleTransactions.filter((tx) => tx.status === 'pending');
+  const totalPaid = confirmed.reduce((sum, tx) => sum + tx.amount, 0);
+  const pendingAmount = pending.reduce((sum, tx) => sum + tx.amount, 0);
+  const filtered = sampleTransactions
+    .filter(
+      (tx) =>
+        (status === 'all' || tx.status === status) &&
+        [tx.bountyTitle, tx.txHash].some((value) =>
+          value.toLowerCase().includes(search.trim().toLowerCase()),
+        ),
+    )
+    .sort((a, b) =>
+      sort === 'newest'
+        ? b.timestamp.getTime() - a.timestamp.getTime()
+        : a.timestamp.getTime() - b.timestamp.getTime(),
+    );
+  const summaries = [
+    {
+      label: 'Confirmed payments',
+      value: totalPaid.toFixed(4),
+      unit: 'BTC',
+      note: confirmed.length + ' confirmed transactions',
+      icon: Bitcoin,
+    },
+    {
+      label: 'Pending payments',
+      value: pendingAmount.toFixed(4),
+      unit: 'BTC',
+      note: pending.length + ' awaiting confirmation',
+      icon: Clock,
+    },
+    {
+      label: 'Total transactions',
+      value: String(sampleTransactions.length),
+      unit: '',
+      note: 'Across all bounty payments',
+      icon: ArrowLeftRight,
+    },
+  ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-      <header className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-          Public Transaction History
-        </h1>
-        <p className="mt-2 text-sm text-gray-600 sm:text-base">
-          Recent bounty payments made on the platform
-        </p>
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-200 pb-7">
+        <div>
+          <p className="text-sm font-medium text-orange-600">
+            Payment activity
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-950">
+            Transactions
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-gray-500">
+            Track bounty payments and their confirmation status.
+          </p>
+        </div>
+        <span className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600">
+          Demo data
+        </span>
       </header>
 
-      {/* summary stats */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
-        <div className="rounded-lg border border-gray-200 bg-white p-4 text-center sm:p-6">
-          <Bitcoin className="text-primary mx-auto mb-2 h-6 w-6 sm:mb-3 sm:h-8 sm:w-8" />
-          <p className="text-xs font-medium text-gray-600 sm:text-sm">
-            Total BTC Paid
-          </p>
-          <p className="text-lg font-bold text-gray-900 sm:text-2xl">
-            {totalSent.toFixed(4)} BTC
-          </p>
-        </div>
+      <p className="mt-5 text-sm text-gray-500">
+        These are sample transactions, not live payment records.
+      </p>
+      <section
+        aria-label="Payment summary"
+        className="my-6 grid gap-4 sm:grid-cols-3"
+      >
+        {summaries.map(({ label, value, unit, note, icon: Icon }) => (
+          <div
+            key={label}
+            className="rounded-lg border border-gray-200 bg-white p-5"
+          >
+            <div className="flex items-center justify-between gap-3 text-sm text-gray-500">
+              {label}
+              <Icon
+                aria-hidden="true"
+                className="size-4 shrink-0 text-orange-600"
+              />
+            </div>
+            <p className="mt-4 text-2xl font-semibold tracking-tight text-gray-950 tabular-nums">
+              {value}{' '}
+              <span className="text-sm font-medium text-gray-500">{unit}</span>
+            </p>
+            <p className="mt-2 text-xs text-gray-500">{note}</p>
+          </div>
+        ))}
+      </section>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-4 text-center sm:p-6">
-          <ArrowUpRight className="mx-auto mb-2 h-6 w-6 text-green-500 sm:mb-3 sm:h-8 sm:w-8" />
-          <p className="text-xs font-medium text-gray-600 sm:text-sm">
-            Total USD Value
-          </p>
-          <p className="text-lg font-bold text-gray-900 sm:text-2xl">
-            ${totalUsdSent.toLocaleString()}
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-gray-200 bg-white p-4 text-center sm:p-6">
-          <CheckCircle className="mx-auto mb-2 h-6 w-6 text-blue-500 sm:mb-3 sm:h-8 sm:w-8" />
-          <p className="text-xs font-medium text-gray-600 sm:text-sm">
-            Total Transactions
-          </p>
-          <p className="text-lg font-bold text-gray-900 sm:text-2xl">
-            {transactions.length}
-          </p>
-        </div>
-      </div>
-
-      {/* transactions list */}
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4">
-          <h2 className="text-base font-semibold text-gray-900 sm:text-lg">
-            Recent Transactions
+      <section aria-labelledby="history-title" className="mt-9">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h2
+            id="history-title"
+            className="text-lg font-semibold text-gray-950"
+          >
+            Payment history
           </h2>
+          <span role="status" className="text-xs text-gray-500">
+            {filtered.length} of {sampleTransactions.length} transactions
+          </span>
         </div>
-
-        <ul className="divide-y divide-gray-200">
-          {transactions.map((transaction) => (
-            <li
-              key={transaction.id}
-              className="p-4 transition-colors hover:bg-gray-50 sm:p-6"
+        <div className="rounded-lg border border-gray-200 bg-white">
+          <div className="flex flex-wrap gap-3 border-b border-gray-200 p-4">
+            <div className="relative min-w-0 grow basis-60">
+              <Search
+                aria-hidden="true"
+                className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
+              />
+              <Input
+                aria-label="Search transactions"
+                placeholder="Search bounty or transaction hash"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className="h-10 pl-9 shadow-none"
+              />
+            </div>
+            <select
+              aria-label="Filter by status"
+              value={status}
+              onChange={(event) => setStatus(event.target.value)}
+              className="h-10 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 focus-visible:outline-orange-600"
             >
-              {/* mobile layout */}
-              <div className="block space-y-3 sm:hidden">
-                <div className="flex items-start justify-between">
-                  <div className="flex min-w-0 flex-1 items-start space-x-3">
-                    <div className="mt-0.5 flex-shrink-0">
-                      <ArrowUpRight className="h-5 w-5 text-red-500" />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-sm leading-5 font-medium text-gray-900">
-                        {transaction.bountyTitle}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="ml-2 flex items-center">
-                    {getTransactionStatusIcon(transaction.status)}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center text-xs text-gray-500">
-                    <Hash className="mr-1 h-3 w-3 flex-shrink-0" />
-
-                    <span className="mr-1 truncate font-mono">
-                      {formatTxHash(transaction.txHash)}
-                    </span>
-
-                    <a
-                      href={`https://blockstream.info/tx/${transaction.txHash}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-shrink-0 text-blue-600 hover:text-blue-800"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3 text-xs text-gray-500">
-                      <span>{formatTimeAgo(transaction.timestamp)}</span>
-                      {transaction.status === 'confirmed' && (
-                        <span>{transaction.confirmations} conf.</span>
-                      )}
-                    </div>
-
-                    <span
-                      className={`rounded-full border px-2 py-1 text-xs font-medium ${getTransactionStatusColor(
-                        transaction.status,
-                      )}`}
-                    >
-                      {transaction.status.charAt(0).toUpperCase() +
-                        transaction.status.slice(1)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-1">
-                    <div className="flex items-center text-base font-bold text-gray-900">
-                      <Bitcoin className="text-primary mr-1 h-4 w-4" />
-                      {transaction.amount} BTC
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      ${transaction.usdValue.toLocaleString()}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* desktop layout */}
-              <div className="hidden items-center justify-between sm:flex">
-                <div className="flex flex-1 items-center space-x-4">
-                  <div className="flex-shrink-0">
-                    <ArrowUpRight className="h-6 w-6 text-red-500" />
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-base font-medium text-gray-900">
-                      {transaction.bountyTitle}
-                    </h3>
-
-                    <div className="mt-1 flex items-center space-x-4">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Hash className="mr-1 h-3 w-3" />
-                        <span className="font-mono">
-                          {formatTxHash(transaction.txHash)}
-                        </span>
-                        <a
-                          href={`https://blockstream.info/tx/${transaction.txHash}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="ml-1 text-blue-600 hover:text-blue-800"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        {formatTimeAgo(transaction.timestamp)}
+              <option value="all">All statuses</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="pending">Pending</option>
+            </select>
+            <select
+              aria-label="Sort transactions"
+              value={sort}
+              onChange={(event) => setSort(event.target.value)}
+              className="h-10 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 focus-visible:outline-orange-600"
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </div>
+          <div
+            className="overflow-x-auto focus-visible:outline-orange-600"
+            tabIndex={0}
+            role="region"
+            aria-label="Transaction table"
+          >
+            <table className="w-full min-w-[760px] text-left text-sm">
+              <caption className="sr-only">
+                Sample bounty payments with amounts, status, and dates
+              </caption>
+              <thead className="border-b border-gray-200 bg-gray-50 text-xs text-gray-500">
+                <tr>
+                  {['Bounty / transaction', 'Amount', 'Status', 'Date'].map(
+                    (heading) => (
+                      <th
+                        key={heading}
+                        scope="col"
+                        className="px-5 py-3 font-medium"
+                      >
+                        {heading}
+                      </th>
+                    ),
+                  )}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filtered.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-gray-50">
+                    <th scope="row" className="px-5 py-5 font-normal">
+                      <p className="font-medium text-gray-950">
+                        {tx.bountyTitle}
+                      </p>
+                      <p
+                        title={tx.txHash}
+                        className="mt-1.5 font-mono text-xs text-gray-400"
+                      >
+                        {formatTxHash(tx.txHash)}
+                      </p>
+                    </th>
+                    <td className="px-5 py-5 whitespace-nowrap">
+                      <p className="font-medium text-gray-950 tabular-nums">
+                        {tx.amount.toFixed(4)} BTC
+                      </p>
+                      <p className="mt-1.5 text-xs text-gray-500 tabular-nums">
+                        {tx.usdValue.toLocaleString('en-US', {
+                          style: 'currency',
+                          currency: 'USD',
+                        })}
+                      </p>
+                    </td>
+                    <td className="px-5 py-5">
+                      <span
+                        className={
+                          'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ' +
+                          (tx.status === 'confirmed'
+                            ? 'bg-green-50 text-green-700'
+                            : 'bg-amber-50 text-amber-700')
+                        }
+                      >
+                        {tx.status === 'confirmed' ? (
+                          <CheckCircle
+                            aria-hidden="true"
+                            className="size-3.5"
+                          />
+                        ) : (
+                          <Clock aria-hidden="true" className="size-3.5" />
+                        )}
+                        {tx.status === 'confirmed' ? 'Confirmed' : 'Pending'}
                       </span>
-                      {transaction.status === 'confirmed' && (
-                        <span className="text-sm text-gray-500">
-                          {transaction.confirmations} confirmations
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <div className="flex items-center text-lg font-bold text-gray-900">
-                      <Bitcoin className="text-primary mr-1 h-4 w-4" />
-                      {transaction.amount} BTC
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      ${transaction.usdValue.toLocaleString()}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center">
-                    {getTransactionStatusIcon(transaction.status)}
-                    <span
-                      className={`ml-2 rounded-full border px-3 py-1 text-xs font-medium ${getTransactionStatusColor(
-                        transaction.status,
-                      )}`}
-                    >
-                      {transaction.status.charAt(0).toUpperCase() +
-                        transaction.status.slice(1)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+                      <p className="mt-1.5 text-xs text-gray-500">
+                        {tx.confirmations} confirmations
+                      </p>
+                    </td>
+                    <td className="px-5 py-5 whitespace-nowrap text-gray-600">
+                      <time dateTime={tx.timestamp.toISOString()}>
+                        {tx.timestamp.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </time>
+                    </td>
+                  </tr>
+                ))}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-5 py-14 text-center">
+                      <Search
+                        aria-hidden="true"
+                        className="mx-auto size-6 text-gray-400"
+                      />
+                      <p className="mt-3 font-medium text-gray-950">
+                        No matching transactions
+                      </p>
+                      <p className="mt-2 text-gray-500">
+                        Try another search or reset the status filter.
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="mt-4"
+                        onClick={() => {
+                          setSearch('');
+                          setStatus('all');
+                        }}
+                      >
+                        Clear filters
+                      </Button>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
-
-export default TransactionsPage;
