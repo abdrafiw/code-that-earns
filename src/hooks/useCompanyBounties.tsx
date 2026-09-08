@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { bountyService } from '../services/bounties/bountyService';
+import type { CompanyBountyFilters } from '../services/bounties/bountyService';
 
 export interface Bounty {
   id: string;
@@ -12,15 +13,17 @@ export interface Bounty {
   deadline: string;
 }
 
-const fetchCompanyBounties = async (
+const getCompanyBounties = async (
   uid: string | undefined,
   user: { success: boolean } | null,
+  filters: CompanyBountyFilters,
 ): Promise<Bounty[]> => {
-  if (!user?.success) {
-    throw new Error('User not authenticated');
-  }
+  if (!user?.success) throw new Error('User not authenticated');
 
-  const response = await bountyService.getBountiesByCompanyID(uid as string);
+  const response = await bountyService.getBountiesByCompanyID(
+    uid as string,
+    filters,
+  );
 
   if (response.success && response.bounties) {
     return response.bounties.map((bounty: any) => ({
@@ -41,11 +44,12 @@ const fetchCompanyBounties = async (
 export function useGetCompanyBounties(
   uid: string | undefined,
   user: { success: boolean } | null,
+  filters: CompanyBountyFilters,
 ) {
   return useQuery<Bounty[], Error>({
-    queryKey: ['companyBounties', uid],
-    queryFn: () => fetchCompanyBounties(uid, user),
-
+    queryKey: ['companyBounties', uid, filters],
+    queryFn: () => getCompanyBounties(uid, user, filters),
     enabled: !!uid && !!user,
+    placeholderData: keepPreviousData,
   });
 }

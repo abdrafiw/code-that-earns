@@ -13,6 +13,7 @@ import {
   limit,
   startAfter,
   documentId,
+  type QueryConstraint,
 } from 'firebase/firestore';
 
 import { auth, db } from '../../config/firebase';
@@ -20,15 +21,20 @@ import { COLLECTIONS } from '../firestore-structure';
 
 import type { CreateBountyPayload } from '../../features/bounties/types';
 
+import {
+  createBountySearchTerms,
+  normalizeBountyFilter,
+} from '../../features/bounties/utils/bountyFilters';
+import { getErrorMessage } from '../../utils/getErrorMessage';
+
 type Result<T extends object = object> =
   ({ success: true } & T) | { success: false; error: string };
 
-function toErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  if (typeof error === 'string') return error;
-
-  return 'An unknown error occurred';
-}
+export type CompanyBountyFilters = {
+  search?: string;
+  category?: string;
+  difficulty?: string;
+};
 
 class BountyService {
   async createBounty({
@@ -69,6 +75,7 @@ class BountyService {
         difficulty,
         bountyBTC,
         deadline,
+        searchTerms: createBountySearchTerms(title, description, category),
         companyName: companyName ?? null,
         companyUid: user.uid,
         createdAt: serverTimestamp(),
@@ -81,7 +88,7 @@ class BountyService {
       );
       return { success: true, id: docRef.id } as Result & { id: string };
     } catch (error: unknown) {
-      return { success: false, error: toErrorMessage(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 
@@ -114,7 +121,7 @@ class BountyService {
         hasMore: snapshot.docs.length === pageSize,
       };
     } catch (error: unknown) {
-      return { success: false, error: toErrorMessage(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 
@@ -138,15 +145,34 @@ class BountyService {
         },
       };
     } catch (error: unknown) {
-      return { success: false, error: toErrorMessage(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 
-  async getBountiesByCompanyID(companyUid: string) {
+  async getBountiesByCompanyID(
+    companyUid: string,
+    filters: CompanyBountyFilters = {},
+  ) {
     try {
+      const constraints: QueryConstraint[] = [
+        where('companyUid', '==', companyUid),
+      ];
+      const search = normalizeBountyFilter(filters.search ?? '');
+      const category = filters.category ?? '';
+      const difficulty = filters.difficulty ?? '';
+
+      if (search)
+        constraints.push(where('searchTerms', 'array-contains', search));
+      if (category && category !== 'all') {
+        constraints.push(where('category', '==', category));
+      }
+      if (difficulty && difficulty !== 'all') {
+        constraints.push(where('difficulty', '==', difficulty));
+      }
+
       const bountiesQuery = query(
         collection(db, COLLECTIONS.BOUNTIES),
-        where('companyUid', '==', companyUid),
+        ...constraints,
       );
 
       const querySnapshot = await getDocs(bountiesQuery);
@@ -161,7 +187,7 @@ class BountyService {
         bounties,
       };
     } catch (error: unknown) {
-      return { success: false, error: toErrorMessage(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 
@@ -194,7 +220,7 @@ class BountyService {
         },
       };
     } catch (error: unknown) {
-      return { success: false, error: toErrorMessage(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 
@@ -229,7 +255,7 @@ class BountyService {
 
       return { success: true, companies };
     } catch (error: unknown) {
-      return { success: false, error: toErrorMessage(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 }
