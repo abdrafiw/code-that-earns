@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { bountyService } from '../services/bounties/bountyService';
 import type { CompanyBountyFilters } from '../services/bounties/bountyService';
+import type { BountyDeadline } from '../features/bounties/utils/bountyDeadline';
 
 export interface Bounty {
   id: string;
@@ -10,7 +11,7 @@ export interface Bounty {
   category: string;
   difficulty: string;
   company: string;
-  deadline: string;
+  deadline: BountyDeadline;
 }
 
 const getCompanyBounties = async (
@@ -20,25 +21,21 @@ const getCompanyBounties = async (
 ): Promise<Bounty[]> => {
   if (!user?.success) throw new Error('User not authenticated');
 
-  const response = await bountyService.getBountiesByCompanyID(
+  const bounties = await bountyService.getBountiesByCompanyID(
     uid as string,
     filters,
   );
 
-  if (response.success && response.bounties) {
-    return response.bounties.map((bounty: any) => ({
-      id: bounty.id,
-      title: bounty.title,
-      description: bounty.description || '',
-      bountyBTC: bounty.bountyBTC || 0.001,
-      category: bounty.category || '',
-      difficulty: bounty.difficulty || '',
-      company: bounty.companyName || '',
-      deadline: bounty.deadline || '',
-    }));
-  }
-
-  throw new Error(response.error || 'Failed to load bounties');
+  return bounties.map((bounty: any) => ({
+    id: bounty.id,
+    title: bounty.title,
+    description: bounty.description || '',
+    bountyBTC: bounty.bountyBTC || 0.001,
+    category: bounty.category || '',
+    difficulty: bounty.difficulty || '',
+    company: bounty.companyName || '',
+    deadline: bounty.deadline || '',
+  }));
 };
 
 export function useGetCompanyBounties(

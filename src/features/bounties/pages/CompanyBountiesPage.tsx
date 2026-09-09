@@ -20,6 +20,7 @@ import { PageSkeleton } from '../../../components/common/PageSkeleton';
 import { PageErrorState } from '../../../components/common/PageErrorState';
 import { normalizeBountyFilter } from '../utils/bountyFilters';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
+import { formatBountyDeadline } from '../utils/bountyDeadline';
 
 const difficultyStyles: Record<string, string> = {
   beginner: 'bg-green-50 text-green-700',
@@ -232,7 +233,7 @@ export const CompanyBountiesPage = () => {
                             <td className="px-5 py-5 text-gray-500">
                               <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
                                 <CalendarDays className="size-4" />
-                                {bounty.deadline || 'No deadline'}
+                                {formatBountyDeadline(bounty.deadline)}
                               </span>
                             </td>
                             <td className="px-5 py-5 text-gray-500">

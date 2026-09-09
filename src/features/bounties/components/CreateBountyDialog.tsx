@@ -77,7 +77,7 @@ export const CreateBountyDialog = () => {
         category: form.category,
         difficulty: form.difficulty,
         bountyBTC: Number(form.bountyBTC),
-        deadline: format(form.deadline!, 'yyyy-MM-dd'),
+        deadline: form.deadline!,
       },
       {
         onSuccess: () => {

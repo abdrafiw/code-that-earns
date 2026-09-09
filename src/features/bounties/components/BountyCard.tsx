@@ -10,6 +10,7 @@ import {
 
 import { Button } from '../../../components/ui/button';
 import type { TBounty } from '../types';
+import { formatBountyDeadline } from '../utils/bountyDeadline';
 
 export const BountyCard = ({ bounty }: { bounty: TBounty }) => {
   return (
@@ -52,7 +53,9 @@ export const BountyCard = ({ bounty }: { bounty: TBounty }) => {
               {bounty.company}
             </span>
           </p>
-          <span className="">Deadline: {bounty.deadline}</span>
+          <span className="">
+            Deadline: {formatBountyDeadline(bounty.deadline)}
+          </span>
         </div>
       </CardContent>
 

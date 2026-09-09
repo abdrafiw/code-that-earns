@@ -4,15 +4,10 @@ export type SubmitSolutionPayload = {
   bountyID: string;
 };
 
-export type SubmissionRecord = {
+export type SubmissionRecord = Partial<SubmissionDocument> & {
   id: string;
   bountyId: string;
   githubUrl: string;
   bitcoinAddress: string;
-  createdAt?: any;
-  status?: string;
-  developerUid?: string;
-  bountyDetails?: Record<string, any> | null;
-  developerDetails?: Record<string, any> | null;
-  [key: string]: any;
 };
+import type { SubmissionDocument } from '../../services/firestore-structure';

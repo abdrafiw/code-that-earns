@@ -31,7 +31,9 @@ service cloud.firestore {
       // Only companies can create bounties
       allow create: if isAuthenticated() 
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'COMPANY';
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'COMPANY'
+        && request.resource.data.deadline is timestamp
+        && request.resource.data.deadline > request.time;
       
       // Only the creator can update their own bounties
       allow update: if isAuthenticated() 
@@ -47,16 +49,23 @@ service cloud.firestore {
       // Developers can read their own submissions
       allow read: if isAuthenticated() 
         && (resource.data.developerUid == request.auth.uid 
+            || resource.data.companyUid == request.auth.uid
             || exists(/databases/$(database)/documents/bounties/$(resource.data.bountyId))
             && get(/databases/$(database)/documents/bounties/$(resource.data.bountyId)).data.companyUid == request.auth.uid);
       
       // Only developers can create submissions
       allow create: if isAuthenticated() 
+        && request.resource.data.developerUid == request.auth.uid
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'DEVELOPER';
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'DEVELOPER'
+        && exists(/databases/$(database)/documents/bounties/$(request.resource.data.bountyId))
+        && request.resource.data.companyUid == get(/databases/$(database)/documents/bounties/$(request.resource.data.bountyId)).data.companyUid;
       
       // Companies can update submissions for their bounties
       allow update: if isAuthenticated() 
+        && request.resource.data.bountyId == resource.data.bountyId
+        && request.resource.data.companyUid == resource.data.companyUid
+        && request.resource.data.developerUid == resource.data.developerUid
         && exists(/databases/$(database)/documents/bounties/$(resource.data.bountyId))
         && get(/databases/$(database)/documents/bounties/$(resource.data.bountyId)).data.companyUid == request.auth.uid;
     }
@@ -75,4 +84,3 @@ service cloud.firestore {
     }
   }
 }
-

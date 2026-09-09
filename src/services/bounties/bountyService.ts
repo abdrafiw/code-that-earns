@@ -12,12 +12,11 @@ import {
   orderBy,
   limit,
   startAfter,
-  documentId,
   type QueryConstraint,
 } from 'firebase/firestore';
 
 import { auth, db } from '../../config/firebase';
-import { COLLECTIONS } from '../firestore-structure';
+import { bountyConverter, COLLECTIONS } from '../firestore-structure';
 
 import type { CreateBountyPayload } from '../../features/bounties/types';
 
@@ -26,9 +25,7 @@ import {
   normalizeBountyFilter,
 } from '../../features/bounties/utils/bountyFilters';
 import { getErrorMessage } from '../../utils/getErrorMessage';
-
-type Result<T extends object = object> =
-  ({ success: true } & T) | { success: false; error: string };
+import { toBountyDeadlineTimestamp } from '../../features/bounties/utils/bountyDeadline';
 
 export type CompanyBountyFilters = {
   search?: string;
@@ -44,9 +41,9 @@ class BountyService {
     difficulty,
     bountyBTC,
     deadline,
-  }: CreateBountyPayload): Promise<Result> {
+  }: CreateBountyPayload): Promise<{ id: string }> {
     const user = auth.currentUser;
-    if (!user) return { success: false, error: 'User not authenticated' };
+    if (!user) throw new Error('User not authenticated');
 
     try {
       // The user's role is stored in Firestore during signup. Do not rely on
@@ -54,16 +51,13 @@ class BountyService {
       const userSnapshot = await getDoc(doc(db, COLLECTIONS.USERS, user.uid));
 
       if (!userSnapshot.exists()) {
-        return {
-          success: false,
-          error: 'Company profile not found. Please sign in again.',
-        };
+        throw new Error('Company profile not found. Please sign in again.');
       }
 
       const userData = userSnapshot.data();
 
       if (userData.role !== 'COMPANY') {
-        return { success: false, error: 'Only companies can create bounties' };
+        throw new Error('Only companies can create bounties');
       }
 
       const companyName = userData.companyName as string | undefined;
@@ -74,7 +68,7 @@ class BountyService {
         category,
         difficulty,
         bountyBTC,
-        deadline,
+        deadline: toBountyDeadlineTimestamp(deadline),
         searchTerms: createBountySearchTerms(title, description, category),
         companyName: companyName ?? null,
         companyUid: user.uid,
@@ -83,12 +77,12 @@ class BountyService {
       };
 
       const docRef = await addDoc(
-        collection(db, COLLECTIONS.BOUNTIES),
+        collection(db, COLLECTIONS.BOUNTIES).withConverter(bountyConverter),
         bountyData,
       );
-      return { success: true, id: docRef.id } as Result & { id: string };
+      return { id: docRef.id };
     } catch (error: unknown) {
-      return { success: false, error: getErrorMessage(error) };
+      throw new Error(getErrorMessage(error));
     }
   }
 
@@ -98,7 +92,7 @@ class BountyService {
   ) {
     try {
       let bountyQuery = query(
-        collection(db, COLLECTIONS.BOUNTIES),
+        collection(db, COLLECTIONS.BOUNTIES).withConverter(bountyConverter),
         orderBy('createdAt', 'desc'),
         limit(pageSize),
       );
@@ -114,38 +108,33 @@ class BountyService {
 
       const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
-      return {
-        success: true,
-        bounties,
-        lastDoc,
-        hasMore: snapshot.docs.length === pageSize,
-      };
+      return { bounties, lastDoc, hasMore: snapshot.docs.length === pageSize };
     } catch (error: unknown) {
-      return { success: false, error: getErrorMessage(error) };
+      throw new Error(getErrorMessage(error));
     }
   }
 
   async getBountyByID(bountyID: string) {
     try {
-      const bountyDocRef = doc(db, COLLECTIONS.BOUNTIES, bountyID);
+      const bountyDocRef = doc(
+        db,
+        COLLECTIONS.BOUNTIES,
+        bountyID,
+      ).withConverter(bountyConverter);
       const bountySnap = await getDoc(bountyDocRef);
 
       if (!bountySnap.exists()) {
-        return {
-          success: false,
-          error: 'Bounty not found',
-        };
+        throw new Error('Bounty not found');
       }
 
       return {
-        success: true,
         bounty: {
           id: bountySnap.id,
           ...bountySnap.data(),
         },
       };
     } catch (error: unknown) {
-      return { success: false, error: getErrorMessage(error) };
+      throw new Error(getErrorMessage(error));
     }
   }
 
@@ -170,8 +159,10 @@ class BountyService {
         constraints.push(where('difficulty', '==', difficulty));
       }
 
+      constraints.push(orderBy('createdAt', 'desc'));
+
       const bountiesQuery = query(
-        collection(db, COLLECTIONS.BOUNTIES),
+        collection(db, COLLECTIONS.BOUNTIES).withConverter(bountyConverter),
         ...constraints,
       );
 
@@ -182,80 +173,9 @@ class BountyService {
         ...doc.data(),
       }));
 
-      return {
-        success: true,
-        bounties,
-      };
+      return bounties;
     } catch (error: unknown) {
-      return { success: false, error: getErrorMessage(error) };
-    }
-  }
-
-  async getCompanyById(companyUid: string) {
-    try {
-      const userDocRef = doc(db, COLLECTIONS.USERS, companyUid);
-      const userSnap = await getDoc(userDocRef);
-
-      if (!userSnap.exists()) {
-        return {
-          success: false,
-          error: 'Company not found',
-        };
-      }
-
-      const userData = userSnap.data();
-
-      if (userData.role !== 'COMPANY') {
-        return {
-          success: false,
-          error: 'User is not a company',
-        };
-      }
-
-      return {
-        success: true,
-        company: {
-          id: userSnap.id,
-          ...userData,
-        },
-      };
-    } catch (error: unknown) {
-      return { success: false, error: getErrorMessage(error) };
-    }
-  }
-
-  async getCompaniesByIds(companyUids: string[]) {
-    if (companyUids.length === 0) {
-      return {
-        success: true,
-        companies: [] as Array<{ id: string } & DocumentData>,
-      };
-    }
-
-    try {
-      const chunks: string[][] = [];
-      for (let i = 0; i < companyUids.length; i += 30) {
-        chunks.push(companyUids.slice(i, i + 30));
-      }
-
-      const results = await Promise.all(
-        chunks.map((chunk) =>
-          getDocs(
-            query(
-              collection(db, COLLECTIONS.USERS),
-              where(documentId(), 'in', chunk),
-            ),
-          ),
-        ),
-      );
-
-      const companies = results.flatMap((snap) =>
-        snap.docs.map((d) => ({ id: d.id, ...d.data() })),
-      );
-
-      return { success: true, companies };
-    } catch (error: unknown) {
-      return { success: false, error: getErrorMessage(error) };
+      throw new Error(getErrorMessage(error));
     }
   }
 }

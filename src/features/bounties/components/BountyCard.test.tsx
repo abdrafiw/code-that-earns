@@ -1,5 +1,6 @@
 import { screen, render } from '@testing-library/react';
 import { BountyCard } from './BountyCard';
+import { formatBountyDeadline } from '../utils/bountyDeadline';
 import type { TBounty } from '../types';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -42,7 +43,9 @@ describe('Bounty card', () => {
     expect(screen.getByText(`${mockBounty.bountyBTC} BTC`)).toBeInTheDocument();
     expect(screen.getByText(`${mockBounty.company}`)).toBeInTheDocument();
     expect(
-      screen.getByText(`Deadline: ${mockBounty.deadline}`),
+      screen.getByText(
+        `Deadline: ${formatBountyDeadline(mockBounty.deadline)}`,
+      ),
     ).toBeInTheDocument();
 
     const submitLink = screen.getByRole('link', { name: /submit solution/i });

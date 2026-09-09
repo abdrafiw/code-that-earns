@@ -5,11 +5,6 @@ import { transformBounty } from '../utils/transformBounty';
 
 async function getBounty() {
   const response = await bountyService.getAllBounties();
-
-  if (!response.success) {
-    throw new Error(response.error);
-  }
-
   const bounties = response.bounties as TBounty[];
 
   return bounties?.map(transformBounty);
@@ -23,11 +18,7 @@ export function useGetBounty() {
 }
 
 async function createBounty(payload: CreateBountyPayload) {
-  const response = await bountyService.createBounty(payload);
-
-  if (!response.success) {
-    throw new Error(response.error || 'Something went wrong');
-  }
+  return bountyService.createBounty(payload);
 }
 
 export function useCreateBounty() {

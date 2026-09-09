@@ -1,4 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import type { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { submissionService } from '../../../services/submissions/submissionService';
 import type { UserData } from '../../auth/types';
@@ -6,7 +12,8 @@ import type { SubmissionRecord, SubmitSolutionPayload } from '../types';
 
 async function getCompanySubmissions(
   currentUser: UserData | null,
-): Promise<SubmissionRecord[]> {
+  cursor?: QueryDocumentSnapshot<DocumentData>,
+) {
   if (!currentUser) {
     throw new Error('You must be signed in to view submissions.');
   }
@@ -15,15 +22,10 @@ async function getCompanySubmissions(
     throw new Error('Only companies can view submissions.');
   }
 
-  const result = await submissionService.getSubmissionsForCompany(
-    currentUser.uid,
-  );
-
-  if (!result.success) {
-    throw new Error(result.error || 'Failed to fetch submissions');
-  }
-
-  return (result.submissions ?? []) as SubmissionRecord[];
+  return submissionService.getSubmissionsForCompany({
+    companyUid: currentUser.uid,
+    cursor,
+  });
 }
 
 async function getDeveloperSubmissions(
@@ -37,25 +39,15 @@ async function getDeveloperSubmissions(
     throw new Error('Only developers can view submissions.');
   }
 
-  const result = await submissionService.getSubmissionsByDeveloperId(
+  const submissions = await submissionService.getSubmissionsByDeveloperId(
     currentUser.uid,
   );
 
-  if (!result.success) {
-    throw new Error(result.error || 'Failed to fetch submissions');
-  }
-
-  return (result.submissions ?? []) as SubmissionRecord[];
+  return submissions as SubmissionRecord[];
 }
 
 async function submitSolution(payload: SubmitSolutionPayload) {
-  const result = await submissionService.submitSolution(payload);
-
-  if (!result.success) {
-    throw new Error(result.error || 'Failed to submit solution');
-  }
-
-  return result;
+  return submissionService.submitSolution(payload);
 }
 
 export function useGetCompanySubmissions() {
@@ -67,21 +59,31 @@ export function useGetCompanySubmissions() {
       ? 'Only companies can view submissions.'
       : null;
 
-  const query = useQuery<SubmissionRecord[]>({
+  const query = useInfiniteQuery({
     queryKey: ['company-submissions', currentUser?.uid],
     enabled: !!currentUser && currentUser.role === 'COMPANY',
-    queryFn: () => getCompanySubmissions(currentUser),
+    queryFn: ({ pageParam }) => getCompanySubmissions(currentUser, pageParam),
+    initialPageParam: undefined as
+      QueryDocumentSnapshot<DocumentData> | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.cursor : undefined,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
   });
 
   return {
-    submissions: query.data ?? [],
+    submissions:
+      query.data?.pages.flatMap(
+        (page) => page.submissions as SubmissionRecord[],
+      ) ?? [],
     loading: query.isLoading,
     error: query.error?.message ?? null,
     accessMessage,
     refetch: query.refetch,
     isFetching: query.isFetching,
+    fetchNextPage: query.fetchNextPage,
+    hasNextPage: query.hasNextPage,
+    isFetchingNextPage: query.isFetchingNextPage,
   };
 }
 

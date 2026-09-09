@@ -1,15 +1,18 @@
-export type TBounty = {
+import type { BountyDeadline } from './utils/bountyDeadline';
+import type { BountyDocument } from '../../services/firestore-structure';
+
+export type TBounty = Omit<
+  Partial<BountyDocument>,
+  'deadline' | 'companyName'
+> & {
   id: string | number;
   title: string;
   description: string;
   category: string;
-  companyUid?: string;
   company?: string;
   difficulty: string;
   bountyBTC: number;
-  deadline: string;
-  status?: string;
-  submissions?: number;
+  deadline: BountyDeadline;
 };
 
 export type CreateBountyPayload = {
@@ -18,5 +21,5 @@ export type CreateBountyPayload = {
   category: string;
   difficulty: string;
   bountyBTC: number;
-  deadline: string;
+  deadline: Date;
 };

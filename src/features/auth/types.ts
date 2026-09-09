@@ -1,4 +1,10 @@
-export type UserRole = 'DEVELOPER' | 'COMPANY';
+import type { FieldValue, Timestamp } from 'firebase/firestore';
+import type {
+  UserDocument,
+  UserRole,
+} from '../../services/firestore-structure';
+
+export type { UserRole } from '../../services/firestore-structure';
 
 export interface SignUpPayload {
   email: string;
@@ -20,15 +26,10 @@ export interface UserStats {
   totalSpent?: number;
 }
 
-export interface UserData {
-  uid: string;
-  email: string;
-  role: UserRole;
-  name?: string;
-  companyName?: string;
-  createdAt?: any;
-  updatedAt?: any;
-}
+export type UserData = Omit<UserDocument, 'createdAt' | 'updatedAt'> & {
+  createdAt?: Timestamp | FieldValue;
+  updatedAt?: Timestamp | FieldValue;
+};
 
 export interface AuthResponseSuccess {
   success: true;

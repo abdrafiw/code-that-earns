@@ -16,6 +16,7 @@ import {
 
 import { useSignUp } from '../hooks/useAuth';
 import type { SignUpPayload, UserRole } from '../types';
+import { USER_ROLES } from '../../../services/firestore-structure';
 
 export const SignUpForm = () => {
   const [signupForm, setSignupForm] = useState({
@@ -31,7 +32,7 @@ export const SignUpForm = () => {
 
   const signUpMutation = useSignUp();
 
-  const roleOptions: UserRole[] = ['DEVELOPER', 'COMPANY'];
+  const roleOptions: readonly UserRole[] = USER_ROLES;
 
   const handleSignUp = (e: FormEvent) => {
     e.preventDefault();

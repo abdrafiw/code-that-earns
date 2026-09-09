@@ -4,14 +4,22 @@ import { AccessDeniedState } from '../../../components/common/AccessDeniedState'
 import { PageSkeleton } from '../../../components/common/PageSkeleton';
 import { PageEmptyState } from '../../../components/common/PageEmptyState';
 import { PageErrorState } from '../../../components/common/PageErrorState';
+import { Button } from '../../../components/ui/button';
 import {
   getSubmissionStatusColor,
   getSubmissionStatusIcon,
 } from '../utils/submissionStatus';
 
 export function CompanySubmissionsPage() {
-  const { submissions, loading, error, accessMessage } =
-    useGetCompanySubmissions();
+  const {
+    submissions,
+    loading,
+    error,
+    accessMessage,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useGetCompanySubmissions();
 
   if (loading) return <PageSkeleton variant="company-submissions" />;
   if (accessMessage) return <AccessDeniedState message={accessMessage} />;
@@ -46,10 +54,10 @@ export function CompanySubmissionsPage() {
                   Bounty ID: {submission.bountyId}
                 </p>
 
-                {submission.bountyDetails?.title && (
+                {submission.bountyTitle && (
                   <p className="mt-1 text-sm text-gray-600">
                     <span className="font-medium">Bounty:</span>{' '}
-                    {submission.bountyDetails.title}
+                    {submission.bountyTitle}
                   </p>
                 )}
               </div>
@@ -78,32 +86,31 @@ export function CompanySubmissionsPage() {
             </div>
 
             <div className="space-y-3">
-              {submission.developerDetails && (
+              {(submission.developerName || submission.developerEmail) && (
                 <div className="flex items-center text-sm">
                   <User className="mr-2 h-4 w-4 text-gray-400" />
                   <span className="font-medium text-gray-600">Developer:</span>
 
                   <span className="ml-2 text-gray-900">
-                    {submission.developerDetails.name ||
-                      submission.developerDetails.email ||
+                    {submission.developerName ||
+                      submission.developerEmail ||
                       'Unknown Developer'}
                   </span>
 
-                  {submission.developerDetails.email &&
-                    submission.developerDetails.name && (
-                      <span className="ml-1 text-gray-500">
-                        ({submission.developerDetails.email})
-                      </span>
-                    )}
+                  {submission.developerEmail && submission.developerName && (
+                    <span className="ml-1 text-gray-500">
+                      ({submission.developerEmail})
+                    </span>
+                  )}
                 </div>
               )}
 
-              {submission.bountyDetails?.reward && (
+              {submission.bountyRewardBTC != null && (
                 <div className="flex items-center text-sm">
                   <DollarSign className="mr-2 h-4 w-4 text-gray-400" />
                   <span className="font-medium text-gray-600">Reward:</span>
                   <span className="ml-2 font-semibold text-gray-900">
-                    ${submission.bountyDetails.reward}
+                    {submission.bountyRewardBTC} BTC
                   </span>
                 </div>
               )}
@@ -134,11 +141,11 @@ export function CompanySubmissionsPage() {
                 </div>
               </div>
 
-              {submission.bountyDetails?.description && (
+              {submission.bountyDescription && (
                 <div className="mt-4 border-t border-gray-100 pt-4">
                   <p className="text-sm text-gray-500">
                     <span className="font-medium">Bounty Description:</span>{' '}
-                    {submission.bountyDetails.description}
+                    {submission.bountyDescription}
                   </p>
                 </div>
               )}
@@ -146,6 +153,18 @@ export function CompanySubmissionsPage() {
           </li>
         ))}
       </ul>
+
+      {hasNextPage && (
+        <div className="flex justify-center pt-2">
+          <Button
+            variant="outline"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? 'Loading…' : 'Load more submissions'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
