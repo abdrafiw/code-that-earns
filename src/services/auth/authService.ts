@@ -2,7 +2,6 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
   updateProfile,
 } from 'firebase/auth';
 
@@ -12,7 +11,7 @@ import { auth, db } from '../../config/firebase';
 import { COLLECTIONS } from '../firestore-structure';
 
 import type {
-  AuthResponse,
+  AuthResponseSuccess,
   SignInPayload,
   SignUpPayload,
   UserData,
@@ -25,7 +24,7 @@ class AuthService {
     name,
     companyName,
     role,
-  }: SignUpPayload): Promise<AuthResponse> {
+  }: SignUpPayload): Promise<AuthResponseSuccess['user']> {
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -56,19 +55,14 @@ class AuthService {
         await setDoc(doc(db, COLLECTIONS.USERS, user.uid), userData);
       } catch (createError: any) {
         console.error('Error creating user document:', createError);
-        return {
-          success: false,
-          error:
-            'Account created but profile setup incomplete. Please sign in to complete setup.',
-        };
+        throw new Error(
+          'Account created but profile setup incomplete. Please sign in to complete setup.',
+        );
       }
 
       return {
-        success: true,
-        user: {
-          ...userData,
-          displayName: user.displayName,
-        },
+        ...userData,
+        displayName: user.displayName,
       };
     } catch (error: any) {
       let errorMessage = error.message;
@@ -90,14 +84,14 @@ class AuthService {
           'Permission denied. Please check your Firestore security rules.';
       }
 
-      return {
-        success: false,
-        error: errorMessage,
-      };
+      throw new Error(errorMessage);
     }
   }
 
-  async signIn({ email, password }: SignInPayload): Promise<AuthResponse> {
+  async signIn({
+    email,
+    password,
+  }: SignInPayload): Promise<AuthResponseSuccess['user']> {
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -121,31 +115,23 @@ class AuthService {
           await setDoc(doc(db, COLLECTIONS.USERS, user.uid), basicUserData);
 
           return {
-            success: true,
-            user: {
-              ...basicUserData,
-              displayName: user.displayName,
-            },
+            ...basicUserData,
+            displayName: user.displayName,
           };
         } catch (createError: any) {
-          return {
-            success: false,
-            error:
-              'Failed to create user profile. Please try signing up again.',
-          };
+          throw new Error(
+            'Failed to create user profile. Please try signing up again.',
+          );
         }
       }
 
       const userData = userDoc.data() as UserData;
 
       return {
-        success: true,
-        user: {
-          ...userData,
-          uid: user.uid,
-          email: user.email!,
-          displayName: user.displayName,
-        },
+        ...userData,
+        uid: user.uid,
+        email: user.email!,
+        displayName: user.displayName,
       };
     } catch (error: any) {
       let errorMessage = error.message;
@@ -160,96 +146,15 @@ class AuthService {
         errorMessage = 'Too many failed attempts. Please try again later.';
       }
 
-      return {
-        success: false,
-        error: errorMessage,
-      };
+      throw new Error(errorMessage);
     }
   }
 
-  async signOut(): Promise<
-    { success: true } | { success: false; error: string }
-  > {
+  async signOut(): Promise<void> {
     try {
       await signOut(auth);
-      return { success: true };
     } catch (error: any) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  }
-
-  async getCurrentUserData(): Promise<
-    (UserData & { displayName?: string | null }) | null
-  > {
-    const user = auth.currentUser;
-    if (!user) return null;
-
-    try {
-      const userDoc = await getDoc(doc(db, COLLECTIONS.USERS, user.uid));
-      if (!userDoc.exists()) return null;
-
-      const userData = userDoc.data() as UserData;
-      return {
-        ...userData,
-        uid: user.uid,
-        email: user.email!,
-        displayName: user.displayName,
-      };
-    } catch (error) {
-      console.error('Get user data error:', error);
-      return null;
-    }
-  }
-
-  onAuthStateChange(
-    callback: (
-      user: (UserData & { displayName?: string | null }) | null,
-    ) => void,
-  ) {
-    return onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userData = await this.getCurrentUserData();
-        callback(userData);
-      } else {
-        callback(null);
-      }
-    });
-  }
-
-  async updateUserProfile(
-    updates: Partial<
-      Omit<UserData, 'uid' | 'email' | 'createdAt' | 'stats'>
-    > & { displayName?: string },
-  ): Promise<{ success: true } | { success: false; error: string }> {
-    const user = auth.currentUser;
-    if (!user) throw new Error('No authenticated user');
-
-    try {
-      await setDoc(
-        doc(db, COLLECTIONS.USERS, user.uid),
-        {
-          ...updates,
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true },
-      );
-
-      if (updates.name || updates.companyName) {
-        await updateProfile(user, {
-          displayName: updates.companyName || updates.name || '',
-        });
-      }
-
-      return { success: true };
-    } catch (error: any) {
-      console.error('Update profile error:', error);
-      return {
-        success: false,
-        error: error.message,
-      };
+      throw new Error(error.message);
     }
   }
 }

@@ -20,6 +20,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/auth/authService';
 import { toast } from 'sonner';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import { useEffect } from 'react';
 import { RoleIndicator } from './components/RoleIndicator';
 import { NavigationLinks } from './components/NavigationLinks';
@@ -44,7 +45,7 @@ export const Header = () => {
 
   const handleLogout = async () => {
     try {
-      toast.promise(authService.signOut(), {
+      await toast.promise(authService.signOut(), {
         loading: 'Logging you out...',
         success: 'Logged out successfully!',
         error: 'Failed to log out.',
@@ -55,6 +56,7 @@ export const Header = () => {
       setIsMobileMenuOpen(false);
     } catch (error) {
       console.error('Logout failed:', error);
+      toast.error(getErrorMessage(error));
     }
   };
 
