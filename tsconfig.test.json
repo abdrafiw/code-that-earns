@@ -3,6 +3,7 @@
   "compilerOptions": {
     "types": ["vite/client", "jest", "node", "@testing-library/jest-dom"],
     "jsx": "react-jsx",
+    "esModuleInterop": true,
 
     /* ts-jest emits CommonJS, which trips verbatimModuleSyntax on every import */
     "verbatimModuleSyntax": false

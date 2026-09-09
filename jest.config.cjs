@@ -1,18 +1,11 @@
-// import { defineConfig } from "jest";
-import type { Config } from 'jest';
-
-const config: Config = {
+/** @type {import('jest').Config} */
+const config = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-
   setupFiles: ['<rootDir>/src/test/polyfills.ts'],
-
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
-
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-
   testMatch: ['<rootDir>/src/**/*.test.ts', '<rootDir>/src/**/*.test.tsx'],
-
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
@@ -21,12 +14,10 @@ const config: Config = {
       },
     ],
   },
-
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-
   clearMocks: true,
 };
 
-export default config;
+module.exports = config;
