@@ -11,4 +11,25 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('@firebase/analytics')) return 'firebase-analytics';
+          if (id.includes('@firebase') || id.includes('/firebase/'))
+            return 'firebase-vendor';
+          if (id.includes('@tanstack')) return 'query-vendor';
+          if (id.includes('@radix-ui')) return 'ui-vendor';
+          if (
+            id.includes('/react/') ||
+            id.includes('/react-dom/') ||
+            id.includes('/react-router')
+          )
+            return 'react-vendor';
+          return undefined;
+        },
+      },
+    },
+  },
 });

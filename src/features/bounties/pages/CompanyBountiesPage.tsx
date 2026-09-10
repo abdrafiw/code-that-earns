@@ -1,8 +1,7 @@
-import { useDeferredValue, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bitcoin, CalendarDays, Code2, Search, Users } from 'lucide-react';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { useGetCompanyBounties } from '../../../hooks/useCompanyBounties';
 import { CreateBountyDialog } from '../components/CreateBountyDialog';
 import { EmptyBountiesState } from '../components/EmptyBountiesState';
 import { KpiCard } from '../components/KpiCard';
@@ -21,6 +20,11 @@ import { PageErrorState } from '../../../components/common/PageErrorState';
 import { normalizeBountyFilter } from '../utils/bountyFilters';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { formatBountyDeadline } from '../utils/bountyDeadline';
+import {
+  useGetCompanyBounties,
+  useGetCompanyBountyMetrics,
+} from '../hooks/useBounties';
+import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 
 const difficultyStyles: Record<string, string> = {
   beginner: 'bg-green-50 text-green-700',
@@ -32,10 +36,16 @@ export const CompanyBountiesPage = () => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [difficulty, setDifficulty] = useState('all');
-  const deferredSearch = useDeferredValue(search.trim());
+  const normalizedSearch = normalizeBountyFilter(search);
+  const debouncedSearch = useDebouncedValue(normalizedSearch, 350);
+  const effectiveSearch =
+    normalizedSearch.length >= 3 && debouncedSearch.length >= 3
+      ? debouncedSearch
+      : '';
 
   const { user } = useAppContext();
   const uid = user?.success ? user.user.uid : undefined;
+  const metricsQuery = useGetCompanyBountyMetrics(uid);
 
   const {
     data: bounties = [],
@@ -43,26 +53,18 @@ export const CompanyBountiesPage = () => {
     isFetching,
     error,
     refetch,
-  } = useGetCompanyBounties(uid, user ?? null, {
-    search: deferredSearch,
+  } = useGetCompanyBounties(uid, {
+    search: effectiveSearch,
     category,
     difficulty,
   });
 
   const hasActiveFilters = Boolean(
-    deferredSearch || category !== 'all' || difficulty !== 'all',
+    effectiveSearch || category !== 'all' || difficulty !== 'all',
   );
 
-  const totalRewards = bounties.reduce(
-    (total, bounty) => total + Number(bounty.bountyBTC || 0),
-    0,
-  );
-
-  const categories = new Set(
-    bounties.map((bounty) => normalizeBountyFilter(bounty.category)),
-  ).size;
-
-  if (isBountiesPending) return <PageSkeleton variant="company-bounties" />;
+  if (isBountiesPending || metricsQuery.isPending)
+    return <PageSkeleton variant="company-bounties" />;
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -85,12 +87,15 @@ export const CompanyBountiesPage = () => {
           <CreateBountyDialog />
         </header>
 
-        {error ? (
+        {error || metricsQuery.error ? (
           <div className="mt-8">
             <PageErrorState
-              message={getErrorMessage(error)}
-              onRetry={() => void refetch()}
-              isRetrying={isFetching}
+              message={getErrorMessage(error ?? metricsQuery.error)}
+              onRetry={() => {
+                void refetch();
+                void metricsQuery.refetch();
+              }}
+              isRetrying={isFetching || metricsQuery.isFetching}
             />
           </div>
         ) : (
@@ -99,20 +104,20 @@ export const CompanyBountiesPage = () => {
               <KpiCard
                 icon={Code2}
                 label="Published bounties"
-                value={bounties.length}
+                value={metricsQuery.data?.published ?? 0}
                 iconClassName="bg-orange-50 text-orange-600"
               />
               <KpiCard
                 icon={Bitcoin}
                 label="Total reward pool"
-                value={totalRewards.toFixed(4)}
+                value={(metricsQuery.data?.totalRewards ?? 0).toFixed(4)}
                 suffix="BTC"
                 iconClassName="bg-green-50 text-green-600"
               />
               <KpiCard
                 icon={Users}
                 label="Categories used"
-                value={categories}
+                value={metricsQuery.data?.categoriesUsed ?? 0}
                 iconClassName="bg-blue-50 text-blue-600"
               />
             </div>
@@ -136,17 +141,42 @@ export const CompanyBountiesPage = () => {
               </div>
 
               <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-3 sm:flex-row">
-                <div className="relative flex-1">
-                  <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search bounties"
-                    className="h-10 border-gray-200 pl-9 shadow-none"
-                  />
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400" />
+                    <Input
+                      value={search}
+                      onChange={(event) => {
+                        setSearch(event.target.value);
+                        if (event.target.value.trim()) {
+                          setCategory('all');
+                          setDifficulty('all');
+                        }
+                      }}
+                      placeholder="Search bounties"
+                      className="h-10 border-gray-200 pl-9 shadow-none"
+                      aria-describedby="bounty-search-help"
+                    />
+                  </div>
+                  <p
+                    id="bounty-search-help"
+                    className="mt-1 text-xs text-gray-500"
+                  >
+                    {normalizedSearch.length > 0 && normalizedSearch.length < 3
+                      ? 'Enter at least 3 characters to search.'
+                      : normalizedSearch !== debouncedSearch
+                        ? 'Waiting for you to finish typing…'
+                        : 'Search by title, description, or category.'}
+                  </p>
                 </div>
 
-                <Select value={category} onValueChange={setCategory}>
+                <Select
+                  value={category}
+                  onValueChange={(value) => {
+                    setSearch('');
+                    setCategory(value);
+                  }}
+                >
                   <SelectTrigger className="h-10 w-full border-gray-200 sm:w-44">
                     <SelectValue placeholder="All categories" />
                   </SelectTrigger>
@@ -158,7 +188,13 @@ export const CompanyBountiesPage = () => {
                   </SelectContent>
                 </Select>
 
-                <Select value={difficulty} onValueChange={setDifficulty}>
+                <Select
+                  value={difficulty}
+                  onValueChange={(value) => {
+                    setSearch('');
+                    setDifficulty(value);
+                  }}
+                >
                   <SelectTrigger className="h-10 w-full border-gray-200 sm:w-44">
                     <SelectValue placeholder="All difficulties" />
                   </SelectTrigger>

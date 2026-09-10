@@ -12,6 +12,7 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -21,7 +22,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/auth/authService';
 import { toast } from 'sonner';
 import { getErrorMessage } from '../../utils/getErrorMessage';
-import { useEffect } from 'react';
 import { RoleIndicator } from './components/RoleIndicator';
 import { NavigationLinks } from './components/NavigationLinks';
 import {
@@ -37,11 +37,13 @@ import {
 } from '../../components/ui/alert-dialog';
 
 export const Header = () => {
-  const [name, setName] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigate = useNavigate();
-  const { user, setUser } = useAppContext();
+  const { user } = useAppContext();
+  const name = user?.success
+    ? user.user.companyName || user.user.name || 'User'
+    : '';
 
   const handleLogout = async () => {
     try {
@@ -51,7 +53,6 @@ export const Header = () => {
         error: 'Failed to log out.',
       });
 
-      setUser(null);
       navigate('/');
       setIsMobileMenuOpen(false);
     } catch (error) {
@@ -59,12 +60,6 @@ export const Header = () => {
       toast.error(getErrorMessage(error));
     }
   };
-
-  useEffect(() => {
-    if (user?.success) {
-      setName(user?.user?.companyName || user?.user?.name || 'User');
-    }
-  }, [user]);
 
   return (
     <header
@@ -181,19 +176,18 @@ export const Header = () => {
                   <SheetTrigger asChild>
                     <button
                       className="p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
-                      aria-label="Toggle menu"
+                      aria-label="Open navigation menu"
                     >
                       <Menu className="h-6 w-6" />
                     </button>
                   </SheetTrigger>
 
-                  <SheetContent
-                    side="left"
-                    className="w-[300px] sm:w-[350px]"
-                    aria-describedby={undefined}
-                  >
-                    <SheetHeader className="hidden">
-                      <SheetTitle></SheetTitle>
+                  <SheetContent side="left" className="w-[300px] sm:w-[350px]">
+                    <SheetHeader className="sr-only">
+                      <SheetTitle>Dashboard navigation</SheetTitle>
+                      <SheetDescription>
+                        Navigate between your dashboard pages or sign out.
+                      </SheetDescription>
                     </SheetHeader>
 
                     <div className="mt-10 flex h-full flex-col">

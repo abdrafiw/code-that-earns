@@ -2,7 +2,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getAnalytics } from 'firebase/analytics';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -24,6 +23,19 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const analytics = getAnalytics(app);
+export async function initializeAnalytics(hasConsent: boolean) {
+  if (!hasConsent || !import.meta.env.PROD || !firebaseConfig.measurementId) {
+    return null;
+  }
+
+  try {
+    const { getAnalytics, isSupported } = await import('firebase/analytics');
+    if (!(await isSupported())) return null;
+
+    return getAnalytics(app);
+  } catch {
+    return null;
+  }
+}
 
 export default app;

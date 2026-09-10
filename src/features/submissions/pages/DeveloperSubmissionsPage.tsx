@@ -2,17 +2,28 @@ import { PageSkeleton } from '../../../components/common/PageSkeleton';
 import { PageEmptyState } from '../../../components/common/PageEmptyState';
 import { PageErrorState } from '../../../components/common/PageErrorState';
 import { useGetDeveloperSubmissions } from '../hooks/useSubmissions';
+import { getErrorMessage } from '../../../utils/getErrorMessage';
 
 export function DeveloperSubmissionsPage() {
-  const { submissions, loading, error } = useGetDeveloperSubmissions();
+  const submissionsQuery = useGetDeveloperSubmissions();
+  const submissions = submissionsQuery.data ?? [];
 
-  if (loading) return <PageSkeleton variant="submissions" />;
-  if (error) return <PageErrorState message={error} />;
+  if (submissionsQuery.isPending) return <PageSkeleton variant="submissions" />;
+  if (submissionsQuery.error)
+    return (
+      <PageErrorState
+        message={getErrorMessage(submissionsQuery.error)}
+        onRetry={() => void submissionsQuery.refetch()}
+        isRetrying={submissionsQuery.isFetching}
+      />
+    );
   if (submissions.length === 0)
     return (
       <PageEmptyState
         title="No submissions found"
         description="You haven't submitted any solutions yet."
+        actionHref="/dev-bounties"
+        actionLabel="Browse bounties"
       />
     );
 

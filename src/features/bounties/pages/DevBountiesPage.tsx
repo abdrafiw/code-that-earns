@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
 import { PageSkeleton } from '../../../components/common/PageSkeleton';
 import { PageErrorState } from '../../../components/common/PageErrorState';
-import { useAppContext } from '../../../hooks/useAppContext';
 import { BountyCard } from '../components/BountyCard';
-import { useGetBounty } from '../hooks/useBounties';
+import { useGetBounties } from '../hooks/useBounties';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
+import { Button } from '../../../components/ui/button';
 
 import {
   Select,
@@ -19,38 +18,23 @@ export const DevBountiesPage = () => {
   const [category, setCategory] = useState<string>('all');
   const [difficulty, setDifficulty] = useState<string>('all');
 
-  const { user } = useAppContext();
-  const {
-    data: bounties = [],
-    isLoading: loading,
-    isFetching,
-    error,
-    refetch,
-  } = useGetBounty();
+  const bountiesQuery = useGetBounties({ category, difficulty });
+  const bounties =
+    bountiesQuery.data?.pages.flatMap((page) => page.bounties) ?? [];
 
-  if (!user?.success) return <Navigate to="/" />;
-
-  if (loading) {
+  if (bountiesQuery.isPending) {
     return <PageSkeleton variant="dev-bounties" />;
   }
 
-  if (error) {
+  if (bountiesQuery.error) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-10">
         <PageErrorState
-          message={getErrorMessage(error)}
-          onRetry={() => void refetch()}
-          isRetrying={isFetching}
+          message={getErrorMessage(bountiesQuery.error)}
+          onRetry={() => void bountiesQuery.refetch()}
+          isRetrying={bountiesQuery.isFetching}
         />
       </div>
-    );
-  }
-
-  if (bounties.length === 0) {
-    return (
-      <p className="text-muted-foreground text-center">
-        No bounties available at the moment.
-      </p>
     );
   }
 
@@ -70,9 +54,9 @@ export const DevBountiesPage = () => {
 
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="coding">Coding</SelectItem>
-                <SelectItem value="data-analysis">Data Analysis</SelectItem>
-                <SelectItem value="blockchain">Blockchain</SelectItem>
+                <SelectItem value="Coding">Coding</SelectItem>
+                <SelectItem value="Data Analysis">Data Analysis</SelectItem>
+                <SelectItem value="Blockchain">Blockchain</SelectItem>
               </SelectContent>
             </Select>
 
@@ -83,19 +67,39 @@ export const DevBountiesPage = () => {
 
               <SelectContent>
                 <SelectItem value="all">All Difficulties</SelectItem>
-                <SelectItem value="beginner">Beginner</SelectItem>
-                <SelectItem value="intermediate">Intermediate</SelectItem>
-                <SelectItem value="advanced">Advanced</SelectItem>
+                <SelectItem value="Beginner">Beginner</SelectItem>
+                <SelectItem value="Intermediate">Intermediate</SelectItem>
+                <SelectItem value="Advanced">Advanced</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </header>
 
-        <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-1">
-          {bounties.map((bounty) => (
-            <BountyCard key={bounty.id} bounty={bounty} />
-          ))}
-        </div>
+        {bounties.length === 0 ? (
+          <p className="text-muted-foreground py-12 text-center">
+            No bounties match the selected filters.
+          </p>
+        ) : (
+          <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-1">
+            {bounties.map((bounty) => (
+              <BountyCard key={bounty.id} bounty={bounty} />
+            ))}
+          </div>
+        )}
+
+        {bountiesQuery.hasNextPage && (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              onClick={() => void bountiesQuery.fetchNextPage()}
+              disabled={bountiesQuery.isFetchingNextPage}
+            >
+              {bountiesQuery.isFetchingNextPage
+                ? 'Loading…'
+                : 'Load more bounties'}
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );

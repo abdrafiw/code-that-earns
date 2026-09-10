@@ -1,6 +1,9 @@
 import type { TBounty } from '../types';
+import type { BountyDocument } from '../../../services/firestore-structure';
 
-export const transformBounty = (doc: any): TBounty => {
+type BountySource = Partial<BountyDocument> & { id: string | number };
+
+export const transformBounty = (doc: BountySource): TBounty => {
   return {
     id: doc.id,
     title: doc.title || '',

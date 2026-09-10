@@ -1,7 +1,7 @@
 import {
   doc,
   getDoc,
-  addDoc,
+  setDoc,
   collection,
   query,
   where,
@@ -24,9 +24,10 @@ import {
 } from '../firestore-structure';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 import type { SubmitSolutionPayload } from '../../features/submissions/types';
+import type { SubmissionDocument } from '../firestore-structure';
 
 export type CompanySubmissionPage = {
-  submissions: Array<{ id: string } & DocumentData>;
+  submissions: Array<{ id: string } & SubmissionDocument>;
   cursor?: QueryDocumentSnapshot<DocumentData>;
   hasMore: boolean;
 };
@@ -41,16 +42,27 @@ class SubmissionService {
     if (!user) throw new Error('User not authenticated');
 
     try {
-      const [bountySnapshot, developerSnapshot] = await Promise.all([
-        getDoc(
-          doc(db, COLLECTIONS.BOUNTIES, bountyID).withConverter(
-            bountyConverter,
+      const [bountySnapshot, developerSnapshot, existingSubmissions] =
+        await Promise.all([
+          getDoc(
+            doc(db, COLLECTIONS.BOUNTIES, bountyID).withConverter(
+              bountyConverter,
+            ),
           ),
-        ),
-        getDoc(
-          doc(db, COLLECTIONS.USERS, user.uid).withConverter(userConverter),
-        ),
-      ]);
+          getDoc(
+            doc(db, COLLECTIONS.USERS, user.uid).withConverter(userConverter),
+          ),
+          getDocs(
+            query(
+              collection(db, COLLECTIONS.SUBMISSIONS).withConverter(
+                submissionConverter,
+              ),
+              where('developerUid', '==', user.uid),
+              where('bountyId', '==', bountyID),
+              limit(1),
+            ),
+          ),
+        ]);
 
       if (!bountySnapshot.exists()) {
         throw new Error('Bounty not found');
@@ -60,11 +72,21 @@ class SubmissionService {
         throw new Error('Developer profile not found. Please sign in again.');
       }
 
+      if (!existingSubmissions.empty) {
+        throw new Error(
+          'You have already submitted a solution for this bounty.',
+        );
+      }
+
       const bounty = bountySnapshot.data();
       const developer = developerSnapshot.data();
 
       if (developer.role !== 'DEVELOPER') {
         throw new Error('Only developers can submit solutions');
+      }
+
+      if (!developer.name?.trim() || !developer.email?.trim()) {
+        throw new Error('Complete your developer profile before submitting.');
       }
 
       const submissionData = {
@@ -76,13 +98,15 @@ class SubmissionService {
         githubUrl,
         bitcoinAddress,
         developerUid: user.uid,
-        developerName: developer.name ?? user.displayName ?? null,
-        developerEmail: developer.email ?? user.email ?? null,
+        developerName: developer.name,
+        developerEmail: developer.email,
+        status: 'submitted' as const,
         createdAt: serverTimestamp(),
       };
 
-      await addDoc(
-        collection(db, COLLECTIONS.SUBMISSIONS).withConverter(
+      const submissionId = `${bountyID}_${user.uid}`;
+      await setDoc(
+        doc(db, COLLECTIONS.SUBMISSIONS, submissionId).withConverter(
           submissionConverter,
         ),
         submissionData,

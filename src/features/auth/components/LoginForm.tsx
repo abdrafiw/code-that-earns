@@ -1,56 +1,35 @@
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { toast } from 'sonner';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
 
 import { useLogin } from '../hooks/useAuth';
-import { validateEmail } from '../utils/validateEmail';
+import { useTypedForm } from '../../../hooks/useTypedForm';
+import {
+  hasFormErrors,
+  validateLogin,
+  type LoginFormValues,
+} from '../../../utils/formSchemas';
+
+const initialValues: LoginFormValues = { email: '', password: '' };
 
 export const LoginForm = () => {
-  const [loginForm, setLoginForm] = useState({
-    email: '',
-    password: '',
-  });
-  const [emailError, setEmailError] = useState('');
+  const form = useTypedForm(initialValues);
   const [showPassword, setShowPassword] = useState(false);
 
   const loginMutation = useLogin();
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const email = e.target.value;
-    setLoginForm({ ...loginForm, email });
-
-    if (email === '') {
-      setEmailError('');
-    } else if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address');
-    } else {
-      setEmailError('');
-    }
-  };
-
   const handleLogin = (e: FormEvent) => {
     e.preventDefault();
-
-    if (!loginForm.password || !loginForm.email) {
-      toast.error('Please add email and password');
-      return;
-    }
-
-    if (!validateEmail(loginForm.email)) {
-      toast.error('Please enter a valid email address');
-      return;
-    }
-
-    const payload = {
-      email: loginForm.email,
-      password: loginForm.password,
-    };
-
-    loginMutation.mutate(payload);
+    const errors = validateLogin(form.values);
+    form.setErrors(errors);
+    if (hasFormErrors(errors)) return;
+    loginMutation.mutate({
+      email: form.values.email.trim(),
+      password: form.values.password,
+    });
   };
 
   return (
@@ -68,15 +47,28 @@ export const LoginForm = () => {
               type="email"
               autoComplete="email"
               required
-              value={loginForm.email}
-              onChange={handleEmailChange}
-              className={`h-11 bg-slate-50 pl-10 focus-visible:bg-white ${emailError ? 'border-destructive' : ''}`}
+              value={form.values.email}
+              onChange={(event) => {
+                const email = event.target.value;
+                form.setField('email', email);
+                form.setErrors(
+                  email
+                    ? { email: validateLogin({ ...form.values, email }).email }
+                    : {},
+                );
+              }}
+              className={`h-11 bg-slate-50 pl-10 focus-visible:bg-white ${form.errors.email ? 'border-destructive' : ''}`}
               placeholder="your@email.com"
-              aria-invalid={!!emailError}
+              aria-invalid={!!form.errors.email}
+              aria-describedby={
+                form.errors.email ? 'login-email-error' : undefined
+              }
             />
           </div>
-          {emailError && (
-            <p className="text-destructive text-sm">{emailError}</p>
+          {form.errors.email && (
+            <p id="login-email-error" className="text-destructive text-sm">
+              {form.errors.email}
+            </p>
           )}
         </div>
 
@@ -95,12 +87,16 @@ export const LoginForm = () => {
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               required
-              value={loginForm.password}
-              onChange={(e) =>
-                setLoginForm({ ...loginForm, password: e.target.value })
+              value={form.values.password}
+              onChange={(event) =>
+                form.setField('password', event.target.value)
               }
               className="h-11 bg-slate-50 pr-10 pl-10 focus-visible:bg-white"
               placeholder="••••••••"
+              aria-invalid={!!form.errors.password}
+              aria-describedby={
+                form.errors.password ? 'login-password-error' : undefined
+              }
             />
             <button
               type="button"
@@ -115,12 +111,17 @@ export const LoginForm = () => {
               )}
             </button>
           </div>
+          {form.errors.password && (
+            <p id="login-password-error" className="text-destructive text-sm">
+              {form.errors.password}
+            </p>
+          )}
         </div>
       </div>
 
       <Button
         type="submit"
-        disabled={loginMutation.isPending || !!emailError}
+        disabled={loginMutation.isPending || Boolean(form.errors.email)}
         className="h-11 w-full cursor-pointer bg-orange-600 font-semibold hover:bg-orange-700"
         size="lg"
       >

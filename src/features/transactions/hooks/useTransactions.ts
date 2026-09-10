@@ -2,6 +2,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import type { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 import { transactionService } from '../../../services/transactions/transactionService';
 import type { TransactionStatus } from '../types';
+import { transactionKeys } from '../queryKeys';
 
 type TransactionCursor = QueryDocumentSnapshot<DocumentData> | undefined;
 
@@ -22,7 +23,7 @@ export function useGetTransactions(
   status?: TransactionStatus,
 ) {
   return useInfiniteQuery({
-    queryKey: ['transactions', userId, status ?? 'all'],
+    queryKey: transactionKeys.list(userId, status),
     queryFn: ({ pageParam }) =>
       getTransactions({ userId: userId!, status, cursor: pageParam }),
     initialPageParam: undefined as TransactionCursor,

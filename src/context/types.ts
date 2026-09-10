@@ -1,15 +1,15 @@
-import type { AuthResponse } from '../features/auth/types';
-import type { TBounty } from '../features/bounties/types';
+import type { AuthResponseSuccess } from '../features/auth/types';
+
+export type AuthState =
+  | { status: 'loading' }
+  | { status: 'anonymous' }
+  | { status: 'authenticated'; user: AuthResponseSuccess }
+  | { status: 'profile-missing' }
+  | { status: 'error'; error: unknown };
 
 export type AppContextType = {
-  currentView: string;
-  setCurrentView: (arg: string) => void;
-
-  user: AuthResponse | null;
-  setUser: (arg: AuthResponse | null) => void;
-
-  selectedBounty: TBounty | null;
-  setSelectedBounty: (arg: TBounty | null) => void;
-
+  authState: AuthState;
+  user: AuthResponseSuccess | null;
   isAuthLoading: boolean;
+  retryAuthProfile: () => void;
 };

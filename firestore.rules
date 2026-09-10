@@ -10,17 +10,136 @@ service cloud.firestore {
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
+
+    function hasValidRole(role) {
+      return role == 'DEVELOPER' || role == 'COMPANY';
+    }
+
+    function hasValidProfileName(data) {
+      return (data.role == 'DEVELOPER'
+          && data.name is string
+          && data.name.size() > 0
+          && !data.keys().hasAny(['companyName']))
+        || (data.role == 'COMPANY'
+          && data.companyName is string
+          && data.companyName.size() > 0
+          && !data.keys().hasAny(['name']));
+    }
+
+    function changesOnlyEditableProfileFields() {
+      return (resource.data.role == 'DEVELOPER'
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['name', 'updatedAt']))
+        || (resource.data.role == 'COMPANY'
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['companyName', 'updatedAt']));
+    }
+
+    function hasValidBountyFields(data) {
+      return data.keys().hasOnly([
+          'title', 'description', 'category', 'difficulty', 'bountyBTC',
+          'deadline', 'searchTerms', 'searchSchemaVersion', 'filterFacets',
+          'companyName', 'companyUid', 'createdAt', 'updatedAt'
+        ])
+        && data.title is string
+        && data.title.size() >= 3
+        && data.title.size() <= 120
+        && data.description is string
+        && data.description.size() >= 10
+        && data.description.size() <= 5000
+        && data.category in ['Coding', 'Data Analysis', 'Blockchain']
+        && data.difficulty in ['Beginner', 'Intermediate', 'Advanced']
+        && data.bountyBTC is number
+        && data.bountyBTC > 0
+        && data.bountyBTC <= 21
+        && data.searchTerms is list
+        && data.searchTerms.size() <= 100
+        && data.searchSchemaVersion == 1
+        && data.filterFacets is list
+        && data.filterFacets.size() == 3
+        && data.filterFacets.hasAll([
+          'category:' + data.category,
+          'difficulty:' + data.difficulty,
+          'category:' + data.category + '|difficulty:' + data.difficulty
+        ])
+        && data.deadline is timestamp
+        && data.deadline > request.time
+        && data.createdAt == request.time
+        && data.updatedAt == request.time;
+    }
+
+    function hasValidSubmissionFields(submissionId, data) {
+      let bounty = get(/databases/$(database)/documents/bounties/$(data.bountyId)).data;
+      let developer = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return submissionId == data.bountyId + '_' + request.auth.uid
+        && data.keys().hasOnly([
+          'bountyId', 'companyUid', 'bountyTitle', 'bountyDescription',
+          'bountyRewardBTC', 'githubUrl', 'bitcoinAddress', 'developerUid',
+          'developerName', 'developerEmail', 'status', 'createdAt'
+        ])
+        && data.bountyId is string
+        && data.developerUid == request.auth.uid
+        && data.companyUid == bounty.companyUid
+        && data.bountyTitle == bounty.title
+        && data.bountyDescription == bounty.description
+        && data.bountyRewardBTC == bounty.bountyBTC
+        && data.developerName == developer.name
+        && data.developerEmail == developer.email
+        && data.githubUrl is string
+        && data.githubUrl.matches('^https://github[.]com/[^/]+/[^/]+/?$')
+        && data.bitcoinAddress is string
+        && data.bitcoinAddress.matches('^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}$')
+        && data.status == 'submitted'
+        && data.createdAt == request.time
+        && bounty.deadline > request.time
+        && (!bounty.keys().hasAny(['status']) || bounty.status == 'open');
+    }
+
+    function hasValidSubmissionStatusTransition(currentStatus, nextStatus) {
+      return currentStatus == nextStatus
+        || (currentStatus == 'submitted'
+          && nextStatus in ['reviewed', 'rejected'])
+        || (currentStatus == 'reviewed'
+          && nextStatus in ['winner', 'rejected']);
+    }
+
+    function hasValidSubmissionReview(data) {
+      return data.status in ['submitted', 'reviewed', 'winner', 'rejected']
+        && data.reviewedAt == request.time
+        && (!data.keys().hasAny(['reviewNotes'])
+          || (data.reviewNotes is string && data.reviewNotes.size() <= 2000))
+        && (!data.keys().hasAny(['score'])
+          || (data.score is number && data.score >= 0 && data.score <= 100));
+    }
     
     // Users collection
     match /users/{userId} {
-      // Users can read their own profile and other users' profiles (for public info)
-      allow read: if isAuthenticated();
+      // User documents contain private account data. Public display data needed
+      // by another party is stored as a bounded projection on domain records.
+      allow get: if isOwner(userId);
+      allow list: if false;
       
       // Users can create their own profile during signup
-      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly([
+          'uid', 'email', 'role', 'name', 'companyName', 'createdAt'
+        ])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && hasValidRole(request.resource.data.role)
+        && hasValidProfileName(request.resource.data)
+        && request.resource.data.createdAt == request.time;
       
       // Users can update their own profile
-      allow update: if isOwner(userId);
+      allow update: if isOwner(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.createdAt == resource.data.createdAt
+        && changesOnlyEditableProfileFields()
+        && hasValidProfileName(request.resource.data)
+        && request.resource.data.updatedAt == request.time;
     }
     
     // Bounties collection
@@ -32,12 +151,16 @@ service cloud.firestore {
       allow create: if isAuthenticated() 
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'COMPANY'
-        && request.resource.data.deadline is timestamp
-        && request.resource.data.deadline > request.time;
+        && request.resource.data.companyUid == request.auth.uid
+        && request.resource.data.companyName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyName
+        && hasValidBountyFields(request.resource.data);
       
       // Only the creator can update their own bounties
       allow update: if isAuthenticated() 
-        && resource.data.companyUid == request.auth.uid;
+        && resource.data.companyUid == request.auth.uid
+        && request.resource.data.companyUid == resource.data.companyUid
+        && request.resource.data.companyName == resource.data.companyName
+        && request.resource.data.createdAt == resource.data.createdAt;
       
       // Only the creator can delete their own bounties
       allow delete: if isAuthenticated() 
@@ -55,19 +178,22 @@ service cloud.firestore {
       
       // Only developers can create submissions
       allow create: if isAuthenticated() 
-        && request.resource.data.developerUid == request.auth.uid
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'DEVELOPER'
         && exists(/databases/$(database)/documents/bounties/$(request.resource.data.bountyId))
-        && request.resource.data.companyUid == get(/databases/$(database)/documents/bounties/$(request.resource.data.bountyId)).data.companyUid;
+        && hasValidSubmissionFields(submissionId, request.resource.data);
       
       // Companies can update submissions for their bounties
       allow update: if isAuthenticated() 
-        && request.resource.data.bountyId == resource.data.bountyId
-        && request.resource.data.companyUid == resource.data.companyUid
-        && request.resource.data.developerUid == resource.data.developerUid
         && exists(/databases/$(database)/documents/bounties/$(resource.data.bountyId))
-        && get(/databases/$(database)/documents/bounties/$(resource.data.bountyId)).data.companyUid == request.auth.uid;
+        && get(/databases/$(database)/documents/bounties/$(resource.data.bountyId)).data.companyUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'reviewNotes', 'reviewedAt', 'score'])
+        && hasValidSubmissionStatusTransition(
+          resource.data.status,
+          request.resource.data.status
+        )
+        && hasValidSubmissionReview(request.resource.data);
     }
     
     // Transactions collection
@@ -77,10 +203,9 @@ service cloud.firestore {
         && (resource.data.fromUserId == request.auth.uid 
             || resource.data.toUserId == request.auth.uid);
       
-      // Only system/companies can create transactions
-      allow create: if isAuthenticated() 
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'COMPANY';
+      // Financial records are written only by trusted Admin SDK backends,
+      // which bypass client security rules after provider verification.
+      allow create, update, delete: if false;
     }
   }
 }

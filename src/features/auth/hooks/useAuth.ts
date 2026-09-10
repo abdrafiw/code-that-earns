@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { authService } from '../../../services/auth/authService';
 import type { SignInPayload, SignUpPayload } from '../types';
@@ -10,20 +10,46 @@ async function login(payload: SignInPayload) {
   return user;
 }
 
+function getRequestedPath(state: unknown) {
+  if (typeof state !== 'object' || state === null || !('from' in state))
+    return null;
+
+  const from = state.from;
+  if (
+    typeof from !== 'object' ||
+    from === null ||
+    !('pathname' in from) ||
+    typeof from.pathname !== 'string'
+  )
+    return null;
+
+  const search =
+    'search' in from && typeof from.search === 'string' ? from.search : '';
+  const hash = 'hash' in from && typeof from.hash === 'string' ? from.hash : '';
+  return `${from.pathname}${search}${hash}`;
+}
+
 export const useLogin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return useMutation({
     mutationFn: login,
     onSuccess: (data) => {
       toast.success('Login successful');
+      const requestedPath = getRequestedPath(location.state);
+
+      if (requestedPath) {
+        navigate(requestedPath, { replace: true });
+        return;
+      }
 
       if (data.role === 'COMPANY') {
-        navigate('/company-bounties');
+        navigate('/company-bounties', { replace: true });
       } else if (data.role === 'DEVELOPER') {
-        navigate('/dev-bounties');
+        navigate('/dev-bounties', { replace: true });
       } else {
-        navigate('/');
+        navigate('/', { replace: true });
       }
     },
     onError: (error: Error) => {

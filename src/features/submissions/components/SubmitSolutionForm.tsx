@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { SiGithub } from 'react-icons/si';
@@ -8,6 +8,18 @@ import { Label } from '../../../components/ui/label';
 import { useSubmitSolution } from '../hooks/useSubmissions';
 import type { TBounty } from '../../bounties/types';
 import { formatDeadline } from '../utils/formatDeadline';
+import { useTypedForm } from '../../../hooks/useTypedForm';
+import {
+  hasFormErrors,
+  validateSubmission,
+  type SubmissionFormValues,
+} from '../../../utils/formSchemas';
+import { getErrorMessage } from '../../../utils/getErrorMessage';
+
+const initialValues: SubmissionFormValues = {
+  githubUrl: '',
+  bitcoinAddress: '',
+};
 
 type SubmitSolutionFormProps = {
   bounty: TBounty;
@@ -18,8 +30,7 @@ export const SubmitSolutionForm = ({
   bounty,
   bountyID,
 }: SubmitSolutionFormProps) => {
-  const [repoURL, setRepoURL] = useState('');
-  const [btcAddress, setBtcAddress] = useState('');
+  const form = useTypedForm(initialValues);
 
   const navigate = useNavigate();
 
@@ -28,21 +39,27 @@ export const SubmitSolutionForm = ({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!repoURL || !btcAddress) {
+    const errors = validateSubmission(form.values);
+    form.setErrors(errors);
+    if (hasFormErrors(errors)) {
       toast.error('Please fill in all fields.');
       return;
     }
 
     const payload = {
-      githubUrl: repoURL,
-      bitcoinAddress: btcAddress,
+      githubUrl: form.values.githubUrl.trim(),
+      bitcoinAddress: form.values.bitcoinAddress.trim(),
       bountyID,
     };
 
     submitSolutionMutation.mutate(payload, {
       onSuccess: () => {
-        setRepoURL('');
-        setBtcAddress('');
+        toast.success('Solution submitted successfully.');
+        form.reset();
+        navigate('/submissions');
+      },
+      onError: (error) => {
+        toast.error(getErrorMessage(error));
       },
     });
   };
@@ -68,12 +85,21 @@ export const SubmitSolutionForm = ({
             <Input
               id="github-url"
               type="url"
-              value={repoURL}
-              onChange={(e) => setRepoURL(e.target.value)}
+              value={form.values.githubUrl}
+              onChange={(e) => form.setField('githubUrl', e.target.value)}
               className="pl-10"
               placeholder="https://github.com/username/project"
+              aria-invalid={!!form.errors.githubUrl}
+              aria-describedby={
+                form.errors.githubUrl ? 'github-url-error' : undefined
+              }
             />
           </div>
+          {form.errors.githubUrl && (
+            <p id="github-url-error" className="text-destructive text-sm">
+              {form.errors.githubUrl}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -81,10 +107,19 @@ export const SubmitSolutionForm = ({
           <Input
             id="btc-address"
             type="text"
-            value={btcAddress}
-            onChange={(e) => setBtcAddress(e.target.value)}
+            value={form.values.bitcoinAddress}
+            onChange={(e) => form.setField('bitcoinAddress', e.target.value)}
             placeholder="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+            aria-invalid={!!form.errors.bitcoinAddress}
+            aria-describedby={
+              form.errors.bitcoinAddress ? 'btc-address-error' : undefined
+            }
           />
+          {form.errors.bitcoinAddress && (
+            <p id="btc-address-error" className="text-destructive text-sm">
+              {form.errors.bitcoinAddress}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-4 lg:flex-row">

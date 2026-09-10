@@ -2,7 +2,7 @@
 
 CTE (Code That Earns) is a role-based web application for connecting companies with developers through paid coding challenges. Companies publish bounties, developers browse and submit solutions through GitHub repository links, and companies can review submissions.
 
-The project currently provides the core bounty, authentication, and submission workflows. Bitcoin payment integration and transaction history are represented in the UI, but the transaction page currently uses sample data and payment execution is not yet connected to a production backend.
+The project currently provides the core bounty, authentication, and submission workflows. Transaction history is read-only in the browser. Payment execution is intentionally unavailable until it can be implemented by a trusted backend.
 
 ## Features
 
@@ -26,12 +26,11 @@ The project currently provides the core bounty, authentication, and submission w
 - Firebase Authentication and Firestore-backed application state.
 - Role-aware navigation and access-denied, loading, empty, and error states.
 - Responsive interface built with Tailwind CSS and Radix-based UI primitives.
-- Public transaction-history UI with Bitcoin explorer links using Blockstream.
+- Read-only, authenticated Firestore transaction history.
 
 ## Current limitations
 
-- The transactions page currently displays hard-coded sample transactions; it does not read from the Firestore transactions collection.
-- The Bitcoin service contains a client-side Bitnob API call using a legacy REACT_APP_BITNOB_KEY reference. Do not expose a real private payment key in the browser. Production payments should be moved behind a trusted server or Firebase Cloud Function.
+- Payment execution is not implemented. A future implementation must run behind a trusted server or Firebase Cloud Function; payment-provider credentials must never be added to a Vite environment variable or browser bundle.
 - GitHub repositories are submitted as URLs. The app does not upload repository contents or verify repositories automatically.
 - Firebase Analytics is initialized, so a configured Firebase project is required for the app to start successfully.
 
@@ -49,7 +48,7 @@ The project currently provides the core bounty, authentication, and submission w
 
 ## Requirements
 
-- Node.js 16 or newer
+- Node.js 22 or newer
 - npm
 - A Firebase project with Authentication and Firestore enabled
 
@@ -57,13 +56,13 @@ The project currently provides the core bounty, authentication, and submission w
 
 1. Install dependencies:
 
-   ~~~bash
+   ```bash
    npm install
-   ~~~
+   ```
 
 2. Create a .env file in the repository root. Vite exposes only variables prefixed with VITE_ to the client:
 
-   ~~~dotenv
+   ```dotenv
    VITE_FIREBASE_API_KEY=your-api-key
    VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
    VITE_FIREBASE_PROJECT_ID=your-project-id
@@ -71,9 +70,9 @@ The project currently provides the core bounty, authentication, and submission w
    VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
    VITE_FIREBASE_APP_ID=your-app-id
    VITE_FIREBASE_MEASUREMENT_ID=your-measurement-id
-   ~~~
+   ```
 
-   These values are read in src/config/firebase.ts. The repository currently includes a local .env file but does not include a .env.example; create one for new environments without committing secrets.
+   These values are read in `src/config/firebase.ts`. Copy `.env.example` when creating a local environment file, and never commit secrets.
 
 3. In Firebase Console, enable:
 
@@ -83,39 +82,41 @@ The project currently provides the core bounty, authentication, and submission w
 
 4. Start the development server:
 
-   ~~~bash
+   ```bash
    npm run dev
-   ~~~
+   ```
 
    Vite will print the local URL, normally http://localhost:5173.
 
 ## Available scripts
 
-| Command | Description |
-| --- | --- |
-| npm run dev | Start the Vite development server |
-| npm run build | Type-check and create a production build in dist/ |
-| npm run preview | Preview the production build locally |
-| npm run lint | Run ESLint |
-| npm test | Run the Jest test suite |
-| npm run test:watch | Run Jest in watch mode |
-| npm run test:coverage | Generate Jest coverage output |
-| npm run format | Format source files with Prettier |
-| npm run format:check | Check formatting without changing files |
+| Command                             | Description                                       |
+| ----------------------------------- | ------------------------------------------------- |
+| npm run dev                         | Start the Vite development server                 |
+| npm run build                       | Type-check and create a production build in dist/ |
+| npm run preview                     | Preview the production build locally              |
+| npm run lint                        | Run ESLint                                        |
+| npm test                            | Run the Jest test suite                           |
+| npm run test:watch                  | Run Jest in watch mode                            |
+| npm run test:coverage               | Generate Jest coverage output                     |
+| npm run migrate:bounty-search       | Preview the legacy bounty search migration        |
+| npm run migrate:bounty-search:apply | Apply the legacy bounty search migration          |
+| npm run format                      | Format source files with Prettier                 |
+| npm run format:check                | Check formatting without changing files           |
 
 ## Application routes
 
-| Route | Purpose |
-| --- | --- |
-| / | Home page |
-| /login | Sign in |
-| /sign-up | Create a developer or company account |
-| /dev-bounties | Browse bounties as a developer |
-| /company-bounties | View company bounties and open the create-bounty dialog |
-| /submit/:bountyId | Submit a solution for a bounty |
-| /submissions | View developer submissions |
-| /company-submissions | View submissions for company bounties |
-| /transactions | View the current transaction-history UI |
+| Route                | Purpose                                                 |
+| -------------------- | ------------------------------------------------------- |
+| /                    | Home page                                               |
+| /login               | Sign in                                                 |
+| /sign-up             | Create a developer or company account                   |
+| /dev-bounties        | Browse bounties as a developer                          |
+| /company-bounties    | View company bounties and open the create-bounty dialog |
+| /submit/:bountyId    | Submit a solution for a bounty                          |
+| /submissions         | View developer submissions                              |
+| /company-submissions | View submissions for company bounties                   |
+| /transactions        | View authenticated, read-only transaction history       |
 
 ## Firestore
 
@@ -130,9 +131,25 @@ The deployed rules are in firestore.rules. Authenticated users can read user pro
 
 Keep role values consistent with the application’s uppercase values: DEVELOPER and COMPANY.
 
+### Legacy bounty search migration
+
+Older bounty documents must be backfilled before they appear in company search
+and combined filter queries. Authenticate with Application Default Credentials,
+preview the migration, and only then apply it:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service-account.json
+npm run migrate:bounty-search -- --project=code-bounty-6e6b3
+npm run migrate:bounty-search:apply -- --project=code-bounty-6e6b3
+```
+
+The migration is idempotent, paginates through the collection, skips malformed
+records, limits each batch to 400 writes, and stamps records with the current
+search schema version.
+
 ## Project structure
 
-~~~text
+```text
 src/
 ├── components/          Shared and reusable UI components
 ├── config/              Firebase initialization
@@ -148,17 +165,17 @@ src/
 ├── lib/                  General utilities
 ├── services/             Firebase and external-service access
 └── test/                 Jest setup and browser polyfills
-~~~
+```
 
 ## Firebase deployment
 
 The repository is configured to deploy the Vite dist/ directory to Firebase Hosting and to rewrite routes to index.html for client-side routing.
 
-~~~bash
+```bash
 npm run build
 firebase login
 firebase deploy
-~~~
+```
 
 The Firebase project selected by the Firebase CLI must match the project ID in your environment configuration. Firestore rules are deployed from firestore.rules.
 
@@ -166,9 +183,9 @@ The Firebase project selected by the Firebase CLI must match the project ID in y
 
 Tests live next to the implementation under src/ and use Jest with a jsdom environment. Run the full suite with:
 
-~~~bash
+```bash
 npm test
-~~~
+```
 
 ## Contributing
 

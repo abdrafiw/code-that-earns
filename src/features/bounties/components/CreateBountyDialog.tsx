@@ -37,59 +37,55 @@ import {
   PopoverTrigger,
 } from '../../../components/ui/popover';
 
-const initialForm = {
+import { useTypedForm } from '../../../hooks/useTypedForm';
+import { FormErrorSummary } from '../../../components/common/FormErrorSummary';
+
+import {
+  hasFormErrors,
+  validateBounty,
+  type BountyFormValues,
+} from '../../../utils/formSchemas';
+
+const initialForm: BountyFormValues = {
   title: '',
   description: '',
   category: '',
   difficulty: '',
   bountyBTC: 0.0001,
-  deadline: undefined as Date | undefined,
+  deadline: undefined,
 };
 
 export const CreateBountyDialog = () => {
   const [open, setOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [form, setForm] = useState(initialForm);
+  const form = useTypedForm(initialForm);
   const createBountyMutation = useCreateBounty();
-
-  const isFormValid = Boolean(
-    form.title &&
-    form.description &&
-    form.category &&
-    form.difficulty &&
-    form.deadline,
-  );
-
-  const resetForm = () => setForm(initialForm);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const errors = validateBounty(form.values);
+    form.setErrors(errors);
+    if (hasFormErrors(errors) || !form.values.deadline) return;
 
-    if (!isFormValid) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
+    const payload = {
+      title: form.values.title.trim(),
+      description: form.values.description.trim(),
+      category: form.values.category,
+      difficulty: form.values.difficulty,
+      bountyBTC: form.values.bountyBTC,
+      deadline: form.values.deadline,
+    };
 
-    createBountyMutation.mutate(
-      {
-        title: form.title,
-        description: form.description,
-        category: form.category,
-        difficulty: form.difficulty,
-        bountyBTC: Number(form.bountyBTC),
-        deadline: form.deadline!,
+    createBountyMutation.mutate(payload, {
+      onSuccess: () => {
+        toast.success('Bounty created successfully!');
+        form.reset();
+        setOpen(false);
       },
-      {
-        onSuccess: () => {
-          toast.success('Bounty created successfully!');
-          resetForm();
-          setOpen(false);
-        },
-        onError: (error) => {
-          toast.error(getErrorMessage(error));
-        },
+      onError: (error) => {
+        toast.error(getErrorMessage(error));
       },
-    );
+    });
   };
 
   return (
@@ -97,7 +93,7 @@ export const CreateBountyDialog = () => {
       open={open}
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
-        if (!nextOpen && !createBountyMutation.isPending) resetForm();
+        if (!nextOpen && !createBountyMutation.isPending) form.reset();
       }}
     >
       <DialogTrigger asChild>
@@ -117,45 +113,42 @@ export const CreateBountyDialog = () => {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          <FormErrorSummary errors={form.errors} />
+          {/* title */}
           <div className="space-y-2">
             <Label htmlFor="bounty-title">Title</Label>
             <Input
               id="bounty-title"
-              value={form.title}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  title: event.target.value,
-                }))
-              }
+              value={form.values.title}
+              onChange={(event) => form.setField('title', event.target.value)}
               placeholder="build a React todo app"
+              aria-invalid={!!form.errors.title}
             />
           </div>
 
+          {/* description */}
           <div className="space-y-2">
             <Label htmlFor="bounty-description">Description</Label>
             <Textarea
               id="bounty-description"
-              value={form.description}
+              value={form.values.description}
               onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  description: event.target.value,
-                }))
+                form.setField('description', event.target.value)
               }
               placeholder="Describe the challenge and expected outcome..."
               className="min-h-28"
+              aria-invalid={!!form.errors.description}
             />
           </div>
 
+          {/* category && difficulty */}
           <div className="grid gap-4 sm:grid-cols-2">
+            {/* category */}
             <div className="space-y-2">
               <Label htmlFor="bounty-category">Category</Label>
               <Select
-                value={form.category}
-                onValueChange={(value) =>
-                  setForm((current) => ({ ...current, category: value }))
-                }
+                value={form.values.category}
+                onValueChange={(value) => form.setField('category', value)}
               >
                 <SelectTrigger id="bounty-category" className="w-full">
                   <SelectValue placeholder="Select category" />
@@ -168,17 +161,17 @@ export const CreateBountyDialog = () => {
               </Select>
             </div>
 
+            {/* difficulty */}
             <div className="space-y-2">
               <Label htmlFor="bounty-difficulty">Difficulty</Label>
               <Select
-                value={form.difficulty}
-                onValueChange={(value) =>
-                  setForm((current) => ({ ...current, difficulty: value }))
-                }
+                value={form.values.difficulty}
+                onValueChange={(value) => form.setField('difficulty', value)}
               >
                 <SelectTrigger id="bounty-difficulty" className="w-full">
                   <SelectValue placeholder="Select difficulty" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="Beginner">Beginner</SelectItem>
                   <SelectItem value="Intermediate">Intermediate</SelectItem>
@@ -188,7 +181,9 @@ export const CreateBountyDialog = () => {
             </div>
           </div>
 
+          {/* amount && deadline */}
           <div className="grid gap-4 sm:grid-cols-2">
+            {/* bounty amount */}
             <div className="space-y-2">
               <Label htmlFor="bounty-amount">Bounty amount</Label>
               <div className="relative">
@@ -196,7 +191,7 @@ export const CreateBountyDialog = () => {
                 <Input
                   id="bounty-amount"
                   disabled
-                  value={form.bountyBTC}
+                  value={form.values.bountyBTC}
                   className="pl-9"
                   aria-describedby="bounty-amount-note"
                 />
@@ -206,6 +201,7 @@ export const CreateBountyDialog = () => {
               </p>
             </div>
 
+            {/* deadline */}
             <div className="space-y-2">
               <Label htmlFor="bounty-deadline">Deadline</Label>
               <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
@@ -217,8 +213,8 @@ export const CreateBountyDialog = () => {
                     className="w-full justify-start font-normal text-gray-500"
                   >
                     <CalendarDays className="mr-2 size-4" />
-                    {form.deadline
-                      ? format(form.deadline, 'PPP')
+                    {form.values.deadline
+                      ? format(form.values.deadline, 'PPP')
                       : 'Select deadline'}
                     <ChevronDownIcon className="ml-auto size-4 opacity-50" />
                   </Button>
@@ -227,10 +223,10 @@ export const CreateBountyDialog = () => {
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={form.deadline}
+                    selected={form.values.deadline}
                     captionLayout="dropdown"
                     onSelect={(date) => {
-                      setForm((current) => ({ ...current, deadline: date }));
+                      form.setField('deadline', date);
                       setCalendarOpen(false);
                     }}
                     disabled={(date) => date < new Date()}
@@ -240,7 +236,6 @@ export const CreateBountyDialog = () => {
               </Popover>
             </div>
           </div>
-
           <DialogFooter>
             <Button
               type="button"
@@ -251,10 +246,7 @@ export const CreateBountyDialog = () => {
               Cancel
             </Button>
 
-            <Button
-              type="submit"
-              disabled={createBountyMutation.isPending || !isFormValid}
-            >
+            <Button type="submit" disabled={createBountyMutation.isPending}>
               {createBountyMutation.isPending
                 ? 'Publishing bounty…'
                 : 'Publish bounty'}

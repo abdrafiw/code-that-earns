@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, it, jest } from '@jest/globals';
+import type { ChangeEvent, ReactNode } from 'react';
 
 import { useSignUp } from '../hooks/useAuth';
 import { SignUpForm } from './SignUpForm';
@@ -20,20 +21,30 @@ jest.mock('sonner', () => ({
 
 // Replace Radix Select with plain HTML so tests don't need real layout/pointer APIs
 jest.mock('../../../components/ui/select', () => ({
-  Select: ({ children, onValueChange, value }: any) => (
+  Select: ({
+    children,
+    onValueChange,
+    value,
+  }: {
+    children: ReactNode;
+    onValueChange: (value: string) => void;
+    value?: string;
+  }) => (
     <select
       aria-label="Role"
       value={value}
-      onChange={(e) => onValueChange(e.target.value)}
+      onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+        onValueChange(event.target.value)
+      }
     >
       <option value="">Select your role</option>
       {children}
     </select>
   ),
-  SelectTrigger: ({ children }: any) => <>{children}</>,
+  SelectTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
   SelectValue: () => null,
-  SelectContent: ({ children }: any) => <>{children}</>,
-  SelectItem: ({ children, value }: any) => (
+  SelectContent: ({ children }: { children: ReactNode }) => <>{children}</>,
+  SelectItem: ({ children, value }: { children: ReactNode; value: string }) => (
     <option value={value}>{children}</option>
   ),
 }));

@@ -1,34 +1,37 @@
 import { User, DollarSign, ExternalLink } from 'lucide-react';
 import { useGetCompanySubmissions } from '../hooks/useSubmissions';
-import { AccessDeniedState } from '../../../components/common/AccessDeniedState';
 import { PageSkeleton } from '../../../components/common/PageSkeleton';
 import { PageEmptyState } from '../../../components/common/PageEmptyState';
 import { PageErrorState } from '../../../components/common/PageErrorState';
 import { Button } from '../../../components/ui/button';
+import { getErrorMessage } from '../../../utils/getErrorMessage';
 import {
   getSubmissionStatusColor,
   getSubmissionStatusIcon,
 } from '../utils/submissionStatus';
 
 export function CompanySubmissionsPage() {
-  const {
-    submissions,
-    loading,
-    error,
-    accessMessage,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useGetCompanySubmissions();
+  const submissionsQuery = useGetCompanySubmissions();
+  const submissions =
+    submissionsQuery.data?.pages.flatMap((page) => page.submissions) ?? [];
 
-  if (loading) return <PageSkeleton variant="company-submissions" />;
-  if (accessMessage) return <AccessDeniedState message={accessMessage} />;
-  if (error) return <PageErrorState message={error} />;
+  if (submissionsQuery.isPending)
+    return <PageSkeleton variant="company-submissions" />;
+  if (submissionsQuery.error)
+    return (
+      <PageErrorState
+        message={getErrorMessage(submissionsQuery.error)}
+        onRetry={() => void submissionsQuery.refetch()}
+        isRetrying={submissionsQuery.isFetching}
+      />
+    );
   if (submissions.length === 0)
     return (
       <PageEmptyState
         title="No submissions found"
         description="Submissions made to your company's bounties will appear here."
+        actionHref="/company-bounties"
+        actionLabel="View company bounties"
       />
     );
 
@@ -105,15 +108,16 @@ export function CompanySubmissionsPage() {
                 </div>
               )}
 
-              {submission.bountyRewardBTC != null && (
-                <div className="flex items-center text-sm">
-                  <DollarSign className="mr-2 h-4 w-4 text-gray-400" />
-                  <span className="font-medium text-gray-600">Reward:</span>
-                  <span className="ml-2 font-semibold text-gray-900">
-                    {submission.bountyRewardBTC} BTC
-                  </span>
-                </div>
-              )}
+              {submission.bountyRewardBTC !== null &&
+                submission.bountyRewardBTC !== undefined && (
+                  <div className="flex items-center text-sm">
+                    <DollarSign className="mr-2 h-4 w-4 text-gray-400" />
+                    <span className="font-medium text-gray-600">Reward:</span>
+                    <span className="ml-2 font-semibold text-gray-900">
+                      {submission.bountyRewardBTC} BTC
+                    </span>
+                  </div>
+                )}
 
               <div className="space-y-2">
                 <div className="">
@@ -154,14 +158,16 @@ export function CompanySubmissionsPage() {
         ))}
       </ul>
 
-      {hasNextPage && (
+      {submissionsQuery.hasNextPage && (
         <div className="flex justify-center pt-2">
           <Button
             variant="outline"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
+            onClick={() => void submissionsQuery.fetchNextPage()}
+            disabled={submissionsQuery.isFetchingNextPage}
           >
-            {isFetchingNextPage ? 'Loading…' : 'Load more submissions'}
+            {submissionsQuery.isFetchingNextPage
+              ? 'Loading…'
+              : 'Load more submissions'}
           </Button>
         </div>
       )}

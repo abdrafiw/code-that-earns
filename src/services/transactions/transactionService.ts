@@ -71,13 +71,10 @@ class TransactionService {
       const snapshot = await getDocs(transactionQuery);
 
       return {
-        transactions: snapshot.docs.map(
-          (document) =>
-            ({
-              id: document.id,
-              ...document.data(),
-            }) as TransactionRecord,
-        ),
+        transactions: snapshot.docs.map((document) => ({
+          id: document.id,
+          ...document.data(),
+        })),
         cursor: snapshot.docs[snapshot.docs.length - 1],
         hasMore: snapshot.docs.length === pageSize,
       };

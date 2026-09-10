@@ -1,62 +1,102 @@
-import { createContext, useState, useEffect, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, type Unsubscribe } from 'firebase/firestore';
 
-import type { AppContextType } from './types';
-import type { TBounty } from '../features/bounties/types';
-import type { AuthResponse, UserData } from '../features/auth/types';
+import type { AppContextType, AuthState } from './types';
 import { auth, db } from '../config/firebase';
+import { userConverter } from '../services/firestore-structure';
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [currentView, setCurrentView] = useState('home');
-  const [user, setUser] = useState<AuthResponse | null>(null);
-  const [selectedBounty, setSelectedBounty] = useState<TBounty | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [authState, setAuthState] = useState<AuthState>({ status: 'loading' });
+  const [profileRetry, setProfileRetry] = useState(0);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+    let isActive = true;
+    let profileSubscription: Unsubscribe | undefined;
+    let authVersion = 0;
 
-          if (userDoc.exists()) {
-            const userData = userDoc.data() as UserData;
-            setUser({
-              success: true,
-              user: {
-                ...userData,
-                displayName: firebaseUser.displayName,
-              },
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-        }
-      } else {
-        setUser(null);
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      authVersion += 1;
+      const currentVersion = authVersion;
+      profileSubscription?.();
+      profileSubscription = undefined;
+      setAuthState({ status: 'loading' });
+
+      if (!firebaseUser) {
+        setAuthState({ status: 'anonymous' });
+        return;
       }
 
-      setIsAuthLoading(false);
+      profileSubscription = onSnapshot(
+        doc(db, 'users', firebaseUser.uid).withConverter(userConverter),
+        { includeMetadataChanges: true },
+        (profileSnapshot) => {
+          if (!isActive || currentVersion !== authVersion) return;
+
+          if (!profileSnapshot.exists()) {
+            if (profileSnapshot.metadata.fromCache) return;
+            setAuthState({ status: 'profile-missing' });
+            return;
+          }
+
+          try {
+            const userData = profileSnapshot.data();
+            setAuthState({
+              status: 'authenticated',
+              user: {
+                success: true,
+                user: {
+                  ...userData,
+                  uid: firebaseUser.uid,
+                  email: firebaseUser.email ?? userData.email,
+                  displayName: firebaseUser.displayName,
+                },
+              },
+            });
+          } catch (error) {
+            setAuthState({ status: 'error', error });
+          }
+        },
+        (error) => {
+          if (!isActive || currentVersion !== authVersion) return;
+          setAuthState({ status: 'error', error });
+        },
+      );
     });
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      isActive = false;
+      authVersion += 1;
+      profileSubscription?.();
+      unsubscribeAuth();
+    };
+  }, [profileRetry]);
+
+  const user = authState.status === 'authenticated' ? authState.user : null;
+  const retryAuthProfile = useCallback(
+    () => setProfileRetry((attempt) => attempt + 1),
+    [],
+  );
+  const contextValue = useMemo<AppContextType>(
+    () => ({
+      authState,
+      user,
+      isAuthLoading: authState.status === 'loading',
+      retryAuthProfile,
+    }),
+    [authState, retryAuthProfile, user],
+  );
 
   return (
-    <AppContext.Provider
-      value={{
-        currentView,
-        setCurrentView,
-        user,
-        setUser,
-        selectedBounty,
-        setSelectedBounty,
-        isAuthLoading,
-      }}
-    >
-      {children}
-    </AppContext.Provider>
+    <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
   );
 };

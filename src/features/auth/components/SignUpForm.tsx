@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { toast } from 'sonner';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
@@ -17,16 +16,25 @@ import {
 import { useSignUp } from '../hooks/useAuth';
 import type { SignUpPayload, UserRole } from '../types';
 import { USER_ROLES } from '../../../services/firestore-structure';
+import { useTypedForm } from '../../../hooks/useTypedForm';
+import { FormErrorSummary } from '../../../components/common/FormErrorSummary';
+import {
+  hasFormErrors,
+  validateSignUp,
+  type SignUpFormValues,
+} from '../../../utils/formSchemas';
+
+const initialValues: SignUpFormValues = {
+  name: '',
+  companyName: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  role: null,
+};
 
 export const SignUpForm = () => {
-  const [signupForm, setSignupForm] = useState({
-    name: '',
-    companyName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: '',
-  });
+  const form = useTypedForm(initialValues);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -37,26 +45,20 @@ export const SignUpForm = () => {
   const handleSignUp = (e: FormEvent) => {
     e.preventDefault();
 
-    if (signupForm.password !== signupForm.confirmPassword) {
-      toast.error('Passwords do not match!');
-      return;
-    }
-
-    if (!signupForm.role || !signupForm.email || !signupForm.password) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
+    const errors = validateSignUp(form.values);
+    form.setErrors(errors);
+    if (hasFormErrors(errors) || !form.values.role) return;
 
     const payload: SignUpPayload = {
-      email: signupForm.email,
-      password: signupForm.password,
-      role: signupForm.role as UserRole,
+      email: form.values.email.trim(),
+      password: form.values.password,
+      role: form.values.role,
     };
 
-    if (signupForm.role === 'DEVELOPER') {
-      payload.name = signupForm.name || 'New User';
-    } else if (signupForm.role === 'COMPANY') {
-      payload.companyName = signupForm.companyName;
+    if (form.values.role === 'DEVELOPER') {
+      payload.name = form.values.name.trim();
+    } else {
+      payload.companyName = form.values.companyName.trim();
     }
 
     signUpMutation.mutate(payload);
@@ -64,6 +66,7 @@ export const SignUpForm = () => {
 
   return (
     <form onSubmit={handleSignUp} className="space-y-4 sm:space-y-5">
+      <FormErrorSummary errors={form.errors} />
       <div className="grid gap-3.5 sm:grid-cols-2 sm:gap-4">
         {/* email */}
         <div className="space-y-2">
@@ -80,17 +83,16 @@ export const SignUpForm = () => {
               type="email"
               autoComplete="email"
               required
-              value={signupForm.email}
-              onChange={(e) =>
-                setSignupForm({ ...signupForm, email: e.target.value })
-              }
+              value={form.values.email}
+              onChange={(e) => form.setField('email', e.target.value)}
               className="h-11 bg-slate-50 pl-10 focus-visible:bg-white"
               placeholder="your@email.com"
+              aria-invalid={!!form.errors.email}
             />
           </div>
         </div>
 
-        {signupForm.role === 'DEVELOPER' || signupForm.role === '' ? (
+        {form.values.role === 'DEVELOPER' || form.values.role === null ? (
           <div className="space-y-2">
             <Label
               htmlFor="name"
@@ -102,12 +104,11 @@ export const SignUpForm = () => {
               id="name"
               type="text"
               autoComplete="name"
-              value={signupForm.name}
-              onChange={(e) =>
-                setSignupForm({ ...signupForm, name: e.target.value })
-              }
+              value={form.values.name}
+              onChange={(e) => form.setField('name', e.target.value)}
               placeholder="John Doe"
               className="h-11 bg-slate-50 focus-visible:bg-white"
+              aria-invalid={!!form.errors.name}
             />
           </div>
         ) : (
@@ -123,15 +124,11 @@ export const SignUpForm = () => {
               type="text"
               autoComplete="organization"
               required
-              value={signupForm.companyName}
-              onChange={(e) =>
-                setSignupForm({
-                  ...signupForm,
-                  companyName: e.target.value,
-                })
-              }
+              value={form.values.companyName}
+              onChange={(e) => form.setField('companyName', e.target.value)}
               placeholder="Your Company Inc."
               className="h-11 bg-slate-50 focus-visible:bg-white"
+              aria-invalid={!!form.errors.companyName}
             />
           </div>
         )}
@@ -145,13 +142,8 @@ export const SignUpForm = () => {
             Account type
           </Label>
           <Select
-            value={signupForm.role}
-            onValueChange={(value) =>
-              setSignupForm({
-                ...signupForm,
-                role: value as UserRole,
-              })
-            }
+            value={form.values.role ?? undefined}
+            onValueChange={(value: UserRole) => form.setField('role', value)}
           >
             <SelectTrigger id="signup-role" className="h-11 w-full bg-slate-50">
               <SelectValue placeholder="Select your role" />
@@ -182,12 +174,11 @@ export const SignUpForm = () => {
               type={showPassword ? 'text' : 'password'}
               required
               autoComplete="new-password"
-              value={signupForm.password}
-              onChange={(e) =>
-                setSignupForm({ ...signupForm, password: e.target.value })
-              }
+              value={form.values.password}
+              onChange={(e) => form.setField('password', e.target.value)}
               className="h-11 bg-slate-50 pr-10 pl-10 focus-visible:bg-white"
               placeholder="••••••••"
+              aria-invalid={!!form.errors.password}
             />
             <button
               type="button"
@@ -219,15 +210,11 @@ export const SignUpForm = () => {
               type={showConfirmPassword ? 'text' : 'password'}
               required
               autoComplete="new-password"
-              value={signupForm.confirmPassword}
-              onChange={(e) =>
-                setSignupForm({
-                  ...signupForm,
-                  confirmPassword: e.target.value,
-                })
-              }
+              value={form.values.confirmPassword}
+              onChange={(e) => form.setField('confirmPassword', e.target.value)}
               className="h-11 bg-slate-50 pr-10 pl-10 focus-visible:bg-white"
               placeholder="••••••••"
+              aria-invalid={!!form.errors.confirmPassword}
             />
             <button
               type="button"

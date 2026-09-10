@@ -1,5 +1,6 @@
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -8,7 +9,7 @@ import {
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 import { auth, db } from '../../config/firebase';
-import { COLLECTIONS } from '../firestore-structure';
+import { COLLECTIONS, userConverter } from '../firestore-structure';
 
 import type {
   AuthResponseSuccess,
@@ -16,6 +17,12 @@ import type {
   SignUpPayload,
   UserData,
 } from '../../features/auth/types';
+import { getErrorMessage } from '../../utils/getErrorMessage';
+
+const getErrorCode = (error: unknown) =>
+  typeof error === 'object' && error !== null && 'code' in error
+    ? String(error.code)
+    : '';
 
 class AuthService {
   async signUp({
@@ -33,52 +40,65 @@ class AuthService {
       );
       const user = userCredential.user;
 
-      await updateProfile(user, {
-        displayName: role === 'COMPANY' ? companyName : name,
-      });
-
-      const userData: UserData = {
-        uid: user.uid,
-        email: user.email!,
-        role,
-        createdAt: serverTimestamp(),
-      };
-
-      if (role === 'COMPANY') {
-        userData.companyName = companyName;
-      } else if (role === 'DEVELOPER') {
-        userData.name = name;
-      }
-
-      // Create user document in Firestore
       try {
+        await updateProfile(user, {
+          displayName: role === 'COMPANY' ? companyName : name,
+        });
+
+        const userData: UserData = {
+          uid: user.uid,
+          email: user.email!,
+          role,
+          createdAt: serverTimestamp(),
+        };
+
+        if (role === 'COMPANY') {
+          userData.companyName = companyName;
+        } else if (role === 'DEVELOPER') {
+          userData.name = name;
+        }
+
         await setDoc(doc(db, COLLECTIONS.USERS, user.uid), userData);
-      } catch (createError: any) {
-        console.error('Error creating user document:', createError);
+
+        return {
+          ...userData,
+          displayName: user.displayName,
+        };
+      } catch (profileError: unknown) {
+        console.error('Error provisioning account profile:', profileError);
+
+        try {
+          await deleteUser(user);
+        } catch (cleanupError: unknown) {
+          console.error(
+            'Error rolling back Firebase Auth account:',
+            cleanupError,
+          );
+          throw new Error(
+            'Account setup failed and automatic cleanup could not be confirmed. Try signing in to recover the profile, or contact support.',
+          );
+        }
+
         throw new Error(
-          'Account created but profile setup incomplete. Please sign in to complete setup.',
+          'Account setup failed. No account was kept, so you can safely try signing up again.',
         );
       }
-
-      return {
-        ...userData,
-        displayName: user.displayName,
-      };
-    } catch (error: any) {
-      let errorMessage = error.message;
+    } catch (error: unknown) {
+      const errorCode = getErrorCode(error);
+      let errorMessage = getErrorMessage(error);
 
       // Handle specific Firebase auth errors
-      if (error.code === 'auth/email-already-in-use') {
+      if (errorCode === 'auth/email-already-in-use') {
         errorMessage =
           'An account with this email already exists. Please try signing in instead.';
-      } else if (error.code === 'auth/weak-password') {
+      } else if (errorCode === 'auth/weak-password') {
         errorMessage =
           'Password is too weak. Please choose a stronger password.';
-      } else if (error.code === 'auth/invalid-email') {
+      } else if (errorCode === 'auth/invalid-email') {
         errorMessage = 'Please enter a valid email address.';
       } else if (
-        error.code === 'permission-denied' ||
-        error.message?.includes('permission')
+        errorCode === 'permission-denied' ||
+        errorMessage.toLowerCase().includes('permission')
       ) {
         errorMessage =
           'Permission denied. Please check your Firestore security rules.';
@@ -100,32 +120,18 @@ class AuthService {
       );
       const user = userCredential.user;
 
-      const userDoc = await getDoc(doc(db, COLLECTIONS.USERS, user.uid));
+      const userDoc = await getDoc(
+        doc(db, COLLECTIONS.USERS, user.uid).withConverter(userConverter),
+      );
 
       if (!userDoc.exists()) {
-        const basicUserData: UserData = {
-          uid: user.uid,
-          email: user.email!,
-          role: 'DEVELOPER',
-          name: user.displayName || 'User',
-          createdAt: serverTimestamp(),
-        };
-
-        try {
-          await setDoc(doc(db, COLLECTIONS.USERS, user.uid), basicUserData);
-
-          return {
-            ...basicUserData,
-            displayName: user.displayName,
-          };
-        } catch (createError: any) {
-          throw new Error(
-            'Failed to create user profile. Please try signing up again.',
-          );
-        }
+        await signOut(auth);
+        throw new Error(
+          'Your account profile is missing. Contact support to recover your account before signing in.',
+        );
       }
 
-      const userData = userDoc.data() as UserData;
+      const userData = userDoc.data();
 
       return {
         ...userData,
@@ -133,16 +139,17 @@ class AuthService {
         email: user.email!,
         displayName: user.displayName,
       };
-    } catch (error: any) {
-      let errorMessage = error.message;
-      if (error.code === 'auth/user-not-found') {
+    } catch (error: unknown) {
+      const errorCode = getErrorCode(error);
+      let errorMessage = getErrorMessage(error);
+      if (errorCode === 'auth/user-not-found') {
         errorMessage =
           'No account found with this email. Please sign up first.';
-      } else if (error.code === 'auth/wrong-password') {
+      } else if (errorCode === 'auth/wrong-password') {
         errorMessage = 'Incorrect password. Please try again.';
-      } else if (error.code === 'auth/invalid-credential') {
+      } else if (errorCode === 'auth/invalid-credential') {
         errorMessage = 'Invalid credentials';
-      } else if (error.code === 'auth/too-many-requests') {
+      } else if (errorCode === 'auth/too-many-requests') {
         errorMessage = 'Too many failed attempts. Please try again later.';
       }
 
@@ -153,8 +160,8 @@ class AuthService {
   async signOut(): Promise<void> {
     try {
       await signOut(auth);
-    } catch (error: any) {
-      throw new Error(error.message);
+    } catch (error: unknown) {
+      throw new Error(getErrorMessage(error));
     }
   }
 }

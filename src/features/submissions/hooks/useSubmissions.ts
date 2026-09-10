@@ -9,6 +9,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { submissionService } from '../../../services/submissions/submissionService';
 import type { UserData } from '../../auth/types';
 import type { SubmissionRecord, SubmitSolutionPayload } from '../types';
+import { submissionKeys } from '../queryKeys';
 
 async function getCompanySubmissions(
   currentUser: UserData | null,
@@ -43,7 +44,7 @@ async function getDeveloperSubmissions(
     currentUser.uid,
   );
 
-  return submissions as SubmissionRecord[];
+  return submissions;
 }
 
 async function submitSolution(payload: SubmitSolutionPayload) {
@@ -53,14 +54,8 @@ async function submitSolution(payload: SubmitSolutionPayload) {
 export function useGetCompanySubmissions() {
   const { user } = useAppContext();
   const currentUser = user?.success ? user.user : null;
-  const accessMessage = !currentUser
-    ? 'You must be signed in to view submissions.'
-    : currentUser.role !== 'COMPANY'
-      ? 'Only companies can view submissions.'
-      : null;
-
-  const query = useInfiniteQuery({
-    queryKey: ['company-submissions', currentUser?.uid],
+  return useInfiniteQuery({
+    queryKey: submissionKeys.companyList(currentUser?.uid),
     enabled: !!currentUser && currentUser.role === 'COMPANY',
     queryFn: ({ pageParam }) => getCompanySubmissions(currentUser, pageParam),
     initialPageParam: undefined as
@@ -70,48 +65,18 @@ export function useGetCompanySubmissions() {
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
   });
-
-  return {
-    submissions:
-      query.data?.pages.flatMap(
-        (page) => page.submissions as SubmissionRecord[],
-      ) ?? [],
-    loading: query.isLoading,
-    error: query.error?.message ?? null,
-    accessMessage,
-    refetch: query.refetch,
-    isFetching: query.isFetching,
-    fetchNextPage: query.fetchNextPage,
-    hasNextPage: query.hasNextPage,
-    isFetchingNextPage: query.isFetchingNextPage,
-  };
 }
 
 export function useGetDeveloperSubmissions() {
   const { user } = useAppContext();
   const currentUser = user?.success ? user.user : null;
-  const accessMessage = !currentUser
-    ? 'You must be signed in to view submissions.'
-    : currentUser.role !== 'DEVELOPER'
-      ? 'Only developers can view submissions.'
-      : null;
-
-  const query = useQuery<SubmissionRecord[]>({
-    queryKey: ['developer-submissions', currentUser?.uid],
+  return useQuery<SubmissionRecord[]>({
+    queryKey: submissionKeys.developerList(currentUser?.uid),
     queryFn: () => getDeveloperSubmissions(currentUser),
     enabled: !!currentUser && currentUser.role === 'DEVELOPER',
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
   });
-
-  return {
-    submissions: query.data ?? [],
-    loading: query.isLoading,
-    error: query.error?.message ?? null,
-    accessMessage,
-    refetch: query.refetch,
-    isFetching: query.isFetching,
-  };
 }
 
 export function useSubmitSolution() {
@@ -121,7 +86,7 @@ export function useSubmitSolution() {
     mutationFn: submitSolution,
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['developer-submissions'],
+        queryKey: submissionKeys.all,
       });
     },
   });

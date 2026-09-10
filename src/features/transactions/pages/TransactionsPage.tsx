@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { CheckCircle, Clock, Search } from 'lucide-react';
-import { AccessDeniedState } from '../../../components/common/AccessDeniedState';
 import { PageErrorState } from '../../../components/common/PageErrorState';
 import { PageSkeleton } from '../../../components/common/PageSkeleton';
 import { Button } from '../../../components/ui/button';
@@ -45,9 +44,6 @@ export function TransactionsPage() {
     (transaction) => transaction.status === 'pending',
   );
 
-  if (!userId) {
-    return <AccessDeniedState message="Sign in to view your transactions." />;
-  }
   if (transactionsQuery.isPending) {
     return <PageSkeleton variant="transactions" />;
   }
@@ -76,7 +72,8 @@ export function TransactionsPage() {
           Transactions
         </h1>
         <p className="mt-2 text-sm leading-6 text-gray-500">
-          Track bounty payments involving your account.
+          View bounty payment records involving your account. Payments cannot be
+          initiated from this dashboard.
         </p>
       </header>
 

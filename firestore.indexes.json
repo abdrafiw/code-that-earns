@@ -39,29 +39,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "companyUid", "order": "ASCENDING" },
-        { "fieldPath": "category", "order": "ASCENDING" },
-        { "fieldPath": "difficulty", "order": "ASCENDING" },
-        { "fieldPath": "searchTerms", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "bounties",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "companyUid", "order": "ASCENDING" },
-        { "fieldPath": "category", "order": "ASCENDING" },
-        { "fieldPath": "searchTerms", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "bounties",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "companyUid", "order": "ASCENDING" },
-        { "fieldPath": "difficulty", "order": "ASCENDING" },
-        { "fieldPath": "searchTerms", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "filterFacets", "arrayConfig": "CONTAINS" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
@@ -79,8 +57,6 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "companyUid", "order": "ASCENDING" },
-        { "fieldPath": "category", "order": "ASCENDING" },
-        { "fieldPath": "difficulty", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
@@ -88,25 +64,7 @@
       "collectionGroup": "bounties",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "companyUid", "order": "ASCENDING" },
-        { "fieldPath": "category", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "bounties",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "companyUid", "order": "ASCENDING" },
-        { "fieldPath": "difficulty", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "bounties",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "companyUid", "order": "ASCENDING" },
+        { "fieldPath": "filterFacets", "arrayConfig": "CONTAINS" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
@@ -116,6 +74,14 @@
       "fields": [
         { "fieldPath": "developerUid", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "developerUid", "order": "ASCENDING" },
+        { "fieldPath": "bountyId", "order": "ASCENDING" }
       ]
     },
     {

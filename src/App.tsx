@@ -3,14 +3,28 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
 import { useAppContext } from './hooks/useAppContext';
 import { AppSkeleton } from './components/common/PageSkeleton';
+import { AuthProfileState } from './features/auth/components/AuthProfileState';
 
 function AppContent() {
-  const { isAuthLoading } = useAppContext();
+  const { authState, retryAuthProfile } = useAppContext();
 
-  if (isAuthLoading) {
+  if (authState.status === 'loading') {
     return (
       <>
         <AppSkeleton pathname={router.state.location.pathname} />
+        <Toaster position="top-right" richColors />
+      </>
+    );
+  }
+
+  if (authState.status === 'profile-missing' || authState.status === 'error') {
+    return (
+      <>
+        <AuthProfileState
+          status={authState.status}
+          error={authState.status === 'error' ? authState.error : undefined}
+          onRetry={retryAuthProfile}
+        />
         <Toaster position="top-right" richColors />
       </>
     );

@@ -23,5 +23,24 @@ export function createBountySearchTerms(...values: string[]) {
     });
   });
 
-  return Array.from(terms);
+  return Array.from(terms).slice(0, 100);
 }
+
+export function createBountyFilterFacets(category: string, difficulty: string) {
+  return [
+    `category:${category}`,
+    `difficulty:${difficulty}`,
+    `category:${category}|difficulty:${difficulty}`,
+  ];
+}
+
+export function getBountyFilterFacet(category?: string, difficulty?: string) {
+  const hasCategory = Boolean(category && category !== 'all');
+  const hasDifficulty = Boolean(difficulty && difficulty !== 'all');
+  if (hasCategory && hasDifficulty)
+    return `category:${category}|difficulty:${difficulty}`;
+  if (hasCategory) return `category:${category}`;
+  if (hasDifficulty) return `difficulty:${difficulty}`;
+  return null;
+}
+export const BOUNTY_SEARCH_SCHEMA_VERSION = 1;

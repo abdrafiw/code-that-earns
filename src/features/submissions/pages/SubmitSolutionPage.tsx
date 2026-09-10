@@ -1,22 +1,32 @@
 import { useParams } from 'react-router-dom';
-import { useAppContext } from '../../../hooks/useAppContext';
 import { SubmitSolutionForm } from '../components/SubmitSolutionForm';
 import { SubmitSolutionLoadingState } from '../components/SubmitSolutionLoadingState';
 import { SubmitSolutionNotFoundState } from '../components/SubmitSolutionNotFoundState';
-import { SubmitSolutionUnauthenticatedState } from '../components/SubmitSolutionUnauthenticatedState';
 import { useGetBountyByID } from '../hooks/useBounty';
+import { PageErrorState } from '../../../components/common/PageErrorState';
+import { getErrorMessage } from '../../../utils/getErrorMessage';
+import { BountyNotFoundError } from '../../../services/bounties/bountyService';
 
 export const SubmitSolutionPage = () => {
   const { bountyId } = useParams();
-  const { user } = useAppContext();
+  const bountyQuery = useGetBountyByID();
+  const bounty = bountyQuery.data;
 
-  const { data: bounty, isLoading } = useGetBountyByID();
+  if (!bountyId || bountyQuery.error instanceof BountyNotFoundError)
+    return <SubmitSolutionNotFoundState />;
 
-  if (!user?.success) return <SubmitSolutionUnauthenticatedState />;
+  if (bountyQuery.isPending) return <SubmitSolutionLoadingState />;
 
-  if (isLoading) return <SubmitSolutionLoadingState />;
+  if (bountyQuery.error)
+    return (
+      <PageErrorState
+        message={getErrorMessage(bountyQuery.error)}
+        onRetry={() => void bountyQuery.refetch()}
+        isRetrying={bountyQuery.isFetching}
+      />
+    );
 
-  if (!bounty || !bountyId) return <SubmitSolutionNotFoundState />;
+  if (!bounty) return <SubmitSolutionNotFoundState />;
 
   return (
     <main className="bg-background min-h-screen">

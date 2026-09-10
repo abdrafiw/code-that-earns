@@ -67,7 +67,9 @@ export const NavigationLinks = ({
 
       <li>
         <Link
-          to={userRole == 'DEVELOPER' ? '/submissions' : '/company-submissions'}
+          to={
+            userRole === 'DEVELOPER' ? '/submissions' : '/company-submissions'
+          }
           onClick={onLinkClick}
           aria-current={
             isSubmissions || isCompanySubmissions ? 'page' : undefined

@@ -1,87 +1,113 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { BaseLayout } from './layout/BaseLayout';
-import { HomePage } from './features/home/pages/HomePage';
-import { LoginPage } from './features/auth/pages/LoginPage';
-import { SignUpPage } from './features/auth/pages/SignUpPage';
-import { CompanyBountiesPage } from './features/bounties/pages/CompanyBountiesPage';
-import { DevBountiesPage } from './features/bounties/pages/DevBountiesPage';
-import { CompanySubmissionsPage } from './features/submissions/pages/CompanySubmissionsPage';
-import { DeveloperSubmissionsPage } from './features/submissions/pages/DeveloperSubmissionsPage';
-import { SubmitSolutionPage } from './features/submissions/pages/SubmitSolutionPage';
-import { TransactionsPage } from './features/transactions/pages/TransactionsPage';
+import { RouteErrorPage } from './components/common/RouteErrorPage';
+import { NotFoundPage } from './components/common/NotFoundPage';
+import {
+  GuestOnlyRoute,
+  ProtectedRoute,
+} from './features/auth/components/RouteGuards';
 
 export const router = createBrowserRouter([
   {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/sign-up',
-    element: <SignUpPage />,
+    element: <GuestOnlyRoute />,
+    errorElement: <RouteErrorPage />,
+    children: [
+      {
+        path: '/login',
+        lazy: async () => {
+          const { LoginPage } = await import('./features/auth/pages/LoginPage');
+          return { Component: LoginPage };
+        },
+      },
+      {
+        path: '/sign-up',
+        lazy: async () => {
+          const { SignUpPage } =
+            await import('./features/auth/pages/SignUpPage');
+          return { Component: SignUpPage };
+        },
+      },
+    ],
   },
   {
     element: <BaseLayout />,
     path: '/',
-    // errorElement: <Error />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         index: true,
-        element: <HomePage />,
+        lazy: async () => {
+          const { HomePage } = await import('./features/home/pages/HomePage');
+          return { Component: HomePage };
+        },
       },
 
       {
-        path: 'dev-bounties',
+        element: <ProtectedRoute allowedRoles={['DEVELOPER']} />,
         children: [
           {
-            index: true,
-            element: <DevBountiesPage />,
+            path: 'dev-bounties',
+            lazy: async () => {
+              const { DevBountiesPage } =
+                await import('./features/bounties/pages/DevBountiesPage');
+              return { Component: DevBountiesPage };
+            },
+          },
+          {
+            path: 'submissions',
+            lazy: async () => {
+              const { DeveloperSubmissionsPage } =
+                await import('./features/submissions/pages/DeveloperSubmissionsPage');
+              return { Component: DeveloperSubmissionsPage };
+            },
+          },
+          {
+            path: 'submit/:bountyId',
+            lazy: async () => {
+              const { SubmitSolutionPage } =
+                await import('./features/submissions/pages/SubmitSolutionPage');
+              return { Component: SubmitSolutionPage };
+            },
           },
         ],
       },
-
       {
-        path: 'company-bounties',
+        element: <ProtectedRoute allowedRoles={['COMPANY']} />,
         children: [
           {
-            index: true,
-            element: <CompanyBountiesPage />,
+            path: 'company-bounties',
+            lazy: async () => {
+              const { CompanyBountiesPage } =
+                await import('./features/bounties/pages/CompanyBountiesPage');
+              return { Component: CompanyBountiesPage };
+            },
+          },
+          {
+            path: 'company-submissions',
+            lazy: async () => {
+              const { CompanySubmissionsPage } =
+                await import('./features/submissions/pages/CompanySubmissionsPage');
+              return { Component: CompanySubmissionsPage };
+            },
           },
         ],
       },
-
       {
-        path: 'transactions',
+        element: <ProtectedRoute />,
         children: [
           {
-            index: true,
-            element: <TransactionsPage />,
+            path: 'transactions',
+            lazy: async () => {
+              const { TransactionsPage } =
+                await import('./features/transactions/pages/TransactionsPage');
+              return { Component: TransactionsPage };
+            },
           },
         ],
       },
-
       {
-        path: 'submissions',
-        children: [
-          {
-            index: true,
-            element: <DeveloperSubmissionsPage />,
-          },
-        ],
-      },
-
-      {
-        path: 'company-submissions',
-        children: [
-          {
-            index: true,
-            element: <CompanySubmissionsPage />,
-          },
-        ],
-      },
-
-      {
-        path: 'submit/:bountyId',
-        element: <SubmitSolutionPage />,
+        path: '*',
+        element: <NotFoundPage />,
       },
     ],
   },
