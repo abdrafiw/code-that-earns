@@ -121,7 +121,7 @@ export const DevChallengesPage = () => {
                   setCategory(value);
                 }}
               >
-                <SelectTrigger className="h-10 w-full border-gray-200 bg-white shadow-none sm:w-48">
+                <SelectTrigger className="h-10 w-full border-gray-200 bg-transparent shadow-none sm:w-48">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
 
@@ -140,7 +140,7 @@ export const DevChallengesPage = () => {
                   setDifficulty(value);
                 }}
               >
-                <SelectTrigger className="h-10 w-full border-gray-200 bg-white shadow-none sm:w-48">
+                <SelectTrigger className="h-10 w-full border-gray-200 bg-transparent shadow-none sm:w-48">
                   <SelectValue placeholder="All Difficulties" />
                 </SelectTrigger>
 

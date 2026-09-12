@@ -5,7 +5,6 @@ import {
   Code2,
   Github,
   ShieldCheck,
-  Sparkles,
   Trophy,
   Users,
 } from 'lucide-react';
@@ -60,12 +59,7 @@ export const HomePage = () => {
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:px-8 lg:grid-cols-[1.08fr_0.92fr] lg:px-10 lg:py-24">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-600 shadow-sm">
-              <Sparkles className="size-3.5" />
-              CTE · Code That Earns
-            </div>
-
-            <h1 className="mt-7 text-5xl leading-[1.02] font-semibold tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-7xl">
+            <h1 className="text-5xl leading-[1.02] font-semibold tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-7xl">
               Solve real problems.
               <span className="mt-1 block text-indigo-500">
                 Earn real Bitcoin.

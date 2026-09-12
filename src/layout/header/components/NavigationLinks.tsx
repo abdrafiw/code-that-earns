@@ -4,11 +4,13 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 interface NavigationLinksProps {
   mobile?: boolean;
+  collapsed?: boolean;
   onLinkClick?: () => void;
 }
 
 export const NavigationLinks = ({
   mobile = false,
+  collapsed = false,
   onLinkClick = () => {},
 }: NavigationLinksProps) => {
   const { user } = useAppContext();
@@ -29,7 +31,7 @@ export const NavigationLinks = ({
               ? 'bg-indigo-50 font-semibold text-indigo-700 ring-1 ring-indigo-100 ring-inset'
               : 'font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-950'
           }`
-        : `rounded-lg px-3 py-2.5 ${
+        : `rounded-lg py-2.5 ${collapsed ? 'justify-center px-2' : 'px-3'} ${
             active
               ? 'bg-indigo-500 font-semibold text-white'
               : 'font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-950'
@@ -44,9 +46,10 @@ export const NavigationLinks = ({
           onClick={onLinkClick}
           aria-current={isChallenges ? 'page' : undefined}
           className={linkClass(isChallenges)}
+          title={collapsed ? 'Challenges' : undefined}
         >
-          <SquareKanban className="size-5" strokeWidth={1.8} />
-          Challenges
+          <SquareKanban className="size-5 shrink-0" strokeWidth={1.8} />
+          {!collapsed && <span>Challenges</span>}
         </Link>
       </li>
 
@@ -60,9 +63,10 @@ export const NavigationLinks = ({
             isSubmissions || isCompanySubmissions ? 'page' : undefined
           }
           className={linkClass(isSubmissions || isCompanySubmissions)}
+          title={collapsed ? 'Submissions' : undefined}
         >
-          <FileCheck2 className="size-5" strokeWidth={1.8} />
-          Submissions
+          <FileCheck2 className="size-5 shrink-0" strokeWidth={1.8} />
+          {!collapsed && <span>Submissions</span>}
         </Link>
       </li>
 
@@ -72,9 +76,10 @@ export const NavigationLinks = ({
           onClick={onLinkClick}
           aria-current={isTransactions ? 'page' : undefined}
           className={linkClass(isTransactions)}
+          title={collapsed ? 'Transactions' : undefined}
         >
-          <ReceiptText className="size-5" strokeWidth={1.8} />
-          Transactions
+          <ReceiptText className="size-5 shrink-0" strokeWidth={1.8} />
+          {!collapsed && <span>Transactions</span>}
         </Link>
       </li>
     </ul>

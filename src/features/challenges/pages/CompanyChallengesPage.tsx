@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bitcoin, CalendarDays, Code2, Search, Users } from 'lucide-react';
+import { Bitcoin, Code2, Search, Users } from 'lucide-react';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { CreateChallengeDialog } from '../components/CreateChallengeDialog';
 import { EmptyChallengesState } from '../components/EmptyChallengesState';
@@ -72,13 +72,8 @@ export const CompanyChallengesPage = () => {
         <header className="flex flex-col justify-between gap-5 border-b border-gray-200 pb-8 sm:flex-row sm:items-end">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-gray-950">
-              Your challenges
+              Challenges
             </h1>
-
-            <p className="mt-2 max-w-xl text-sm leading-6 text-gray-500">
-              Keep track of the challenges you have published and the work
-              coming in.
-            </p>
           </div>
           <CreateChallengeDialog />
         </header>
@@ -119,15 +114,7 @@ export const CompanyChallengesPage = () => {
             </div>
 
             <div className="space-y-4">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                <div className="">
-                  <h2 className="text-xl font-semibold text-gray-950">
-                    Challenge list
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {challenges.length} challenges shown
-                  </p>
-                </div>
+              <div className="flex justify-end">
                 <Link
                   to="/company-submissions"
                   className="text-sm font-medium text-indigo-500 hover:text-indigo-600"
@@ -151,19 +138,8 @@ export const CompanyChallengesPage = () => {
                       }}
                       placeholder="Search challenges"
                       className="h-10 border-gray-200 pl-9 shadow-none"
-                      aria-describedby="challenge-search-help"
                     />
                   </div>
-                  <p
-                    id="challenge-search-help"
-                    className="mt-1 text-xs text-gray-500"
-                  >
-                    {normalizedSearch.length > 0 && normalizedSearch.length < 3
-                      ? 'Enter at least 3 characters to search.'
-                      : normalizedSearch !== debouncedSearch
-                        ? 'Waiting for you to finish typing…'
-                        : 'Search by title, description, or category.'}
-                  </p>
                 </div>
 
                 <Select
@@ -173,7 +149,7 @@ export const CompanyChallengesPage = () => {
                     setCategory(value);
                   }}
                 >
-                  <SelectTrigger className="h-10 w-full border-gray-200 bg-white shadow-none sm:w-44">
+                  <SelectTrigger className="h-10 w-full border-gray-200 bg-transparent shadow-none sm:w-44">
                     <SelectValue placeholder="All categories" />
                   </SelectTrigger>
                   <SelectContent>
@@ -191,7 +167,7 @@ export const CompanyChallengesPage = () => {
                     setDifficulty(value);
                   }}
                 >
-                  <SelectTrigger className="h-10 w-full border-gray-200 bg-white shadow-none sm:w-44">
+                  <SelectTrigger className="h-10 w-full border-gray-200 bg-transparent shadow-none sm:w-44">
                     <SelectValue placeholder="All difficulties" />
                   </SelectTrigger>
                   <SelectContent>
@@ -257,22 +233,15 @@ export const CompanyChallengesPage = () => {
                               </span>
                             </td>
                             <td className="px-5 py-5 font-semibold text-gray-900">
-                              <span className="inline-flex items-center gap-1.5">
-                                <Bitcoin className="size-4 text-emerald-500" />
-                                {challenge.rewardBTC} BTC
-                              </span>
+                              {challenge.rewardBTC} BTC
                             </td>
                             <td className="px-5 py-5 text-gray-500">
-                              <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                                <CalendarDays className="size-4" />
+                              <span className="whitespace-nowrap">
                                 {formatChallengeDeadline(challenge.deadline)}
                               </span>
                             </td>
                             <td className="px-5 py-5 text-gray-500">
-                              <span className="inline-flex items-center gap-1.5">
-                                <Users className="size-4" />
-                                {challenge.submissions ?? 0}
-                              </span>
+                              {challenge.submissions ?? 0}
                             </td>
                           </tr>
                         );
