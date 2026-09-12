@@ -1,9 +1,9 @@
 import { Timestamp } from 'firebase/firestore';
 
-export type BountyDeadline = Timestamp | Date | string;
+export type ChallengeDeadline = Timestamp | Date | string;
 
 /** A selected calendar day closes at 23:59:59.999 UTC. */
-export function toBountyDeadlineTimestamp(selectedDate: Date): Timestamp {
+export function toChallengeDeadlineTimestamp(selectedDate: Date): Timestamp {
   return Timestamp.fromDate(
     new Date(
       Date.UTC(
@@ -19,7 +19,9 @@ export function toBountyDeadlineTimestamp(selectedDate: Date): Timestamp {
   );
 }
 
-export function formatBountyDeadline(deadline?: BountyDeadline | null): string {
+export function formatChallengeDeadline(
+  deadline?: ChallengeDeadline | null,
+): string {
   if (!deadline) return 'No deadline';
 
   const date =

@@ -1,4 +1,4 @@
-import { Menu, Code2 } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useAppContext } from '../../hooks/useAppContext';
 import { useState } from 'react';
 
@@ -66,27 +66,27 @@ export const Header = () => {
       className={`relative z-40 border-b ${
         user?.success
           ? 'border-gray-200 bg-white'
-          : 'border-slate-200/80 bg-[#fbfaf8]'
+          : 'border-slate-200/80 bg-slate-50'
       }`}
     >
       <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* logo */}
         <Link
           to="/"
-          className="flex min-w-0 items-center gap-3 text-lg font-semibold tracking-tight text-gray-950"
+          className="flex min-w-0 items-center gap-3 font-semibold text-gray-950"
         >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-orange-600 text-white shadow-sm">
-            <Code2 className="size-5" aria-hidden="true" />
+          <span
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-[11px] font-bold tracking-tight text-white shadow-sm"
+            aria-hidden="true"
+          >
+            CTE
           </span>
-          <span className="max-w-[45vw] truncate lg:max-w-md">
+          <span className="hidden max-w-[45vw] truncate text-sm font-bold tracking-wide uppercase sm:block lg:max-w-md">
             {user?.success && user.user.role === 'COMPANY'
-              ? user.user.companyName || 'CTE'
-              : 'CTE'}
+              ? user.user.companyName || 'Code That Earns'
+              : 'Code That Earns'}
           </span>
         </Link>
-
-        {/* desktop navigation */}
-        <RoleIndicator mobile />
 
         {/* right side - auth/user */}
         <div className="flex items-center gap-4">
@@ -117,7 +117,7 @@ export const Header = () => {
                       asChild
                       className="flex cursor-pointer items-center gap-5"
                     >
-                      <Avatar className="size-9 bg-orange-50 text-orange-700 ring-1 ring-orange-200">
+                      <Avatar className="size-9 bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200">
                         <AvatarFallback className="bg-transparent">
                           {name && name[0].toUpperCase()}
                         </AvatarFallback>
@@ -163,6 +163,8 @@ export const Header = () => {
 
               {/* mobile menu button */}
               <div className="flex items-center gap-3 lg:hidden">
+                <RoleIndicator />
+
                 <Avatar className="hidden size-[35px] bg-slate-950 text-slate-50">
                   <AvatarFallback className="bg-transparent text-sm">
                     {name && name[0].toUpperCase()}

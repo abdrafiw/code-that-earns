@@ -10,15 +10,15 @@ const renderInRouter = (component: ReactNode) =>
   render(<MemoryRouter>{component}</MemoryRouter>);
 
 describe('semantic page states', () => {
-  it('provides navigation when a bounty cannot be found', () => {
+  it('provides navigation when a challenge cannot be found', () => {
     renderInRouter(<SubmitSolutionNotFoundState />);
 
     expect(
-      screen.getByRole('heading', { name: /bounty not found/i }),
+      screen.getByRole('heading', { name: /challenge not found/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: /browse bounties/i }),
-    ).toHaveAttribute('href', '/dev-bounties');
+      screen.getByRole('link', { name: /browse challenges/i }),
+    ).toHaveAttribute('href', '/challenges');
   });
 
   it('associates generic empty-state headings with actionable regions', () => {
@@ -26,8 +26,8 @@ describe('semantic page states', () => {
       <PageEmptyState
         title="No submissions found"
         description="Nothing has been submitted yet."
-        actionHref="/dev-bounties"
-        actionLabel="Browse bounties"
+        actionHref="/challenges"
+        actionLabel="Browse challenges"
       />,
     );
 

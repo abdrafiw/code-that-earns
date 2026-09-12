@@ -8,7 +8,7 @@ import { z } from 'zod';
 
 export const COLLECTIONS = {
   USERS: 'users',
-  BOUNTIES: 'bounties',
+  CHALLENGES: 'challenges',
   SUBMISSIONS: 'submissions',
   TRANSACTIONS: 'transactions',
 } as const;
@@ -29,12 +29,12 @@ export const userDocumentSchema = z.object({
   updatedAt: timestampSchema.optional(),
 });
 
-export const bountyDocumentSchema = z.object({
+export const challengeDocumentSchema = z.object({
   title: z.string().trim().min(3).max(120),
   description: z.string().trim().min(10).max(5000),
   category: z.string().trim().min(1),
   difficulty: z.string().trim().min(1),
-  bountyBTC: z.number().positive().max(21),
+  rewardBTC: z.number().positive().max(21),
   deadline: timestampSchema,
   searchTerms: z.array(z.string()).max(100).default([]),
   searchSchemaVersion: z.number().int().nonnegative().default(0),
@@ -50,11 +50,11 @@ export const bountyDocumentSchema = z.object({
 });
 
 export const submissionDocumentSchema = z.object({
-  bountyId: z.string().min(1),
+  challengeId: z.string().min(1),
   companyUid: z.string().min(1),
-  bountyTitle: nullableString,
-  bountyDescription: nullableString,
-  bountyRewardBTC: z.number().positive().nullable(),
+  challengeTitle: nullableString,
+  challengeDescription: nullableString,
+  challengeRewardBTC: z.number().positive().nullable(),
   githubUrl: z.url().refine((url) => url.startsWith('https://github.com/'), {
     message: 'Expected a GitHub repository URL',
   }),
@@ -73,8 +73,8 @@ export const TRANSACTION_STATUSES = ['pending', 'completed', 'failed'] as const;
 export type TransactionStatus = (typeof TRANSACTION_STATUSES)[number];
 
 export const transactionDocumentSchema = z.object({
-  bountyId: z.string().min(1),
-  bountyTitle: z.string().optional(),
+  challengeId: z.string().min(1),
+  challengeTitle: z.string().optional(),
   fromUserId: z.string().min(1),
   toUserId: z.string().min(1),
   amount: z.number().positive(),
@@ -87,7 +87,7 @@ export const transactionDocumentSchema = z.object({
 });
 
 export type UserDocument = z.infer<typeof userDocumentSchema>;
-export type BountyDocument = z.infer<typeof bountyDocumentSchema>;
+export type ChallengeDocument = z.infer<typeof challengeDocumentSchema>;
 export type SubmissionDocument = z.infer<typeof submissionDocumentSchema>;
 export type TransactionDocument = z.infer<typeof transactionDocumentSchema>;
 
@@ -125,9 +125,9 @@ export const userConverter = createConverter(
   COLLECTIONS.USERS,
   userDocumentSchema,
 );
-export const bountyConverter = createConverter(
-  COLLECTIONS.BOUNTIES,
-  bountyDocumentSchema,
+export const challengeConverter = createConverter(
+  COLLECTIONS.CHALLENGES,
+  challengeDocumentSchema,
 );
 export const submissionConverter = createConverter(
   COLLECTIONS.SUBMISSIONS,

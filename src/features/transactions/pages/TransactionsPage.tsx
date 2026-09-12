@@ -30,7 +30,7 @@ export function TransactionsPage() {
       searchTerm
         ? transactions.filter((transaction) =>
             [
-              transaction.bountyTitle ?? '',
+              transaction.challengeTitle ?? '',
               transaction.transactionHash ?? '',
             ].some((value) => value.toLowerCase().includes(searchTerm)),
           )
@@ -67,13 +67,13 @@ export function TransactionsPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <header className="border-b border-gray-200 pb-7">
-        <p className="text-sm font-medium text-orange-600">Payment activity</p>
+        <p className="text-sm font-medium text-indigo-500">Payment activity</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-950">
           Transactions
         </h1>
         <p className="mt-2 text-sm leading-6 text-gray-500">
-          View bounty payment records involving your account. Payments cannot be
-          initiated from this dashboard.
+          View challenge payment records involving your account. Payments cannot
+          be initiated from this dashboard.
         </p>
       </header>
 
@@ -129,7 +129,7 @@ export function TransactionsPage() {
               />
               <Input
                 aria-label="Search loaded transactions"
-                placeholder="Search loaded bounty or transaction hash"
+                placeholder="Search loaded challenge or transaction hash"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 className="h-10 pl-9 shadow-none"
@@ -158,11 +158,11 @@ export function TransactionsPage() {
           >
             <table className="w-full min-w-190 text-left text-sm">
               <caption className="sr-only">
-                Your bounty payment transactions
+                Your challenge payment transactions
               </caption>
               <thead className="border-b border-gray-200 bg-gray-50 text-xs text-gray-500">
                 <tr>
-                  {['Bounty / transaction', 'Amount', 'Status', 'Date'].map(
+                  {['Challenge / transaction', 'Amount', 'Status', 'Date'].map(
                     (heading) => (
                       <th
                         key={heading}
@@ -180,8 +180,8 @@ export function TransactionsPage() {
                   <tr key={transaction.id} className="hover:bg-gray-50">
                     <th scope="row" className="px-5 py-5 font-normal">
                       <p className="font-medium text-gray-950">
-                        {transaction.bountyTitle ||
-                          `Bounty ${transaction.bountyId}`}
+                        {transaction.challengeTitle ||
+                          `Challenge ${transaction.challengeId}`}
                       </p>
                       <p className="mt-1.5 font-mono text-xs text-gray-400">
                         {transaction.transactionHash

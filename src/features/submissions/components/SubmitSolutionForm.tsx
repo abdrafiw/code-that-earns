@@ -6,8 +6,6 @@ import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
 import { useSubmitSolution } from '../hooks/useSubmissions';
-import type { TBounty } from '../../bounties/types';
-import { formatDeadline } from '../utils/formatDeadline';
 import { useTypedForm } from '../../../hooks/useTypedForm';
 import {
   hasFormErrors,
@@ -22,13 +20,11 @@ const initialValues: SubmissionFormValues = {
 };
 
 type SubmitSolutionFormProps = {
-  bounty: TBounty;
-  bountyID: string;
+  challengeID: string;
 };
 
 export const SubmitSolutionForm = ({
-  bounty,
-  bountyID,
+  challengeID,
 }: SubmitSolutionFormProps) => {
   const form = useTypedForm(initialValues);
 
@@ -49,7 +45,7 @@ export const SubmitSolutionForm = ({
     const payload = {
       githubUrl: form.values.githubUrl.trim(),
       bitcoinAddress: form.values.bitcoinAddress.trim(),
-      bountyID,
+      challengeID,
     };
 
     submitSolutionMutation.mutate(payload, {
@@ -65,21 +61,22 @@ export const SubmitSolutionForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-card rounded-lg p-8 shadow-md">
-      <header className="bg-primary-50 border-primary-200 rounded-lg border p-4">
-        <h3 className="text-primary-800 mb-1 font-semibold">
-          Challenge: {bounty.title}
-        </h3>
-
-        <p className="text-primary-700 text-sm">
-          Bounty: {bounty.bountyBTC} BTC • Deadline:{' '}
-          {formatDeadline(bounty.deadline)}
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
+    >
+      <header>
+        <h2 className="text-xl font-semibold text-gray-950">
+          Submit your solution
+        </h2>
+        <p className="mt-1 text-sm leading-6 text-gray-500">
+          Share your repository and payout address for review.
         </p>
       </header>
 
       <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="github-url">GitHub Repository URL</Label>
+          <Label htmlFor="github-url">GitHub repository</Label>
           <div className="relative">
             <SiGithub className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
@@ -103,7 +100,7 @@ export const SubmitSolutionForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="btc-address">Submit hash</Label>
+          <Label htmlFor="btc-address">Bitcoin payout address</Label>
           <Input
             id="btc-address"
             type="text"
@@ -115,6 +112,9 @@ export const SubmitSolutionForm = ({
               form.errors.bitcoinAddress ? 'btc-address-error' : undefined
             }
           />
+          <p className="text-xs text-gray-500">
+            Rewards will be sent to this address if your solution is selected.
+          </p>
           {form.errors.bitcoinAddress && (
             <p id="btc-address-error" className="text-destructive text-sm">
               {form.errors.bitcoinAddress}
@@ -122,7 +122,7 @@ export const SubmitSolutionForm = ({
           )}
         </div>
 
-        <div className="flex flex-col gap-4 lg:flex-row">
+        <div className="flex flex-col gap-3">
           <Button
             type="submit"
             disabled={submitSolutionMutation.isPending}
@@ -131,16 +131,16 @@ export const SubmitSolutionForm = ({
           >
             {submitSolutionMutation.isPending
               ? 'Submitting...'
-              : 'Submit Solution'}
+              : 'Submit solution'}
           </Button>
 
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate('/dev-bounties')}
+            onClick={() => navigate('/challenges')}
             size="lg"
           >
-            Back to Bounties
+            Cancel
           </Button>
         </div>
       </div>

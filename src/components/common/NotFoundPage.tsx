@@ -8,7 +8,7 @@ export function NotFoundPage() {
   return (
     <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-16">
       <section className="max-w-lg text-center">
-        <p className="text-sm font-semibold tracking-widest text-orange-600 uppercase">
+        <p className="text-sm font-semibold tracking-widest text-indigo-500 uppercase">
           Error 404
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl">

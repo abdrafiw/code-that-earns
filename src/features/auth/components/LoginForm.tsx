@@ -122,7 +122,7 @@ export const LoginForm = () => {
       <Button
         type="submit"
         disabled={loginMutation.isPending || Boolean(form.errors.email)}
-        className="h-11 w-full cursor-pointer bg-orange-600 font-semibold hover:bg-orange-700"
+        className="h-11 w-full cursor-pointer bg-indigo-500 font-semibold hover:bg-indigo-600"
         size="lg"
       >
         {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
@@ -133,7 +133,7 @@ export const LoginForm = () => {
 
         <Link
           to="/sign-up"
-          className="font-semibold text-orange-600 hover:text-orange-700"
+          className="font-semibold text-indigo-500 hover:text-indigo-600"
         >
           Sign up
         </Link>

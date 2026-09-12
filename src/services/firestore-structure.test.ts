@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import { Timestamp } from 'firebase/firestore';
 
 import {
-  bountyDocumentSchema,
+  challengeDocumentSchema,
   submissionDocumentSchema,
   transactionDocumentSchema,
   userDocumentSchema,
@@ -22,13 +22,13 @@ describe('Firestore document schemas', () => {
     expect(result.success).toBe(false);
   });
 
-  it('provides safe search defaults for legacy bounty records', () => {
-    const result = bountyDocumentSchema.parse({
-      title: 'Legacy bounty',
-      description: 'A valid legacy bounty description.',
+  it('provides safe search defaults for legacy challenge records', () => {
+    const result = challengeDocumentSchema.parse({
+      title: 'Legacy challenge',
+      description: 'A valid legacy challenge description.',
       category: 'Coding',
       difficulty: 'Beginner',
-      bountyBTC: 0.01,
+      rewardBTC: 0.01,
       deadline: timestamp,
       companyName: 'Example Company',
       companyUid: 'company-1',
@@ -44,11 +44,11 @@ describe('Firestore document schemas', () => {
 
   it('rejects malformed submission content', () => {
     const result = submissionDocumentSchema.safeParse({
-      bountyId: 'bounty-1',
+      challengeId: 'challenge-1',
       companyUid: 'company-1',
-      bountyTitle: 'Bounty',
-      bountyDescription: 'Description',
-      bountyRewardBTC: 0.01,
+      challengeTitle: 'Challenge',
+      challengeDescription: 'Description',
+      challengeRewardBTC: 0.01,
       githubUrl: 'https://example.com/not-github',
       bitcoinAddress: 'bc1qexampleaddress',
       developerUid: 'developer-1',
@@ -63,7 +63,7 @@ describe('Firestore document schemas', () => {
 
   it('rejects invalid financial records', () => {
     const result = transactionDocumentSchema.safeParse({
-      bountyId: 'bounty-1',
+      challengeId: 'challenge-1',
       fromUserId: 'company-1',
       toUserId: 'developer-1',
       amount: -1,

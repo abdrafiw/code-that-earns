@@ -19,24 +19,28 @@ export function CompanySubmissionsPage() {
     return <PageSkeleton variant="company-submissions" />;
   if (submissionsQuery.error)
     return (
-      <PageErrorState
-        message={getErrorMessage(submissionsQuery.error)}
-        onRetry={() => void submissionsQuery.refetch()}
-        isRetrying={submissionsQuery.isFetching}
-      />
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <PageErrorState
+          message={getErrorMessage(submissionsQuery.error)}
+          onRetry={() => void submissionsQuery.refetch()}
+          isRetrying={submissionsQuery.isFetching}
+        />
+      </div>
     );
   if (submissions.length === 0)
     return (
-      <PageEmptyState
-        title="No submissions found"
-        description="Submissions made to your company's bounties will appear here."
-        actionHref="/company-bounties"
-        actionLabel="View company bounties"
-      />
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <PageEmptyState
+          title="No submissions found"
+          description="Submissions made to your company's challenges will appear here."
+          actionHref="/challenges"
+          actionLabel="View company challenges"
+        />
+      </div>
     );
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-7xl space-y-4 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <h2 className="text-2xl font-bold text-gray-900">
         Developer Submissions
       </h2>
@@ -54,13 +58,13 @@ export function CompanySubmissionsPage() {
                 </h3>
 
                 <p className="text-sm text-gray-500">
-                  Bounty ID: {submission.bountyId}
+                  Challenge ID: {submission.challengeId}
                 </p>
 
-                {submission.bountyTitle && (
+                {submission.challengeTitle && (
                   <p className="mt-1 text-sm text-gray-600">
-                    <span className="font-medium">Bounty:</span>{' '}
-                    {submission.bountyTitle}
+                    <span className="font-medium">Challenge:</span>{' '}
+                    {submission.challengeTitle}
                   </p>
                 )}
               </div>
@@ -108,13 +112,13 @@ export function CompanySubmissionsPage() {
                 </div>
               )}
 
-              {submission.bountyRewardBTC !== null &&
-                submission.bountyRewardBTC !== undefined && (
+              {submission.challengeRewardBTC !== null &&
+                submission.challengeRewardBTC !== undefined && (
                   <div className="flex items-center text-sm">
                     <DollarSign className="mr-2 h-4 w-4 text-gray-400" />
                     <span className="font-medium text-gray-600">Reward:</span>
                     <span className="ml-2 font-semibold text-gray-900">
-                      {submission.bountyRewardBTC} BTC
+                      {submission.challengeRewardBTC} BTC
                     </span>
                   </div>
                 )}
@@ -145,11 +149,11 @@ export function CompanySubmissionsPage() {
                 </div>
               </div>
 
-              {submission.bountyDescription && (
+              {submission.challengeDescription && (
                 <div className="mt-4 border-t border-gray-100 pt-4">
                   <p className="text-sm text-gray-500">
-                    <span className="font-medium">Bounty Description:</span>{' '}
-                    {submission.bountyDescription}
+                    <span className="font-medium">Challenge Description:</span>{' '}
+                    {submission.challengeDescription}
                   </p>
                 </div>
               )}

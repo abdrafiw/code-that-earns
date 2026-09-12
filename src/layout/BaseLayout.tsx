@@ -20,7 +20,7 @@ export const BaseLayout = () => {
                 aria-label="Dashboard navigation"
                 className="min-h-0 flex-1 overflow-y-auto px-4 py-7"
               >
-                <NavigationLinks mobile />
+                <NavigationLinks />
               </nav>
               <div className="shrink-0 border-t border-gray-200 p-5">
                 <SettingsMenu />

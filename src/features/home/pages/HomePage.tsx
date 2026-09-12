@@ -36,29 +36,22 @@ const features = [
 const steps = [
   'Choose a challenge that fits your skills',
   'Build and submit your GitHub repository',
-  'Get selected and receive the bounty',
+  'Get selected and receive the challenge',
 ];
 
 export const HomePage = () => {
   const { user } = useAppContext();
 
   if (user?.success) {
-    return (
-      <Navigate
-        to={
-          user.user.role === 'COMPANY' ? '/company-bounties' : '/dev-bounties'
-        }
-        replace
-      />
-    );
+    return <Navigate to="/challenges" replace />;
   }
 
   return (
-    <main className="landing-page min-h-[calc(100dvh-4rem)] bg-[#fbfaf8] text-slate-950">
+    <main className="landing-page min-h-[calc(100dvh-4rem)] bg-slate-50 text-slate-950">
       <section className="relative overflow-hidden border-b border-slate-200/80">
         <div
           aria-hidden="true"
-          className="absolute top-16 right-[7%] size-52 rounded-full border border-orange-200 bg-orange-50"
+          className="absolute top-16 right-[7%] size-52 rounded-full border border-indigo-200 bg-indigo-50"
         />
         <div
           aria-hidden="true"
@@ -67,28 +60,28 @@ export const HomePage = () => {
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:px-8 lg:grid-cols-[1.08fr_0.92fr] lg:px-10 lg:py-24">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-3 py-1.5 text-xs font-semibold text-orange-700 shadow-sm">
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-600 shadow-sm">
               <Sparkles className="size-3.5" />
               CTE · Code That Earns
             </div>
 
             <h1 className="mt-7 text-5xl leading-[1.02] font-semibold tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-7xl">
               Solve real problems.
-              <span className="mt-1 block text-orange-600">
+              <span className="mt-1 block text-indigo-500">
                 Earn real Bitcoin.
               </span>
             </h1>
 
             <p className="mt-7 max-w-xl text-lg leading-8 text-slate-600">
-              CTE connects skilled developers with companies that need
-              ideas shipped. Pick a challenge, submit your solution, and get
-              rewarded for excellent work.
+              CTE connects skilled developers with companies that need ideas
+              shipped. Pick a challenge, submit your solution, and get rewarded
+              for excellent work.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/sign-up"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-orange-600 px-6 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-orange-700 hover:shadow-md"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-indigo-500 px-6 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-indigo-600 hover:shadow-md"
               >
                 Start building
                 <ArrowRight className="size-4" />
@@ -97,7 +90,7 @@ export const HomePage = () => {
                 to="/login"
                 className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-400 hover:bg-slate-50"
               >
-                Browse bounties
+                Browse challenges
               </Link>
             </div>
 
@@ -120,7 +113,7 @@ export const HomePage = () => {
           <div className="relative mx-auto w-full max-w-xl lg:ml-auto">
             <div
               aria-hidden="true"
-              className="absolute -top-5 -left-5 size-20 rounded-2xl bg-orange-500"
+              className="absolute -top-5 -left-5 size-20 rounded-2xl bg-indigo-500"
             />
             <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_24px_70px_rgba(15,23,42,0.14)]">
               <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
@@ -130,21 +123,21 @@ export const HomePage = () => {
                   <span className="size-2.5 rounded-full bg-emerald-400" />
                 </div>
                 <span className="text-xs font-medium text-slate-400">
-                  Open bounty
+                  Open challenge
                 </span>
               </div>
 
               <div className="p-5 sm:p-7">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <span className="text-xs font-semibold tracking-wider text-orange-600 uppercase">
+                    <span className="text-xs font-semibold tracking-wider text-indigo-500 uppercase">
                       Frontend · Intermediate
                     </span>
                     <h2 className="mt-3 text-2xl leading-tight font-semibold tracking-tight text-slate-950">
                       Build an analytics dashboard for an open-source API
                     </h2>
                   </div>
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500">
                     <Code2 className="size-5" />
                   </span>
                 </div>
@@ -160,7 +153,7 @@ export const HomePage = () => {
                       Reward
                     </p>
                     <p className="mt-2 flex items-center gap-2 text-lg font-semibold text-slate-900">
-                      <Bitcoin className="size-5 text-orange-500" />
+                      <Bitcoin className="size-5 text-emerald-500" />
                       0.025 BTC
                     </p>
                   </div>
@@ -184,7 +177,7 @@ export const HomePage = () => {
                           (index === 0
                             ? 'bg-slate-900 text-white'
                             : index === 1
-                              ? 'bg-orange-100 text-orange-700'
+                              ? 'bg-indigo-100 text-indigo-600'
                               : 'bg-emerald-100 text-emerald-700')
                         }
                       >
@@ -219,7 +212,7 @@ export const HomePage = () => {
 
       <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-10 lg:py-28">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold text-orange-600">
+          <p className="text-sm font-semibold text-indigo-500">
             Everything you need
           </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-slate-950 sm:text-4xl">
@@ -237,7 +230,7 @@ export const HomePage = () => {
               key={title}
               className="rounded-2xl border border-slate-200 bg-white p-7 shadow-[0_8px_30px_rgba(15,23,42,0.05)]"
             >
-              <span className="flex size-11 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+              <span className="flex size-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500">
                 <Icon className="size-5" />
               </span>
               <h3 className="mt-6 text-lg font-semibold text-slate-950">
@@ -254,7 +247,7 @@ export const HomePage = () => {
       <section className="bg-slate-950 text-white">
         <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 py-20 sm:px-8 lg:grid-cols-2 lg:px-10 lg:py-24">
           <div>
-            <div className="flex size-12 items-center justify-center rounded-xl bg-orange-500 text-white">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-indigo-500 text-white">
               <Trophy className="size-6" />
             </div>
             <h2 className="mt-6 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
@@ -266,7 +259,7 @@ export const HomePage = () => {
             </p>
             <Link
               to="/sign-up"
-              className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-orange-500 px-6 text-sm font-semibold text-white transition-colors hover:bg-orange-400"
+              className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-indigo-500 px-6 text-sm font-semibold text-white transition-colors hover:bg-indigo-400"
             >
               Create your account <ArrowRight className="size-4" />
             </Link>
@@ -274,13 +267,13 @@ export const HomePage = () => {
 
           <div className="rounded-2xl border border-white/10 bg-white/5 p-7">
             <div className="flex items-center gap-3">
-              <Users className="size-5 text-orange-400" />
+              <Users className="size-5 text-indigo-400" />
               <p className="font-semibold">How it works</p>
             </div>
             <ol className="mt-6 space-y-5">
               {steps.map((step, index) => (
                 <li key={step} className="flex items-center gap-4">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-xs font-semibold text-orange-300">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-xs font-semibold text-indigo-300">
                     {index + 1}
                   </span>
                   <span className="text-sm text-slate-300">{step}</span>

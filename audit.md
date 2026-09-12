@@ -17,7 +17,7 @@ Validation baseline:
 
 Evidence: `submissionService.submitSolution()` checks `tokenResult.claims.role`, while signup stores the role only in `users/{uid}`. Valid developers can therefore be rejected even though the Firestore rule considers them developers.
 
-Solution: Use the same trusted authorization source everywhere. Prefer server-managed custom claims set by an Admin SDK backend, or read the Firestore user profile as the bounty service currently does. Keep the Firestore rule aligned with that source and add emulator tests for developer/company access.
+Solution: Use the same trusted authorization source everywhere. Prefer server-managed custom claims set by an Admin SDK backend, or read the Firestore user profile as the challenge service currently does. Keep the Firestore rule aligned with that source and add emulator tests for developer/company access.
 
 [x] A user can change their own role and promote themselves to a company
 
@@ -25,21 +25,21 @@ Evidence: `firestore.rules` allows a user to update their entire `users/{userId}
 
 Solution: Make role assignment server-controlled. In rules, permit only an explicit set of editable profile fields and require protected fields to remain unchanged using `request.resource.data.diff(resource.data).affectedKeys().hasOnly([...])`. Use custom claims for authorization if possible.
 
-[x] Bounty ownership can be forged during creation
+[x] Challenge ownership can be forged during creation
 
-Evidence: the bounty create rule checks that the caller's profile says `COMPANY`, but does not require `request.resource.data.companyUid == request.auth.uid`. A company can create a bounty owned by another UID.
+Evidence: the challenge create rule checks that the caller's profile says `COMPANY`, but does not require `request.resource.data.companyUid == request.auth.uid`. A company can create a challenge owned by another UID.
 
 Solution: Validate `companyUid`, required fields, allowed category/difficulty values, positive reward, timestamps, and deadline in the create rule. Set ownership fields in a trusted Cloud Function for stronger guarantees.
 
-[x] Submission ownership and bounty validity can be forged during creation
+[x] Submission ownership and challenge validity can be forged during creation
 
-Evidence: the submission create rule checks only the caller's role. It does not require `developerUid == request.auth.uid`, verify that `bountyId` exists/is open, or validate submitted fields.
+Evidence: the submission create rule checks only the caller's role. It does not require `developerUid == request.auth.uid`, verify that `challengeId` exists/is open, or validate submitted fields.
 
-Solution: Require the developer UID to equal `request.auth.uid`, require the referenced bounty to exist and accept submissions, validate the GitHub URL and allowed keys, and set server-owned status/timestamp fields through trusted code.
+Solution: Require the developer UID to equal `request.auth.uid`, require the referenced challenge to exist and accept submissions, validate the GitHub URL and allowed keys, and set server-owned status/timestamp fields through trusted code.
 
 [x] Company submission updates are effectively unrestricted
 
-Evidence: a bounty owner may update the entire submission document. They can alter `developerUid`, `bountyId`, repository URL, wallet address, and creation timestamp, not only review fields.
+Evidence: a challenge owner may update the entire submission document. They can alter `developerUid`, `challengeId`, repository URL, wallet address, and creation timestamp, not only review fields.
 
 Solution: Restrict company updates to review fields such as `status`, `reviewNotes`, `reviewedAt`, and score. Require ownership/reference fields to remain unchanged and validate status transitions.
 
@@ -59,33 +59,33 @@ Solution: make private user documents owner-only. Put intentionally public field
 
 Evidence: `bitcoinService.ts` sends payments directly from the browser with `process.env.REACT_APP_BITNOB_KEY`. Vite uses `import.meta.env`, and any client-exposed key can be extracted from the bundle regardless.
 
-Solution: remove payment execution from the frontend. Call a secured Cloud Function/server endpoint that stores the provider key in server secrets, authenticates the caller, validates bounty ownership and amount, applies idempotency, and records provider results.
+Solution: remove payment execution from the frontend. Call a secured Cloud Function/server endpoint that stores the provider key in server secrets, authenticates the caller, validates challenge ownership and amount, applies idempotency, and records provider results.
 
 ## High: broken application behavior
 
-[x] Creating a bounty invalidates the wrong React Query cache
+[x] Creating a challenge invalidates the wrong React Query cache
 
-Evidence: `useCreateBounty()` invalidates `['bounties']`, but the company page reads `['companyBounties', uid, filters]`. A successful create can leave the company table stale.
+Evidence: `useCreateChallenge()` invalidates `['challenges']`, but the company page reads `['companyChallenges', uid, filters]`. A successful create can leave the company table stale.
 
-Solution: centralize query-key factories and invalidate both the public bounty list and the current company's bounty prefix, e.g. `bountyKeys.all` and `bountyKeys.company(uid)`. Alternatively update the company cache optimistically from the mutation result.
+Solution: centralize query-key factories and invalidate both the public challenge list and the current company's challenge prefix, e.g. `challengeKeys.all` and `challengeKeys.company(uid)`. Alternatively update the company cache optimistically from the mutation result.
 
-[x] Developer bounty filters have state and controls but do not filter anything
+[x] Developer challenge filters have state and controls but do not filter anything
 
-Evidence: `DevBountiesPage` stores category and difficulty with `useState`, but neither value is passed to the query nor applied to the rendered list.
+Evidence: `DevChallengesPage` stores category and difficulty with `useState`, but neither value is passed to the query nor applied to the rendered list.
 
-Solution: add filters to `useGetBounties`, include them in the query key, and apply them in Firestore. Remove the controls until backend filtering is implemented if they cannot work correctly.
+Solution: add filters to `useGetChallenges`, include them in the query key, and apply them in Firestore. Remove the controls until backend filtering is implemented if they cannot work correctly.
 
-[x] The public bounty query silently shows only the first 20 records
+[x] The public challenge query silently shows only the first 20 records
 
-Evidence: `getAllBounties()` supports a cursor and `hasMore`, but `useGetBounties()` calls it once and discards `lastDoc` and `hasMore`.
+Evidence: `getAllChallenges()` supports a cursor and `hasMore`, but `useGetChallenges()` calls it once and discards `lastDoc` and `hasMore`.
 
 Solution: use `useInfiniteQuery` with Firestore cursors and render a Load More/infinite-scroll control, or remove pagination from the service and explicitly document the bounded result.
 
-[x] Bounty-detail failures are converted into a false "not found" state
+[x] Challenge-detail failures are converted into a false "not found" state
 
-Evidence: `useBounty.ts` casts `result.bounty` without checking `result.success`, has no `enabled: Boolean(bountyId)`, and `SubmitSolutionPage` does not render query errors.
+Evidence: `useChallenge.ts` casts `result.challenge` without checking `result.success`, has no `enabled: Boolean(challengeId)`, and `SubmitSolutionPage` does not render query errors.
 
-Solution: make `getBountyById` throw the service error, disable the query when no ID exists, and render `PageErrorState` with retry separately from a genuine not-found response.
+Solution: make `getChallengeById` throw the service error, disable the query when no ID exists, and render `PageErrorState` with retry separately from a genuine not-found response.
 
 [x] Auth profile loading can preserve a stale user or incorrectly appear logged out
 
@@ -119,15 +119,15 @@ Solution: show normalized success/error feedback, navigate to the developer subm
 
 [x] Duplicate submissions are not prevented
 
-Evidence: neither service nor rules prevent the same developer from submitting repeatedly for one bounty.
+Evidence: neither service nor rules prevent the same developer from submitting repeatedly for one challenge.
 
-Solution: use a deterministic document ID such as `${bountyId}_${developerUid}` or a backend transaction, and reject creation when an active submission already exists.
+Solution: use a deterministic document ID such as `${challengeId}_${developerUid}` or a backend transaction, and reject creation when an active submission already exists.
 
-[x] Company search excludes all legacy bounties without `searchTerms`
+[x] Company search excludes all legacy challenges without `searchTerms`
 
 Evidence: filtered search uses `array-contains` on a field only added by the newer create flow. Existing documents are never returned by search.
 
-Solution: run a one-time Admin SDK migration to populate normalized search fields for every existing bounty. Version the search schema and test migration/backfill behavior.
+Solution: run a one-time Admin SDK migration to populate normalized search fields for every existing challenge. Version the search schema and test migration/backfill behavior.
 
 [x] Company KPI values represent filtered rows but are labeled as global totals
 
@@ -143,7 +143,7 @@ Solution: use a real 250–400 ms debounced search value, require a sensible min
 
 [x] Firestore profile and content data is trusted through unchecked type assertions
 
-Evidence: services use `DocumentData`, `any`, and `as UserData`/`as TBounty` without runtime validation. Malformed documents can propagate invalid roles, dates, and amounts into UI and authorization decisions.
+Evidence: services use `DocumentData`, `any`, and `as UserData`/`as TChallenge` without runtime validation. Malformed documents can propagate invalid roles, dates, and amounts into UI and authorization decisions.
 
 Solution: add Firestore data converters plus runtime schemas (for example Zod or Valibot) at the service boundary. Reject or safely default invalid documents and keep domain types aligned with stored data.
 
@@ -157,7 +157,7 @@ Solution: derive `const name = user?.success ? ... : ''` during render. Reserve 
 
 [x] AppContext contains dead global state
 
-Evidence: `currentView` and `selectedBounty` are stored and exposed but never consumed outside the provider. Router state already represents the current view.
+Evidence: `currentView` and `selectedChallenge` are stored and exposed but never consumed outside the provider. Router state already represents the current view.
 
 Solution: remove both state pairs from context. Use route params/query state for navigation and React Query cache or local component state for selected records.
 
@@ -181,31 +181,31 @@ Solution: add a route-level error boundary for loader/render failures and a prop
 
 [x] Query hooks expose custom `loading`/`error` shapes inconsistently
 
-Evidence: submission hooks remap React Query state while bounty hooks return the query object directly. This loses typed errors and creates inconsistent page APIs.
+Evidence: submission hooks remap React Query state while challenge hooks return the query object directly. This loses typed errors and creates inconsistent page APIs.
 
 Solution: return React Query results consistently, or create a well-typed shared adapter used by every query. Preserve `isPending`, `isFetching`, `error`, and `refetch` semantics.
 
 [x] Query-key naming is inconsistent and not centralized
 
-Evidence: keys include `bounties`, `companyBounties`, `company-submissions`, and `developer-submissions`, making invalidation easy to get wrong.
+Evidence: keys include `challenges`, `companyChallenges`, `company-submissions`, and `developer-submissions`, making invalidation easy to get wrong.
 
 Solution: create query-key factories by domain and use them in every query, mutation invalidation, prefetch, and test.
 
-[x] The company bounty hook is outside its feature and duplicates bounty mapping
+[x] The company challenge hook is outside its feature and duplicates challenge mapping
 
-Evidence: `src/hooks/useCompanyBounties.tsx` belongs to the bounty feature and defines a second `Bounty` model/mapping separate from `TBounty` and `transformBounty`.
+Evidence: `src/hooks/useCompanyChallenges.tsx` belongs to the challenge feature and defines a second `Challenge` model/mapping separate from `TChallenge` and `transformChallenge`.
 
-Solution: move it into `features/bounties/hooks/useBounties.ts`, use one domain type and one Firestore converter/transformer, and remove `any` mappings.
+Solution: move it into `features/challenges/hooks/useChallenges.ts`, use one domain type and one Firestore converter/transformer, and remove `any` mappings.
 
-[x] Bounty hook names are singular even though they fetch collections
+[x] Challenge hook names are singular even though they fetch collections
 
-Evidence: the collection query previously used the singular names `getBounty`/`useGetBounty` even though `getAllBounties()` returns an array.
+Evidence: the collection query previously used the singular names `getChallenge`/`useGetChallenge` even though `getAllChallenges()` returns an array.
 
-Solution: rename them to `getBounties`/`useGetBounties`; reserve singular names for ID-based queries.
+Solution: rename them to `getChallenges`/`useGetChallenges`; reserve singular names for ID-based queries.
 
 [x] Form state and validation are duplicated and weakly typed
 
-Evidence: auth and bounty forms keep large objects in `useState`, repeatedly spread snapshots, and implement ad hoc validation. Signup permits an empty developer name and has no shared schema.
+Evidence: auth and challenge forms keep large objects in `useState`, repeatedly spread snapshots, and implement ad hoc validation. Signup permits an empty developer name and has no shared schema.
 
 Solution: use a typed form schema and reducer/form library, trim inputs, validate role-specific required fields, URLs, BTC addresses, bounds, and dates, and map schema errors to accessible field messages.
 
@@ -231,25 +231,25 @@ Solution: lazy-load route modules with `React.lazy`/router lazy routes, load Fir
 
 [x] The documented Firestore schema does not match the implementation
 
-Evidence: `firestore-structure.tsx` documents lowercase roles and fields such as `createdBy`, `bountyAmount`, and `developerId`, while runtime code uses uppercase roles, `companyUid`, `bountyBTC`, and `developerUid`.
+Evidence: `firestore-structure.tsx` documents lowercase roles and fields such as `createdBy`, `challengeAmount`, and `developerId`, while runtime code uses uppercase roles, `companyUid`, `rewardBTC`, and `developerUid`.
 
 Solution: replace the stale `.tsx` pseudo-schema with shared TypeScript domain types/converters that exactly match stored documents. Use constants from one source in forms, services, rules tests, and migrations.
 
 [x] Dates are stored as strings instead of Firestore timestamps
 
-Evidence: bounty deadlines are formatted to `yyyy-MM-dd` before persistence even though the schema describes timestamps.
+Evidence: challenge deadlines are formatted to `yyyy-MM-dd` before persistence even though the schema describes timestamps.
 
 Solution: store deadlines as Firestore `Timestamp` values in UTC, convert only at the UI boundary, and define whether the deadline closes at start or end of day in a named timezone.
 
 [x] Submission queries and joins are not scalable
 
-Evidence: company submissions first fetch every company bounty, then chunk `in` queries for submissions, then fetch developers. Cost and latency grow with the company's full history.
+Evidence: company submissions first fetch every company challenge, then chunk `in` queries for submissions, then fetch developers. Cost and latency grow with the company's full history.
 
-Solution: denormalize `companyUid`, bounty title, and safe developer display fields into submissions at creation; query submissions directly by `companyUid` with pagination and indexes. Keep canonical references for reconciliation.
+Solution: denormalize `companyUid`, challenge title, and safe developer display fields into submissions at creation; query submissions directly by `companyUid` with pagination and indexes. Keep canonical references for reconciliation.
 
-[x] Submission and bounty list queries have no deterministic ordering
+[x] Submission and challenge list queries have no deterministic ordering
 
-Evidence: company bounty and submission queries omit `orderBy`, so list order is undefined and can change between reads.
+Evidence: company challenge and submission queries omit `orderBy`, so list order is undefined and can change between reads.
 
 Solution: add server timestamps and composite indexes, then order by `createdAt desc` with cursor pagination.
 
@@ -305,7 +305,7 @@ Solution: ignore `coverage`, `.firebase`, and generated output; re-enable TypeSc
 
 [] Tests cover only four UI components and no backend security behavior
 
-Evidence: 15 tests cover login, signup, bounty card, and submit form. Services, hooks, route guards, network errors, query invalidation, Firestore rules, and partial auth failures are untested.
+Evidence: 15 tests cover login, signup, challenge card, and submit form. Services, hooks, route guards, network errors, query invalidation, Firestore rules, and partial auth failures are untested.
 
 Solution: add unit tests for query functions and converters, integration tests with mocked Firebase, and Firebase Emulator rule tests for every role/action. Add route/auth and mutation-cache tests to CI.
 
@@ -330,7 +330,7 @@ Solution: verify with static analysis, delete dead code/assets, and add an unuse
 ## Recommended resolution order
 
 1. Fix Firestore rules, submission authorization, role assignment, and payment architecture.
-2. Fix auth consistency, mutation/query error semantics, and bounty cache invalidation.
+2. Fix auth consistency, mutation/query error semantics, and challenge cache invalidation.
 3. Add route guards, query pagination/filter correctness, and legacy search migration.
 4. Align the data schema and add Firestore converters/runtime validation.
 5. Expand emulator/integration tests before changing additional UI behavior.

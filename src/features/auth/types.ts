@@ -20,8 +20,8 @@ export interface SignInPayload {
 }
 
 export interface UserStats {
-  bountiesPosted?: number;
-  bountiesWon?: number;
+  challengesPosted?: number;
+  challengesWon?: number;
   totalEarned?: number;
   totalSpent?: number;
 }

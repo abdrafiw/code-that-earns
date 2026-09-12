@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bitcoin, CalendarDays, Code2, Search, Users } from 'lucide-react';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { CreateBountyDialog } from '../components/CreateBountyDialog';
-import { EmptyBountiesState } from '../components/EmptyBountiesState';
+import { CreateChallengeDialog } from '../components/CreateChallengeDialog';
+import { EmptyChallengesState } from '../components/EmptyChallengesState';
 import { KpiCard } from '../components/KpiCard';
 import { Input } from '../../../components/ui/input';
 
@@ -17,13 +17,13 @@ import {
 
 import { PageSkeleton } from '../../../components/common/PageSkeleton';
 import { PageErrorState } from '../../../components/common/PageErrorState';
-import { normalizeBountyFilter } from '../utils/bountyFilters';
+import { normalizeChallengeFilter } from '../utils/challengeFilters';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
-import { formatBountyDeadline } from '../utils/bountyDeadline';
+import { formatChallengeDeadline } from '../utils/challengeDeadline';
 import {
-  useGetCompanyBounties,
-  useGetCompanyBountyMetrics,
-} from '../hooks/useBounties';
+  useGetCompanyChallenges,
+  useGetCompanyChallengeMetrics,
+} from '../hooks/useChallenges';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 
 const difficultyStyles: Record<string, string> = {
@@ -32,11 +32,11 @@ const difficultyStyles: Record<string, string> = {
   advanced: 'bg-red-50 text-red-700',
 };
 
-export const CompanyBountiesPage = () => {
+export const CompanyChallengesPage = () => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [difficulty, setDifficulty] = useState('all');
-  const normalizedSearch = normalizeBountyFilter(search);
+  const normalizedSearch = normalizeChallengeFilter(search);
   const debouncedSearch = useDebouncedValue(normalizedSearch, 350);
   const effectiveSearch =
     normalizedSearch.length >= 3 && debouncedSearch.length >= 3
@@ -45,15 +45,15 @@ export const CompanyBountiesPage = () => {
 
   const { user } = useAppContext();
   const uid = user?.success ? user.user.uid : undefined;
-  const metricsQuery = useGetCompanyBountyMetrics(uid);
+  const metricsQuery = useGetCompanyChallengeMetrics(uid);
 
   const {
-    data: bounties = [],
-    isPending: isBountiesPending,
+    data: challenges = [],
+    isPending: isChallengesPending,
     isFetching,
     error,
     refetch,
-  } = useGetCompanyBounties(uid, {
+  } = useGetCompanyChallenges(uid, {
     search: effectiveSearch,
     category,
     difficulty,
@@ -63,20 +63,16 @@ export const CompanyBountiesPage = () => {
     effectiveSearch || category !== 'all' || difficulty !== 'all',
   );
 
-  if (isBountiesPending || metricsQuery.isPending)
-    return <PageSkeleton variant="company-bounties" />;
+  if (isChallengesPending || metricsQuery.isPending)
+    return <PageSkeleton variant="company-challenges" />;
 
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <header className="flex flex-col justify-between gap-5 border-b border-gray-200 pb-8 sm:flex-row sm:items-end">
-          <div className="">
-            <p className="text-sm font-medium text-orange-600">
-              Company dashboard
-            </p>
-
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-950">
-              Your bounties
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight text-gray-950">
+              Your challenges
             </h1>
 
             <p className="mt-2 max-w-xl text-sm leading-6 text-gray-500">
@@ -84,7 +80,7 @@ export const CompanyBountiesPage = () => {
               coming in.
             </p>
           </div>
-          <CreateBountyDialog />
+          <CreateChallengeDialog />
         </header>
 
         {error || metricsQuery.error ? (
@@ -103,9 +99,9 @@ export const CompanyBountiesPage = () => {
             <div className="grid gap-4 py-8 sm:grid-cols-3">
               <KpiCard
                 icon={Code2}
-                label="Published bounties"
+                label="Published challenges"
                 value={metricsQuery.data?.published ?? 0}
-                iconClassName="bg-orange-50 text-orange-600"
+                iconClassName="bg-indigo-50 text-indigo-500"
               />
               <KpiCard
                 icon={Bitcoin}
@@ -122,19 +118,19 @@ export const CompanyBountiesPage = () => {
               />
             </div>
 
-            <div className="">
+            <div className="space-y-4">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div className="">
                   <h2 className="text-xl font-semibold text-gray-950">
-                    Bounty list
+                    Challenge list
                   </h2>
                   <p className="mt-1 text-sm text-gray-500">
-                    {bounties.length} bounties shown
+                    {challenges.length} challenges shown
                   </p>
                 </div>
                 <Link
                   to="/company-submissions"
-                  className="text-sm font-medium text-orange-600 hover:text-orange-700"
+                  className="text-sm font-medium text-indigo-500 hover:text-indigo-600"
                 >
                   Review submissions
                 </Link>
@@ -153,13 +149,13 @@ export const CompanyBountiesPage = () => {
                           setDifficulty('all');
                         }
                       }}
-                      placeholder="Search bounties"
+                      placeholder="Search challenges"
                       className="h-10 border-gray-200 pl-9 shadow-none"
-                      aria-describedby="bounty-search-help"
+                      aria-describedby="challenge-search-help"
                     />
                   </div>
                   <p
-                    id="bounty-search-help"
+                    id="challenge-search-help"
                     className="mt-1 text-xs text-gray-500"
                   >
                     {normalizedSearch.length > 0 && normalizedSearch.length < 3
@@ -177,7 +173,7 @@ export const CompanyBountiesPage = () => {
                     setCategory(value);
                   }}
                 >
-                  <SelectTrigger className="h-10 w-full border-gray-200 sm:w-44">
+                  <SelectTrigger className="h-10 w-full border-gray-200 bg-white shadow-none sm:w-44">
                     <SelectValue placeholder="All categories" />
                   </SelectTrigger>
                   <SelectContent>
@@ -195,7 +191,7 @@ export const CompanyBountiesPage = () => {
                     setDifficulty(value);
                   }}
                 >
-                  <SelectTrigger className="h-10 w-full border-gray-200 sm:w-44">
+                  <SelectTrigger className="h-10 w-full border-gray-200 bg-white shadow-none sm:w-44">
                     <SelectValue placeholder="All difficulties" />
                   </SelectTrigger>
                   <SelectContent>
@@ -207,8 +203,8 @@ export const CompanyBountiesPage = () => {
                 </Select>
               </div>
 
-              {bounties.length === 0 ? (
-                <EmptyBountiesState
+              {challenges.length === 0 ? (
+                <EmptyChallengesState
                   hasActiveFilters={hasActiveFilters}
                   onClearFilters={() => {
                     setSearch('');
@@ -219,9 +215,9 @@ export const CompanyBountiesPage = () => {
               ) : (
                 <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
                   <table className="w-full min-w-180 text-left text-sm">
-                    <thead className="border-b border-gray-200 bg-gray-50 text-xs tracking-wide text-gray-500 uppercase">
-                      <tr>
-                        <th className="px-5 py-4 font-medium">Bounty</th>
+                    <thead className="border-b border-gray-200 text-xs tracking-wide text-gray-500 uppercase">
+                      <tr className="bg-white">
+                        <th className="px-5 py-4 font-medium">Challenge</th>
                         <th className="px-5 py-4 font-medium">Difficulty</th>
                         <th className="px-5 py-4 font-medium">Reward</th>
                         <th className="px-5 py-4 font-medium">Deadline</th>
@@ -229,9 +225,9 @@ export const CompanyBountiesPage = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {bounties.map((bounty) => {
-                        const difficulty = normalizeBountyFilter(
-                          bounty.difficulty,
+                      {challenges.map((challenge) => {
+                        const difficulty = normalizeChallengeFilter(
+                          challenge.difficulty,
                         );
                         const badgeClass =
                           difficultyStyles[difficulty] ||
@@ -239,15 +235,15 @@ export const CompanyBountiesPage = () => {
 
                         return (
                           <tr
-                            key={bounty.id}
+                            key={challenge.id}
                             className="transition-colors hover:bg-gray-50"
                           >
                             <td className="max-w-70 px-5 py-5">
                               <p className="truncate font-semibold text-gray-950">
-                                {bounty.title}
+                                {challenge.title}
                               </p>
                               <p className="mt-1 truncate text-xs text-gray-500">
-                                {bounty.category || 'General'}
+                                {challenge.category || 'General'}
                               </p>
                             </td>
                             <td className="px-5 py-5">
@@ -257,25 +253,25 @@ export const CompanyBountiesPage = () => {
                                   badgeClass
                                 }
                               >
-                                {bounty.difficulty || 'Unspecified'}
+                                {challenge.difficulty || 'Unspecified'}
                               </span>
                             </td>
                             <td className="px-5 py-5 font-semibold text-gray-900">
                               <span className="inline-flex items-center gap-1.5">
-                                <Bitcoin className="size-4 text-orange-500" />
-                                {bounty.bountyBTC} BTC
+                                <Bitcoin className="size-4 text-emerald-500" />
+                                {challenge.rewardBTC} BTC
                               </span>
                             </td>
                             <td className="px-5 py-5 text-gray-500">
                               <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
                                 <CalendarDays className="size-4" />
-                                {formatBountyDeadline(bounty.deadline)}
+                                {formatChallengeDeadline(challenge.deadline)}
                               </span>
                             </td>
                             <td className="px-5 py-5 text-gray-500">
                               <span className="inline-flex items-center gap-1.5">
                                 <Users className="size-4" />
-                                Submissions
+                                {challenge.submissions ?? 0}
                               </span>
                             </td>
                           </tr>

@@ -1,14 +1,14 @@
-import type { TBounty } from '../types';
-import type { BountyDocument } from '../../../services/firestore-structure';
+import type { TChallenge } from '../types';
+import type { ChallengeDocument } from '../../../services/firestore-structure';
 
-type BountySource = Partial<BountyDocument> & { id: string | number };
+type ChallengeSource = Partial<ChallengeDocument> & { id: string | number };
 
-export const transformBounty = (doc: BountySource): TBounty => {
+export const transformChallenge = (doc: ChallengeSource): TChallenge => {
   return {
     id: doc.id,
     title: doc.title || '',
     description: doc.description || '',
-    bountyBTC: doc.bountyBTC || 0,
+    rewardBTC: doc.rewardBTC || 0,
     category: doc.category || '',
     difficulty: doc.difficulty || '',
     company: doc.companyName || '',

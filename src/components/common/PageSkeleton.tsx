@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import { Skeleton } from '../ui/skeleton';
 
 export type PageSkeletonVariant =
-  | 'company-bounties'
-  | 'dev-bounties'
+  | 'company-challenges'
+  | 'dev-challenges'
   | 'company-submissions'
   | 'submissions'
   | 'solution'
@@ -112,7 +112,7 @@ function LoadingRegion({
 export function PageSkeleton({ variant }: { variant: PageSkeletonVariant }) {
   if (variant === 'login' || variant === 'signup')
     return (
-      <LoadingRegion className="min-h-screen bg-[#f7f7f5] lg:grid lg:grid-cols-[0.9fr_1.1fr]">
+      <LoadingRegion className="min-h-screen bg-slate-50 lg:grid lg:grid-cols-[0.9fr_1.1fr]">
         <div className="hidden min-h-screen bg-slate-950 px-14 py-12 lg:flex lg:flex-col lg:justify-between">
           <Skeleton className="h-10 w-52 bg-slate-700" />
           <div className="space-y-5">
@@ -137,7 +137,7 @@ export function PageSkeleton({ variant }: { variant: PageSkeletonVariant }) {
 
   if (variant === 'company-submissions' || variant === 'submissions')
     return (
-      <LoadingRegion className="space-y-4">
+      <LoadingRegion className="mx-auto max-w-7xl space-y-4 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <Skeleton className="mb-4 h-8 w-64" />
         {rows.map((i) => (
           <div
@@ -167,12 +167,41 @@ export function PageSkeleton({ variant }: { variant: PageSkeletonVariant }) {
 
   if (variant === 'solution')
     return (
-      <LoadingRegion className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-        <Heading />
-        <div className="mt-4 space-y-6 rounded-lg border bg-white p-8">
-          <Skeleton className="h-20 w-full" />
-          <Fields count={2} />
-          <Skeleton className="h-10 w-40" />
+      <LoadingRegion className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <Skeleton className="h-8 w-40" />
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="space-y-5 border-b border-gray-100 p-6 sm:p-8">
+              <div className="flex gap-2">
+                <Skeleton className="h-6 w-24 rounded-full" />
+                <Skeleton className="h-6 w-20 rounded-full" />
+              </div>
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-10 w-4/5" />
+              </div>
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <div className="space-y-8 p-6 sm:p-8">
+              <div className="space-y-3">
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+            </div>
+          </div>
+          <div className="space-y-6 rounded-xl border border-gray-200 bg-white p-6">
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-48" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+            <Fields count={2} />
+          </div>
         </div>
       </LoadingRegion>
     );
@@ -201,32 +230,50 @@ export function PageSkeleton({ variant }: { variant: PageSkeletonVariant }) {
       </LoadingRegion>
     );
 
-  if (variant === 'dev-bounties')
+  if (variant === 'dev-challenges')
     return (
-      <LoadingRegion className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6 lg:px-8">
-        <Filters />
-        <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-1">
-          {rows.map((i) => (
-            <div
-              key={i}
-              className="space-y-6 rounded-xl border border-l-4 bg-white p-6"
-            >
-              <div className="flex justify-between gap-4">
-                <Skeleton className="h-6 w-2/3" />
-                <Skeleton className="h-7 w-24 rounded-full" />
+      <LoadingRegion className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <div className="space-y-2 border-b border-gray-200 pb-8">
+          <Skeleton className="h-9 w-80 max-w-full" />
+          <Skeleton className="h-4 w-96 max-w-full" />
+        </div>
+
+        <div className="space-y-5">
+          <div className="flex items-end justify-between gap-4">
+            <Skeleton className="h-4 w-28" />
+          </div>
+          <Filters />
+
+          <div className="grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {rows.map((i) => (
+              <div
+                key={i}
+                className="overflow-hidden rounded-xl border border-gray-200 bg-white"
+              >
+                <div className="space-y-3 p-5 pb-0">
+                  <div className="flex justify-between gap-4">
+                    <Skeleton className="h-6 w-24 rounded-full" />
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                  </div>
+                  <Skeleton className="h-6 w-2/3" />
+                </div>
+                <div className="space-y-3 p-5 pt-3">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-4/5" />
+                  </div>
+                  <div className="flex justify-between gap-4 rounded-lg bg-gray-50 px-3 py-2.5">
+                    <Skeleton className="h-9 w-20" />
+                    <Skeleton className="h-9 w-28" />
+                  </div>
+                  <Skeleton className="h-3 w-36" />
+                </div>
+                <div className="border-t border-gray-100 p-4">
+                  <Skeleton className="h-9 w-full" />
+                </div>
               </div>
-              <Skeleton className="h-16 w-full" />
-              <div className="flex justify-between">
-                <Skeleton className="h-5 w-28" />
-                <Skeleton className="h-5 w-28" />
-              </div>
-              <div className="flex justify-between">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-32" />
-              </div>
-              <Skeleton className="ml-auto h-10 w-40" />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </LoadingRegion>
     );
@@ -249,12 +296,14 @@ export function PageSkeleton({ variant }: { variant: PageSkeletonVariant }) {
 
 export function getPageSkeletonVariant(pathname: string): PageSkeletonVariant {
   const path = pathname.replace(/\/$/, '');
-  if (path.startsWith('/submit/')) return 'solution';
+  if (path.startsWith('/challenges/') || path.startsWith('/submit/'))
+    return 'solution';
   if (path === '/login') return 'login';
   if (path === '/sign-up') return 'signup';
   const pages: Record<string, PageSkeletonVariant> = {
-    '/company-bounties': 'company-bounties',
-    '/dev-bounties': 'dev-bounties',
+    '/challenges': 'dev-challenges',
+    '/company-challenges': 'company-challenges',
+    '/dev-challenges': 'dev-challenges',
     '/company-submissions': 'company-submissions',
     '/submissions': 'submissions',
     '/transactions': 'transactions',

@@ -8,12 +8,12 @@ export type SignUpFormValues = LoginFormValues & {
   companyName: string;
   role: UserRole | null;
 };
-export type BountyFormValues = {
+export type ChallengeFormValues = {
   title: string;
   description: string;
   category: string;
   difficulty: string;
-  bountyBTC: number;
+  rewardBTC: number;
   deadline?: Date;
 };
 export type SubmissionFormValues = {
@@ -46,8 +46,8 @@ export function validateSignUp(values: SignUpFormValues) {
   return errors;
 }
 
-export function validateBounty(values: BountyFormValues) {
-  const errors: FormErrors<BountyFormValues> = {};
+export function validateChallenge(values: ChallengeFormValues) {
+  const errors: FormErrors<ChallengeFormValues> = {};
   const title = values.title.trim();
   const description = values.description.trim();
   if (title.length < 3 || title.length > 120)
@@ -58,11 +58,11 @@ export function validateBounty(values: BountyFormValues) {
   if (!values.category) errors.category = 'Select a category.';
   if (!values.difficulty) errors.difficulty = 'Select a difficulty.';
   if (
-    !Number.isFinite(values.bountyBTC) ||
-    values.bountyBTC <= 0 ||
-    values.bountyBTC > 21
+    !Number.isFinite(values.rewardBTC) ||
+    values.rewardBTC <= 0 ||
+    values.rewardBTC > 21
   )
-    errors.bountyBTC = 'Reward must be greater than zero and at most 21 BTC.';
+    errors.rewardBTC = 'Reward must be greater than zero and at most 21 BTC.';
   if (!values.deadline || values.deadline < new Date())
     errors.deadline = 'Select a future deadline.';
   return errors;

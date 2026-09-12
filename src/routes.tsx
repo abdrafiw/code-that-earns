@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { Navigate, createBrowserRouter, redirect } from 'react-router-dom';
 import { BaseLayout } from './layout/BaseLayout';
 import { RouteErrorPage } from './components/common/RouteErrorPage';
 import { NotFoundPage } from './components/common/NotFoundPage';
@@ -46,14 +46,6 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute allowedRoles={['DEVELOPER']} />,
         children: [
           {
-            path: 'dev-bounties',
-            lazy: async () => {
-              const { DevBountiesPage } =
-                await import('./features/bounties/pages/DevBountiesPage');
-              return { Component: DevBountiesPage };
-            },
-          },
-          {
             path: 'submissions',
             lazy: async () => {
               const { DeveloperSubmissionsPage } =
@@ -62,26 +54,23 @@ export const router = createBrowserRouter([
             },
           },
           {
-            path: 'submit/:bountyId',
+            path: 'challenges/:challengeId',
             lazy: async () => {
               const { SubmitSolutionPage } =
                 await import('./features/submissions/pages/SubmitSolutionPage');
               return { Component: SubmitSolutionPage };
             },
           },
+          {
+            path: 'submit/:challengeId',
+            loader: ({ params }) =>
+              redirect(`/challenges/${params.challengeId ?? ''}`),
+          },
         ],
       },
       {
         element: <ProtectedRoute allowedRoles={['COMPANY']} />,
         children: [
-          {
-            path: 'company-bounties',
-            lazy: async () => {
-              const { CompanyBountiesPage } =
-                await import('./features/bounties/pages/CompanyBountiesPage');
-              return { Component: CompanyBountiesPage };
-            },
-          },
           {
             path: 'company-submissions',
             lazy: async () => {
@@ -95,6 +84,22 @@ export const router = createBrowserRouter([
       {
         element: <ProtectedRoute />,
         children: [
+          {
+            path: 'challenges',
+            lazy: async () => {
+              const { ChallengesPage } =
+                await import('./features/challenges/pages/ChallengesPage');
+              return { Component: ChallengesPage };
+            },
+          },
+          {
+            path: 'dev-challenges',
+            element: <Navigate to="/challenges" replace />,
+          },
+          {
+            path: 'company-challenges',
+            element: <Navigate to="/challenges" replace />,
+          },
           {
             path: 'transactions',
             lazy: async () => {

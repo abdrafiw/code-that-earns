@@ -10,8 +10,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "migrate:bounty-search": "tsx scripts/migrateBountySearch.ts",
-    "migrate:bounty-search:apply": "tsx scripts/migrateBountySearch.ts --apply",
+    "migrate:challenges": "tsx scripts/migrateChallenges.ts",
+    "migrate:challenges:apply": "tsx scripts/migrateChallenges.ts --apply",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "preview": "vite preview"

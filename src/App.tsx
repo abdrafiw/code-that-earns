@@ -5,7 +5,7 @@ import { useAppContext } from './hooks/useAppContext';
 import { AppSkeleton } from './components/common/PageSkeleton';
 import { AuthProfileState } from './features/auth/components/AuthProfileState';
 
-function AppContent() {
+const AppContent = () => {
   const { authState, retryAuthProfile } = useAppContext();
 
   if (authState.status === 'loading') {
@@ -36,7 +36,7 @@ function AppContent() {
       <Toaster position="top-right" richColors />
     </div>
   );
-}
+};
 
 function App() {
   return <AppContent />;

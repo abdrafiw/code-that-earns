@@ -1,12 +1,12 @@
-export function normalizeBountyFilter(value: string) {
+export function normalizeChallengeFilter(value: string) {
   return value.toLowerCase().replace(/[-_]+/g, ' ').trim();
 }
 
-export function createBountySearchTerms(...values: string[]) {
+export function createChallengeSearchTerms(...values: string[]) {
   const terms = new Set<string>();
 
   values.forEach((value, valueIndex) => {
-    const normalized = normalizeBountyFilter(value);
+    const normalized = normalizeChallengeFilter(value);
     const searchableValues = [
       ...normalized.split(/\s+/),
       ...(valueIndex === 0 ? [normalized.slice(0, 80)] : []),
@@ -26,7 +26,10 @@ export function createBountySearchTerms(...values: string[]) {
   return Array.from(terms).slice(0, 100);
 }
 
-export function createBountyFilterFacets(category: string, difficulty: string) {
+export function createChallengeFilterFacets(
+  category: string,
+  difficulty: string,
+) {
   return [
     `category:${category}`,
     `difficulty:${difficulty}`,
@@ -34,7 +37,10 @@ export function createBountyFilterFacets(category: string, difficulty: string) {
   ];
 }
 
-export function getBountyFilterFacet(category?: string, difficulty?: string) {
+export function getChallengeFilterFacet(
+  category?: string,
+  difficulty?: string,
+) {
   const hasCategory = Boolean(category && category !== 'all');
   const hasDifficulty = Boolean(difficulty && difficulty !== 'all');
   if (hasCategory && hasDifficulty)
@@ -43,4 +49,4 @@ export function getBountyFilterFacet(category?: string, difficulty?: string) {
   if (hasDifficulty) return `difficulty:${difficulty}`;
   return null;
 }
-export const BOUNTY_SEARCH_SCHEMA_VERSION = 1;
+export const CHALLENGE_SEARCH_SCHEMA_VERSION = 1;

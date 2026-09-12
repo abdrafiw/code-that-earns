@@ -1,25 +1,25 @@
 # CTE — Code That Earns
 
-CTE (Code That Earns) is a role-based web application for connecting companies with developers through paid coding challenges. Companies publish bounties, developers browse and submit solutions through GitHub repository links, and companies can review submissions.
+CTE (Code That Earns) is a role-based web application for connecting companies with developers through paid coding challenges. Companies publish challenges, developers browse and submit solutions through GitHub repository links, and companies can review submissions.
 
-The project currently provides the core bounty, authentication, and submission workflows. Transaction history is read-only in the browser. Payment execution is intentionally unavailable until it can be implemented by a trusted backend.
+The project currently provides the core challenge, authentication, and submission workflows. Transaction history is read-only in the browser. Payment execution is intentionally unavailable until it can be implemented by a trusted backend.
 
 ## Features
 
 ### Developers
 
 - Create an account as a developer and sign in with email and password.
-- Browse open bounties with pagination.
-- View a bounty and submit a GitHub repository URL.
+- Browse open challenges with pagination.
+- View a challenge and submit a GitHub repository URL.
 - Provide a Bitcoin address/hash with a submission.
 - Review personal submission history.
 
 ### Companies
 
 - Create an account as a company and sign in with email and password.
-- Create bounties with a title, description, category, difficulty, BTC amount, and deadline.
-- View bounties created by the company.
-- Review submissions associated with company bounties.
+- Create challenges with a title, description, category, difficulty, BTC amount, and deadline.
+- View challenges created by the company.
+- Review submissions associated with company challenges.
 
 ### Shared
 
@@ -90,62 +90,74 @@ The project currently provides the core bounty, authentication, and submission w
 
 ## Available scripts
 
-| Command                             | Description                                       |
-| ----------------------------------- | ------------------------------------------------- |
-| npm run dev                         | Start the Vite development server                 |
-| npm run build                       | Type-check and create a production build in dist/ |
-| npm run preview                     | Preview the production build locally              |
-| npm run lint                        | Run ESLint                                        |
-| npm test                            | Run the Jest test suite                           |
-| npm run test:watch                  | Run Jest in watch mode                            |
-| npm run test:coverage               | Generate Jest coverage output                     |
-| npm run migrate:bounty-search       | Preview the legacy bounty search migration        |
-| npm run migrate:bounty-search:apply | Apply the legacy bounty search migration          |
-| npm run format                      | Format source files with Prettier                 |
-| npm run format:check                | Check formatting without changing files           |
+| Command                          | Description                                       |
+| -------------------------------- | ------------------------------------------------- |
+| npm run dev                      | Start the Vite development server                 |
+| npm run build                    | Type-check and create a production build in dist/ |
+| npm run preview                  | Preview the production build locally              |
+| npm run lint                     | Run ESLint                                        |
+| npm test                         | Run the Jest test suite                           |
+| npm run test:watch               | Run Jest in watch mode                            |
+| npm run test:coverage            | Generate Jest coverage output                     |
+| npm run migrate:challenges       | Preview the legacy challenge data migration       |
+| npm run migrate:challenges:apply | Apply the legacy challenge data migration         |
+| npm run format                   | Format source files with Prettier                 |
+| npm run format:check             | Check formatting without changing files           |
 
 ## Application routes
 
-| Route                | Purpose                                                 |
-| -------------------- | ------------------------------------------------------- |
-| /                    | Home page                                               |
-| /login               | Sign in                                                 |
-| /sign-up             | Create a developer or company account                   |
-| /dev-bounties        | Browse bounties as a developer                          |
-| /company-bounties    | View company bounties and open the create-bounty dialog |
-| /submit/:bountyId    | Submit a solution for a bounty                          |
-| /submissions         | View developer submissions                              |
-| /company-submissions | View submissions for company bounties                   |
-| /transactions        | View authenticated, read-only transaction history       |
+| Route                    | Purpose                                                     |
+| ------------------------ | ----------------------------------------------------------- |
+| /                        | Home page                                                   |
+| /login                   | Sign in                                                     |
+| /sign-up                 | Create a developer or company account                       |
+| /challenges              | Role-aware challenge marketplace or company management page |
+| /challenges/:challengeId | View challenge details and submit a solution                |
+| /submissions             | View developer submissions                                  |
+| /company-submissions     | View submissions for company challenges                     |
+| /transactions            | View authenticated, read-only transaction history           |
 
 ## Firestore
 
 The application uses these collections:
 
 - users: Firebase user profile, role, email, developer name or company name, and timestamps.
-- bounties: title, description, category, difficulty, BTC amount, deadline, company name/UID, and timestamps.
-- submissions: bounty ID, GitHub URL, Bitcoin address/hash, developer UID, and creation timestamp.
+- challenges: title, description, category, difficulty, BTC amount, deadline, company name/UID, and timestamps.
+- submissions: challenge ID, GitHub URL, Bitcoin address/hash, developer UID, and creation timestamp.
 - transactions: reserved for transaction records; the current transactions page uses local sample data instead.
 
-The deployed rules are in firestore.rules. Authenticated users can read user profiles and bounties. Companies can create, update, and delete their own bounties; developers can create submissions; and submission access is limited to the submitting developer or the company that owns the related bounty.
+The deployed rules are in firestore.rules. Authenticated users can read user profiles and challenges. Companies can create, update, and delete their own challenges; developers can create submissions; and submission access is limited to the submitting developer or the company that owns the related challenge.
 
 Keep role values consistent with the application’s uppercase values: DEVELOPER and COMPANY.
 
-### Legacy bounty search migration
+### Legacy challenge migration
 
-Older bounty documents must be backfilled before they appear in company search
-and combined filter queries. Authenticate with Application Default Credentials,
-preview the migration, and only then apply it:
+The application now stores challenges in the `challenges` collection. Existing
+documents in the legacy collection and their submission/transaction references
+must be migrated before deploying the renamed application. Authenticate with
+Application Default Credentials, preview the migration, and only then apply it:
 
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service-account.json
-npm run migrate:bounty-search -- --project=code-bounty-6e6b3
-npm run migrate:bounty-search:apply -- --project=code-bounty-6e6b3
+npm run migrate:challenges -- --project=code-bounty-6e6b3
+npm run migrate:challenges:apply -- --project=code-bounty-6e6b3
 ```
 
-The migration is idempotent, paginates through the collection, skips malformed
-records, limits each batch to 400 writes, and stamps records with the current
-search schema version.
+The migration is idempotent, paginates through each collection, copies legacy
+challenge documents with their existing IDs, adds renamed reference fields, and
+stamps challenges with the current search schema version. It does not delete
+legacy collections or fields, which remain available for rollback during the
+transition.
+
+After applying and verifying the migration, deploy the renamed rules and indexes
+before deploying the application:
+
+```bash
+firebase deploy --only firestore:rules,firestore:indexes --project=code-bounty-6e6b3
+```
+
+If the CLI asks whether to delete legacy indexes, answer `N` while the recovery
+collection is retained. Wait for all new challenge indexes to become enabled.
 
 ## Project structure
 
@@ -156,7 +168,7 @@ src/
 ├── context/             Application context
 ├── features/            Feature-specific pages, components, hooks, types, and utilities
 │   ├── auth/             Login and sign-up
-│   ├── bounties/         Bounty browsing and creation
+│   ├── challenges/         Challenge browsing and creation
 │   ├── home/             Home page
 │   ├── submissions/      Submission and review workflows
 │   └── transactions/     Transaction-history UI and utilities

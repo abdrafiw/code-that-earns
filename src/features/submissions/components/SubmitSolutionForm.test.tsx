@@ -2,7 +2,6 @@ import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { MemoryRouter } from 'react-router-dom';
 import { SubmitSolutionForm } from './SubmitSolutionForm';
-import type { TBounty } from '../../bounties/types';
 import userEvent from '@testing-library/user-event';
 
 import { toast } from 'sonner';
@@ -18,16 +17,6 @@ jest.mock('sonner', () => ({
   },
 }));
 
-const mockBounty = {
-  id: '1',
-  title: 'build a react dashboard',
-  bountyBTC: 0.1,
-  deadline: new Date().toISOString(),
-  description: 'Test Bounty Description',
-  category: 'Test Category',
-  difficulty: 'Easy',
-} as TBounty;
-
 jest.mock('../hooks/useSubmissions', () => ({
   useSubmitSolution: jest.fn(() => ({
     mutate: mockMutate,
@@ -38,7 +27,7 @@ jest.mock('../hooks/useSubmissions', () => ({
 const RenderSubmitSolutionForm = () => {
   return render(
     <MemoryRouter>
-      <SubmitSolutionForm bounty={mockBounty} bountyID="1" />
+      <SubmitSolutionForm challengeID="1" />
     </MemoryRouter>,
   );
 };
@@ -48,22 +37,20 @@ describe('SubmitSolutionForm', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the bounty info and form fields', () => {
+  it('renders the submission form fields and actions', () => {
     RenderSubmitSolutionForm();
 
-    // heading
     expect(
       screen.getByRole('heading', {
-        name: /challenge: build a react dashboard/i,
+        name: /submit your solution/i,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/bounty: 0.1 btc/i)).toBeInTheDocument();
 
-    // fields
-    expect(screen.getByLabelText(/gitHub repository URL/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/submit hash/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/github repository/i)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/bitcoin payout address/i),
+    ).toBeInTheDocument();
 
-    // actions
     expect(
       screen.getByRole('button', {
         name: /submit solution/i,
@@ -72,7 +59,7 @@ describe('SubmitSolutionForm', () => {
 
     expect(
       screen.getByRole('button', {
-        name: /back to bounties/i,
+        name: /cancel/i,
       }),
     ).toBeInTheDocument();
   });
@@ -98,8 +85,8 @@ describe('SubmitSolutionForm', () => {
   it('shows backend errors and retains entered values', async () => {
     RenderSubmitSolutionForm();
     const user = userEvent.setup();
-    const githubInput = screen.getByLabelText(/github repository url/i);
-    const addressInput = screen.getByLabelText(/submit hash/i);
+    const githubInput = screen.getByLabelText(/github repository/i);
+    const addressInput = screen.getByLabelText(/bitcoin payout address/i);
 
     await user.type(githubInput, 'https://github.com/user/repository');
     await user.type(addressInput, '1BoatSLRHtKNngkdXEeobR76b53LETtpyT');
@@ -122,11 +109,11 @@ describe('SubmitSolutionForm', () => {
     const user = userEvent.setup();
 
     await user.type(
-      screen.getByLabelText(/github repository url/i),
+      screen.getByLabelText(/github repository/i),
       'https://github.com/user/repository',
     );
     await user.type(
-      screen.getByLabelText(/submit hash/i),
+      screen.getByLabelText(/bitcoin payout address/i),
       '1BoatSLRHtKNngkdXEeobR76b53LETtpyT',
     );
     await user.click(screen.getByRole('button', { name: /submit solution/i }));

@@ -35,7 +35,7 @@
       ]
     },
     {
-      "collectionGroup": "bounties",
+      "collectionGroup": "challenges",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "companyUid", "order": "ASCENDING" },
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "collectionGroup": "bounties",
+      "collectionGroup": "challenges",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "companyUid", "order": "ASCENDING" },
@@ -53,7 +53,7 @@
       ]
     },
     {
-      "collectionGroup": "bounties",
+      "collectionGroup": "challenges",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "companyUid", "order": "ASCENDING" },
@@ -61,7 +61,15 @@
       ]
     },
     {
-      "collectionGroup": "bounties",
+      "collectionGroup": "challenges",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "companyUid", "order": "ASCENDING" },
+        { "fieldPath": "rewardBTC", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "challenges",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "filterFacets", "arrayConfig": "CONTAINS" },
@@ -69,6 +77,14 @@
       ]
     },
     {
+      "collectionGroup": "challenges",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "searchTerms", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "submissions",
       "queryScope": "COLLECTION",
       "fields": [
@@ -81,7 +97,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "developerUid", "order": "ASCENDING" },
-        { "fieldPath": "bountyId", "order": "ASCENDING" }
+        { "fieldPath": "challengeId", "order": "ASCENDING" }
       ]
     },
     {

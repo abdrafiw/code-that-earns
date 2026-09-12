@@ -52,15 +52,10 @@ function renderRoutes(authState: AuthState, initialPath: string) {
           </Route>
           <Route element={<ProtectedRoute />}>
             <Route path="/transactions" element={<p>Transactions page</p>} />
-          </Route>
-          <Route element={<ProtectedRoute allowedRoles={['DEVELOPER']} />}>
-            <Route path="/dev-bounties" element={<p>Developer dashboard</p>} />
+            <Route path="/challenges" element={<p>Challenges page</p>} />
           </Route>
           <Route element={<ProtectedRoute allowedRoles={['COMPANY']} />}>
-            <Route
-              path="/company-bounties"
-              element={<p>Company dashboard</p>}
-            />
+            <Route path="/company-only" element={<p>Company dashboard</p>} />
           </Route>
         </Routes>
       </MemoryRouter>
@@ -76,13 +71,13 @@ describe('route guards', () => {
   });
 
   it('redirects users away from routes for another role', () => {
-    renderRoutes(developerState, '/company-bounties');
+    renderRoutes(developerState, '/company-only');
 
-    expect(screen.getByText('Developer dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Challenges page')).toBeInTheDocument();
   });
 
   it('renders routes allowed for the authenticated role', () => {
-    renderRoutes(companyState, '/company-bounties');
+    renderRoutes(companyState, '/company-only');
 
     expect(screen.getByText('Company dashboard')).toBeInTheDocument();
   });
@@ -90,6 +85,6 @@ describe('route guards', () => {
   it('redirects authenticated users away from guest-only routes', () => {
     renderRoutes(companyState, '/login');
 
-    expect(screen.getByText('Company dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Challenges page')).toBeInTheDocument();
   });
 });

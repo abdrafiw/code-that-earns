@@ -35,9 +35,9 @@ service cloud.firestore {
             .hasOnly(['companyName', 'updatedAt']));
     }
 
-    function hasValidBountyFields(data) {
+    function hasValidChallengeFields(data) {
       return data.keys().hasOnly([
-          'title', 'description', 'category', 'difficulty', 'bountyBTC',
+          'title', 'description', 'category', 'difficulty', 'rewardBTC',
           'deadline', 'searchTerms', 'searchSchemaVersion', 'filterFacets',
           'companyName', 'companyUid', 'createdAt', 'updatedAt'
         ])
@@ -49,9 +49,9 @@ service cloud.firestore {
         && data.description.size() <= 5000
         && data.category in ['Coding', 'Data Analysis', 'Blockchain']
         && data.difficulty in ['Beginner', 'Intermediate', 'Advanced']
-        && data.bountyBTC is number
-        && data.bountyBTC > 0
-        && data.bountyBTC <= 21
+        && data.rewardBTC is number
+        && data.rewardBTC > 0
+        && data.rewardBTC <= 21
         && data.searchTerms is list
         && data.searchTerms.size() <= 100
         && data.searchSchemaVersion == 1
@@ -69,20 +69,20 @@ service cloud.firestore {
     }
 
     function hasValidSubmissionFields(submissionId, data) {
-      let bounty = get(/databases/$(database)/documents/bounties/$(data.bountyId)).data;
+      let challenge = get(/databases/$(database)/documents/challenges/$(data.challengeId)).data;
       let developer = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-      return submissionId == data.bountyId + '_' + request.auth.uid
+      return submissionId == data.challengeId + '_' + request.auth.uid
         && data.keys().hasOnly([
-          'bountyId', 'companyUid', 'bountyTitle', 'bountyDescription',
-          'bountyRewardBTC', 'githubUrl', 'bitcoinAddress', 'developerUid',
+          'challengeId', 'companyUid', 'challengeTitle', 'challengeDescription',
+          'challengeRewardBTC', 'githubUrl', 'bitcoinAddress', 'developerUid',
           'developerName', 'developerEmail', 'status', 'createdAt'
         ])
-        && data.bountyId is string
+        && data.challengeId is string
         && data.developerUid == request.auth.uid
-        && data.companyUid == bounty.companyUid
-        && data.bountyTitle == bounty.title
-        && data.bountyDescription == bounty.description
-        && data.bountyRewardBTC == bounty.bountyBTC
+        && data.companyUid == challenge.companyUid
+        && data.challengeTitle == challenge.title
+        && data.challengeDescription == challenge.description
+        && data.challengeRewardBTC == challenge.rewardBTC
         && data.developerName == developer.name
         && data.developerEmail == developer.email
         && data.githubUrl is string
@@ -91,8 +91,8 @@ service cloud.firestore {
         && data.bitcoinAddress.matches('^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}$')
         && data.status == 'submitted'
         && data.createdAt == request.time
-        && bounty.deadline > request.time
-        && (!bounty.keys().hasAny(['status']) || bounty.status == 'open');
+        && challenge.deadline > request.time
+        && (!challenge.keys().hasAny(['status']) || challenge.status == 'open');
     }
 
     function hasValidSubmissionStatusTransition(currentStatus, nextStatus) {
@@ -142,27 +142,27 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time;
     }
     
-    // Bounties collection
-    match /bounties/{bountyId} {
-      // Anyone authenticated can read bounties
+    // Challenges collection
+    match /challenges/{challengeId} {
+      // Anyone authenticated can read challenges
       allow read: if isAuthenticated();
       
-      // Only companies can create bounties
+      // Only companies can create challenges
       allow create: if isAuthenticated() 
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'COMPANY'
         && request.resource.data.companyUid == request.auth.uid
         && request.resource.data.companyName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyName
-        && hasValidBountyFields(request.resource.data);
+        && hasValidChallengeFields(request.resource.data);
       
-      // Only the creator can update their own bounties
+      // Only the creator can update their own challenges
       allow update: if isAuthenticated() 
         && resource.data.companyUid == request.auth.uid
         && request.resource.data.companyUid == resource.data.companyUid
         && request.resource.data.companyName == resource.data.companyName
         && request.resource.data.createdAt == resource.data.createdAt;
       
-      // Only the creator can delete their own bounties
+      // Only the creator can delete their own challenges
       allow delete: if isAuthenticated() 
         && resource.data.companyUid == request.auth.uid;
     }
@@ -173,20 +173,20 @@ service cloud.firestore {
       allow read: if isAuthenticated() 
         && (resource.data.developerUid == request.auth.uid 
             || resource.data.companyUid == request.auth.uid
-            || exists(/databases/$(database)/documents/bounties/$(resource.data.bountyId))
-            && get(/databases/$(database)/documents/bounties/$(resource.data.bountyId)).data.companyUid == request.auth.uid);
+            || exists(/databases/$(database)/documents/challenges/$(resource.data.challengeId))
+            && get(/databases/$(database)/documents/challenges/$(resource.data.challengeId)).data.companyUid == request.auth.uid);
       
       // Only developers can create submissions
       allow create: if isAuthenticated() 
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'DEVELOPER'
-        && exists(/databases/$(database)/documents/bounties/$(request.resource.data.bountyId))
+        && exists(/databases/$(database)/documents/challenges/$(request.resource.data.challengeId))
         && hasValidSubmissionFields(submissionId, request.resource.data);
       
-      // Companies can update submissions for their bounties
+      // Companies can update submissions for their challenges
       allow update: if isAuthenticated() 
-        && exists(/databases/$(database)/documents/bounties/$(resource.data.bountyId))
-        && get(/databases/$(database)/documents/bounties/$(resource.data.bountyId)).data.companyUid == request.auth.uid
+        && exists(/databases/$(database)/documents/challenges/$(resource.data.challengeId))
+        && get(/databases/$(database)/documents/challenges/$(resource.data.challengeId)).data.companyUid == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['status', 'reviewNotes', 'reviewedAt', 'score'])
         && hasValidSubmissionStatusTransition(

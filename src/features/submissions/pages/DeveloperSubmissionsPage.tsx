@@ -11,24 +11,28 @@ export function DeveloperSubmissionsPage() {
   if (submissionsQuery.isPending) return <PageSkeleton variant="submissions" />;
   if (submissionsQuery.error)
     return (
-      <PageErrorState
-        message={getErrorMessage(submissionsQuery.error)}
-        onRetry={() => void submissionsQuery.refetch()}
-        isRetrying={submissionsQuery.isFetching}
-      />
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <PageErrorState
+          message={getErrorMessage(submissionsQuery.error)}
+          onRetry={() => void submissionsQuery.refetch()}
+          isRetrying={submissionsQuery.isFetching}
+        />
+      </div>
     );
   if (submissions.length === 0)
     return (
-      <PageEmptyState
-        title="No submissions found"
-        description="You haven't submitted any solutions yet."
-        actionHref="/dev-bounties"
-        actionLabel="Browse bounties"
-      />
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <PageEmptyState
+          title="No submissions found"
+          description="You haven't submitted any solutions yet."
+          actionHref="/challenges"
+          actionLabel="Browse challenges"
+        />
+      </div>
     );
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-7xl space-y-4 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <h2 className="text-2xl font-bold text-gray-900">My Submissions</h2>
 
       <ul className="space-y-4">
@@ -44,7 +48,7 @@ export function DeveloperSubmissionsPage() {
                     Submission ID: {submission.id}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Bounty ID: {submission.bountyId}
+                    Challenge ID: {submission.challengeId}
                   </p>
                 </div>
 

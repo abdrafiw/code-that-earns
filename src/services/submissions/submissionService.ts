@@ -17,7 +17,7 @@ import {
 
 import { auth, db } from '../../config/firebase';
 import {
-  bountyConverter,
+  challengeConverter,
   COLLECTIONS,
   submissionConverter,
   userConverter,
@@ -36,17 +36,17 @@ class SubmissionService {
   async submitSolution({
     githubUrl,
     bitcoinAddress,
-    bountyID,
+    challengeID,
   }: SubmitSolutionPayload): Promise<void> {
     const user = auth.currentUser;
     if (!user) throw new Error('User not authenticated');
 
     try {
-      const [bountySnapshot, developerSnapshot, existingSubmissions] =
+      const [challengeSnapshot, developerSnapshot, existingSubmissions] =
         await Promise.all([
           getDoc(
-            doc(db, COLLECTIONS.BOUNTIES, bountyID).withConverter(
-              bountyConverter,
+            doc(db, COLLECTIONS.CHALLENGES, challengeID).withConverter(
+              challengeConverter,
             ),
           ),
           getDoc(
@@ -58,14 +58,14 @@ class SubmissionService {
                 submissionConverter,
               ),
               where('developerUid', '==', user.uid),
-              where('bountyId', '==', bountyID),
+              where('challengeId', '==', challengeID),
               limit(1),
             ),
           ),
         ]);
 
-      if (!bountySnapshot.exists()) {
-        throw new Error('Bounty not found');
+      if (!challengeSnapshot.exists()) {
+        throw new Error('Challenge not found');
       }
 
       if (!developerSnapshot.exists()) {
@@ -74,11 +74,11 @@ class SubmissionService {
 
       if (!existingSubmissions.empty) {
         throw new Error(
-          'You have already submitted a solution for this bounty.',
+          'You have already submitted a solution for this challenge.',
         );
       }
 
-      const bounty = bountySnapshot.data();
+      const challenge = challengeSnapshot.data();
       const developer = developerSnapshot.data();
 
       if (developer.role !== 'DEVELOPER') {
@@ -90,11 +90,11 @@ class SubmissionService {
       }
 
       const submissionData = {
-        bountyId: bountyID,
-        companyUid: bounty.companyUid,
-        bountyTitle: bounty.title ?? null,
-        bountyDescription: bounty.description ?? null,
-        bountyRewardBTC: bounty.bountyBTC ?? null,
+        challengeId: challengeID,
+        companyUid: challenge.companyUid,
+        challengeTitle: challenge.title ?? null,
+        challengeDescription: challenge.description ?? null,
+        challengeRewardBTC: challenge.rewardBTC ?? null,
         githubUrl,
         bitcoinAddress,
         developerUid: user.uid,
@@ -104,7 +104,7 @@ class SubmissionService {
         createdAt: serverTimestamp(),
       };
 
-      const submissionId = `${bountyID}_${user.uid}`;
+      const submissionId = `${challengeID}_${user.uid}`;
       await setDoc(
         doc(db, COLLECTIONS.SUBMISSIONS, submissionId).withConverter(
           submissionConverter,

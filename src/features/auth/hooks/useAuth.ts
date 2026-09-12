@@ -44,10 +44,8 @@ export const useLogin = () => {
         return;
       }
 
-      if (data.role === 'COMPANY') {
-        navigate('/company-bounties', { replace: true });
-      } else if (data.role === 'DEVELOPER') {
-        navigate('/dev-bounties', { replace: true });
+      if (data.role === 'COMPANY' || data.role === 'DEVELOPER') {
+        navigate('/challenges', { replace: true });
       } else {
         navigate('/', { replace: true });
       }
@@ -68,14 +66,10 @@ export const useSignUp = () => {
 
   return useMutation({
     mutationFn: signUp,
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success('Signup successful');
 
-      if (data.role === 'COMPANY') {
-        navigate('/company-bounties');
-      } else {
-        navigate('/dev-bounties');
-      }
+      navigate('/challenges');
     },
     onError: (error: Error) => {
       toast.error(getErrorMessage(error));

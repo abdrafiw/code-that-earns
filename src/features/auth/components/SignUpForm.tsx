@@ -236,7 +236,7 @@ export const SignUpForm = () => {
 
       <Button
         type="submit"
-        className="h-11 w-full bg-orange-600 font-semibold hover:bg-orange-700"
+        className="h-11 w-full bg-indigo-500 font-semibold hover:bg-indigo-600"
         size="lg"
         disabled={signUpMutation.isPending}
       >
@@ -247,7 +247,7 @@ export const SignUpForm = () => {
         <p className="text-slate-500">Already have an account?</p>
         <Link
           to="/login"
-          className="font-semibold text-orange-600 hover:text-orange-700"
+          className="font-semibold text-indigo-500 hover:text-indigo-600"
         >
           Sign in
         </Link>

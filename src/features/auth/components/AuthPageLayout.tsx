@@ -24,18 +24,18 @@ export function AuthPageLayout({
   wide = false,
 }: AuthPageLayoutProps) {
   return (
-    <main className="auth-page min-h-screen bg-[#f7f7f5] lg:grid lg:grid-cols-[0.9fr_1.1fr]">
+    <main className="auth-page min-h-screen bg-slate-50 lg:grid lg:grid-cols-[0.9fr_1.1fr]">
       <section className="relative hidden overflow-hidden bg-slate-950 px-6 py-8 text-white sm:px-10 lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:px-14 lg:py-12">
         <div
           aria-hidden="true"
-          className="absolute -right-16 -bottom-20 size-64 rounded-full border-[38px] border-orange-500/10"
+          className="absolute -right-16 -bottom-20 size-64 rounded-full border-[38px] border-indigo-500/10"
         />
 
         <Link
           to="/"
           className="relative inline-flex items-center gap-3 text-base font-semibold"
         >
-          <span className="flex size-10 items-center justify-center rounded-xl bg-orange-500">
+          <span className="flex size-10 items-center justify-center rounded-xl bg-indigo-500">
             <Code2 className="size-5" />
           </span>
           <span>
@@ -47,7 +47,7 @@ export function AuthPageLayout({
         </Link>
 
         <div className="relative mt-14 max-w-lg lg:my-auto">
-          <p className="text-sm font-semibold text-orange-400">
+          <p className="text-sm font-semibold text-indigo-400">
             Build. Submit. Earn.
           </p>
           <h1 className="mt-4 text-4xl leading-tight font-semibold tracking-[-0.04em] sm:text-5xl">
@@ -76,7 +76,7 @@ export function AuthPageLayout({
             Secure Firebase authentication
           </span>
           <span className="inline-flex items-center gap-2">
-            <Bitcoin className="size-4 text-orange-400" />
+            <Bitcoin className="size-4 text-emerald-400" />
             BTC rewards
           </span>
         </div>
@@ -98,7 +98,7 @@ export function AuthPageLayout({
               aria-label="CTE home"
               className="inline-flex items-center gap-2 font-semibold text-slate-950 lg:hidden"
             >
-              <span className="flex size-8 items-center justify-center rounded-lg bg-orange-600 text-white">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-indigo-500 text-white">
                 <Code2 className="size-4" />
               </span>
               CTE
@@ -107,7 +107,7 @@ export function AuthPageLayout({
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] sm:p-8 sm:shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
             <header>
-              <p className="text-sm font-semibold text-orange-600">{eyebrow}</p>
+              <p className="text-sm font-semibold text-indigo-500">{eyebrow}</p>
               <h2 className="mt-1.5 text-2xl font-semibold tracking-[-0.035em] text-slate-950 sm:mt-2 sm:text-3xl">
                 {title}
               </h2>
