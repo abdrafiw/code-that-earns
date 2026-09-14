@@ -41,6 +41,7 @@ import { useTypedForm } from '../../../hooks/useTypedForm';
 import { FormErrorSummary } from '../../../components/common/FormErrorSummary';
 import { ChallengeOutcomeFields } from './ChallengeOutcomeFields';
 import { parseMoneyToMinorUnits } from '../utils/formatOutcome';
+import { CHALLENGE_CATEGORIES } from '../constants';
 
 import {
   hasFormErrors,
@@ -210,9 +211,11 @@ export const CreateChallengeDialog = () => {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Coding">Coding</SelectItem>
-                  <SelectItem value="Data Analysis">Data Analysis</SelectItem>
-                  <SelectItem value="Blockchain">Blockchain</SelectItem>
+                  {CHALLENGE_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

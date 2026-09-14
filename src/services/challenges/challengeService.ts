@@ -22,6 +22,7 @@ import { auth, db, functions } from '../../config/firebase';
 import { challengeConverter, COLLECTIONS } from '../firestore-structure';
 
 import type { CreateChallengePayload } from '../../features/challenges/types';
+import { CHALLENGE_CATEGORIES } from '../../features/challenges/constants';
 
 import {
   getChallengeFilterFacet,
@@ -55,7 +56,7 @@ class ChallengeService {
         challengeCollection,
         where('companyUid', '==', companyUid),
       );
-      const categories = ['Coding', 'Data Analysis', 'Blockchain'] as const;
+      const categories = CHALLENGE_CATEGORIES;
 
       const [totals, ...categoryCounts] = await Promise.all([
         getAggregateFromServer(companyQuery, {

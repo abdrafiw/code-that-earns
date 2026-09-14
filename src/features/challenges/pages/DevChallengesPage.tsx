@@ -9,6 +9,7 @@ import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import { normalizeChallengeFilter } from '../utils/challengeFilters';
+import { CHALLENGE_CATEGORIES } from '../constants';
 
 import {
   Select,
@@ -128,9 +129,11 @@ export const DevChallengesPage = () => {
 
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="Coding">Coding</SelectItem>
-                  <SelectItem value="Data Analysis">Data Analysis</SelectItem>
-                  <SelectItem value="Blockchain">Blockchain</SelectItem>
+                  {CHALLENGE_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 

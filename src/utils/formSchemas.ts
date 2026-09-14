@@ -5,6 +5,8 @@ import {
   isSupportedCurrency,
   parseMoneyToMinorUnits,
 } from '../features/challenges/utils/formatOutcome';
+import { isDesignChallenge } from '../features/challenges/constants';
+import { isValidSubmissionUrl } from './submissionUrl';
 
 export type LoginFormValues = { email: string; password: string };
 export type SignUpFormValues = LoginFormValues & {
@@ -113,23 +115,15 @@ export function validateChallenge(values: ChallengeFormValues) {
   return errors;
 }
 
-export function validateSubmission(values: SubmissionFormValues) {
+export function validateSubmission(
+  values: SubmissionFormValues,
+  category?: string,
+) {
   const errors: FormErrors<SubmissionFormValues> = {};
-  try {
-    const value = values.githubUrl.trim();
-    const url = new URL(value);
-    const pathParts = url.pathname.split('/').filter(Boolean);
-    if (
-      value.length > 2048 ||
-      url.protocol !== 'https:' ||
-      url.hostname !== 'github.com' ||
-      pathParts.length !== 2 ||
-      Boolean(url.search || url.hash)
-    )
-      throw Error();
-  } catch {
-    errors.githubUrl = 'Enter a valid HTTPS GitHub repository URL.';
-  }
+  if (!isValidSubmissionUrl(values.githubUrl, category))
+    errors.githubUrl = isDesignChallenge(category)
+      ? 'Enter a valid Figma, Behance, or Dribbble project URL.'
+      : 'Enter a valid HTTPS GitHub repository URL.';
   if (values.liveDemoUrl.trim()) {
     try {
       const value = values.liveDemoUrl.trim();

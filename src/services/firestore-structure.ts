@@ -5,6 +5,7 @@ import {
   type WithFieldValue,
 } from 'firebase/firestore';
 import { z } from 'zod';
+import { isSupportedStoredSubmissionUrl } from '../utils/submissionUrl';
 
 export const COLLECTIONS = {
   USERS: 'users',
@@ -126,16 +127,10 @@ export const submissionDocumentSchema = z.object({
     .string()
     .max(2048)
     .url()
-    .refine((value) => {
-      const url = new URL(value);
-      return (
-        url.protocol === 'https:' &&
-        url.hostname === 'github.com' &&
-        url.pathname.split('/').filter(Boolean).length === 2 &&
-        !url.search &&
-        !url.hash
-      );
-    }, 'Expected an HTTPS GitHub repository URL'),
+    .refine(
+      isSupportedStoredSubmissionUrl,
+      'Expected a supported HTTPS submission URL',
+    ),
   liveDemoUrl: z
     .string()
     .max(2048)

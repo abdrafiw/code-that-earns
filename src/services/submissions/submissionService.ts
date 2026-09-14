@@ -28,6 +28,8 @@ import {
 import { getErrorMessage } from '../../utils/getErrorMessage';
 import type { SubmitSolutionPayload } from '../../features/submissions/types';
 import type { SubmissionDocument } from '../firestore-structure';
+import { isDesignChallenge } from '../../features/challenges/constants';
+import { isValidSubmissionUrl } from '../../utils/submissionUrl';
 
 export type CompanySubmissionPage = {
   submissions: Array<{ id: string } & SubmissionDocument>;
@@ -128,6 +130,14 @@ class SubmissionService {
 
       if (!developer.name?.trim() || !developer.email?.trim()) {
         throw new Error('Complete your developer profile before submitting.');
+      }
+
+      if (!isValidSubmissionUrl(githubUrl, challenge.category)) {
+        throw new Error(
+          isDesignChallenge(challenge.category)
+            ? 'Submit a valid Figma, Behance, or Dribbble project URL.'
+            : 'Submit a valid HTTPS GitHub repository URL.',
+        );
       }
 
       const submissionData = {

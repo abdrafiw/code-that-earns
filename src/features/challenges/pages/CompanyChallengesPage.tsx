@@ -26,6 +26,7 @@ import {
 } from '../hooks/useChallenges';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import { formatOutcome } from '../utils/formatOutcome';
+import { CHALLENGE_CATEGORIES } from '../constants';
 
 const difficultyStyles: Record<string, string> = {
   beginner: 'bg-green-50 text-green-700',
@@ -155,9 +156,11 @@ export const CompanyChallengesPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All categories</SelectItem>
-                    <SelectItem value="Coding">Coding</SelectItem>
-                    <SelectItem value="Data Analysis">Data Analysis</SelectItem>
-                    <SelectItem value="Blockchain">Blockchain</SelectItem>
+                    {CHALLENGE_CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
