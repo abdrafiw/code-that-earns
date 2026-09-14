@@ -216,7 +216,7 @@ Acceptance criteria:
 - Non-winners are rejected when results are finalized.
 - A company cannot select a submission from another challenge.
 
-### MVP-010 — Announce results and close the workflow
+### [x] MVP-010 — Announce results and close the workflow
 
 - Show results on the completed challenge page.
 - Display consenting winners by display name; otherwise show `Private winner`.

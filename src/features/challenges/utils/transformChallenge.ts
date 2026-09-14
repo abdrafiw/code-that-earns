@@ -18,5 +18,6 @@ export const transformChallenge = (doc: ChallengeSource): TChallenge => {
     submissions: doc.submissions || 0,
     deadline: doc.deadline || '',
     status: doc.status || 'open',
+    results: doc.results,
   };
 };
