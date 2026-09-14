@@ -99,8 +99,8 @@ The project currently provides the core challenge, authentication, and submissio
 | npm test                         | Run the Jest test suite                           |
 | npm run test:watch               | Run Jest in watch mode                            |
 | npm run test:coverage            | Generate Jest coverage output                     |
-| npm run test:rules               | Test Firestore rules against the local emulator    |
-| npm run test:backend             | Test backend transactions against the emulator     |
+| npm run test:rules               | Test Firestore rules against the local emulator   |
+| npm run test:backend             | Test backend transactions against the emulator    |
 | npm run migrate:challenges       | Preview the legacy challenge data migration       |
 | npm run migrate:challenges:apply | Apply the legacy challenge data migration         |
 | npm run format                   | Format source files with Prettier                 |
@@ -144,6 +144,9 @@ The deployed rules are in firestore.rules. Authenticated users can read user pro
 Keep role values consistent with the application’s uppercase values: DEVELOPER and COMPANY.
 
 ### Legacy challenge migration
+
+Follow [`migration-runbook.md`](migration-runbook.md) for backup, dry-run,
+verification, and rollback requirements.
 
 The application now stores challenges in the `challenges` collection. Existing
 documents in the legacy collection and their submission/transaction references

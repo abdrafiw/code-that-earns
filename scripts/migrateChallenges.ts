@@ -1,216 +1,211 @@
 import { applicationDefault, getApps, initializeApp } from 'firebase-admin/app';
-import { FieldPath, Timestamp, getFirestore } from 'firebase-admin/firestore';
-
 import {
-  CHALLENGE_SEARCH_SCHEMA_VERSION,
-  createChallengeFilterFacets,
-  createChallengeSearchTerms,
-} from '../src/features/challenges/utils/challengeFilters';
+  FieldPath,
+  getFirestore,
+  type DocumentData,
+  type Firestore,
+  type QueryDocumentSnapshot,
+} from 'firebase-admin/firestore';
+import {
+  convertLegacyChallenge,
+  convertLegacySubmission,
+  MIGRATION_ID,
+} from './generalRewardMigration';
 
-const PAGE_SIZE = 400;
+const PAGE_SIZE = 200;
 const shouldApply = process.argv.includes('--apply');
 const wantsHelp =
   process.argv.includes('--help') || process.argv.includes('-h');
-const projectArgument = process.argv.find((argument) =>
-  argument.startsWith('--project='),
-);
-const projectId = projectArgument?.slice('--project='.length);
+const projectId = process.argv
+  .find((argument) => argument.startsWith('--project='))
+  ?.slice('--project='.length);
+
+type MigrationStats = {
+  scanned: number;
+  migrated: number;
+  skipped: number;
+  malformed: string[];
+};
+
+const emptyStats = (): MigrationStats => ({
+  scanned: 0,
+  migrated: 0,
+  skipped: 0,
+  malformed: [],
+});
+
+function backupRef(firestore: Firestore, collection: string, id: string) {
+  return firestore
+    .collection('migrationBackups')
+    .doc(MIGRATION_ID)
+    .collection('records')
+    .doc(`${collection}__${id}`);
+}
+
+async function copyLegacyBounties(
+  firestore: Firestore,
+  apply: boolean,
+  stats: MigrationStats,
+) {
+  let cursor: QueryDocumentSnapshot | undefined;
+  do {
+    let sourceQuery = firestore
+      .collection('bounties')
+      .orderBy(FieldPath.documentId())
+      .limit(PAGE_SIZE);
+    if (cursor) sourceQuery = sourceQuery.startAfter(cursor);
+    const snapshot = await sourceQuery.get();
+    if (snapshot.empty) break;
+    const targets = await firestore.getAll(
+      ...snapshot.docs.map((source) =>
+        firestore.collection('challenges').doc(source.id),
+      ),
+    );
+    const batch = firestore.batch();
+    snapshot.docs.forEach((source, index) => {
+      stats.scanned += 1;
+      if (targets[index].exists) {
+        stats.skipped += 1;
+        return;
+      }
+      try {
+        const converted = convertLegacyChallenge(source.data());
+        stats.migrated += 1;
+        if (apply) {
+          batch.set(targets[index].ref, converted);
+        }
+      } catch (error) {
+        stats.malformed.push(
+          `bounties/${source.id}: ${(error as Error).message}`,
+        );
+      }
+    });
+    if (apply) await batch.commit();
+    cursor = snapshot.docs.at(-1);
+  } while (cursor);
+}
+
+async function migrateCollection(
+  firestore: Firestore,
+  collectionName: 'challenges' | 'submissions',
+  apply: boolean,
+  stats: MigrationStats,
+) {
+  let cursor: QueryDocumentSnapshot | undefined;
+  do {
+    let sourceQuery = firestore
+      .collection(collectionName)
+      .orderBy(FieldPath.documentId())
+      .limit(PAGE_SIZE);
+    if (cursor) sourceQuery = sourceQuery.startAfter(cursor);
+    const snapshot = await sourceQuery.get();
+    if (snapshot.empty) break;
+
+    const outcomes = new Map<string, DocumentData>();
+    if (collectionName === 'submissions') {
+      const challengeIds = [
+        ...new Set(
+          snapshot.docs
+            .map((item) => item.data().challengeId ?? item.data().bountyId)
+            .filter((id): id is string => typeof id === 'string'),
+        ),
+      ];
+      const challenges = challengeIds.length
+        ? await firestore.getAll(
+            ...challengeIds.map((id) =>
+              firestore.collection('challenges').doc(id),
+            ),
+          )
+        : [];
+      challenges.forEach((item) => {
+        if (item.exists && item.data()?.outcome) {
+          outcomes.set(item.id, item.data()!.outcome);
+        }
+      });
+    }
+
+    const existingBackups = await firestore.getAll(
+      ...snapshot.docs.map((item) =>
+        backupRef(firestore, collectionName, item.id),
+      ),
+    );
+    const batch = firestore.batch();
+    for (const [index, item] of snapshot.docs.entries()) {
+      stats.scanned += 1;
+      const data = item.data();
+      if (data.schemaVersion === 2) {
+        stats.skipped += 1;
+        continue;
+      }
+      try {
+        const converted =
+          collectionName === 'challenges'
+            ? convertLegacyChallenge(data)
+            : convertLegacySubmission(
+                data,
+                outcomes.get(data.challengeId ?? data.bountyId),
+              );
+        stats.migrated += 1;
+        if (apply) {
+          if (!existingBackups[index].exists) {
+            batch.set(existingBackups[index].ref, {
+              sourceCollection: collectionName,
+              sourceId: item.id,
+              original: data,
+            });
+          }
+          batch.set(item.ref, converted);
+        }
+      } catch (error) {
+        stats.malformed.push(
+          `${collectionName}/${item.id}: ${(error as Error).message}`,
+        );
+      }
+    }
+    if (apply) await batch.commit();
+    cursor = snapshot.docs.at(-1);
+  } while (cursor);
+}
+
+export async function migrateGeneralRewards(
+  firestore: Firestore,
+  apply: boolean,
+) {
+  const stats = {
+    bounties: emptyStats(),
+    challenges: emptyStats(),
+    submissions: emptyStats(),
+  };
+  await copyLegacyBounties(firestore, apply, stats.bounties);
+  await migrateCollection(firestore, 'challenges', apply, stats.challenges);
+  await migrateCollection(firestore, 'submissions', apply, stats.submissions);
+  return stats;
+}
+
+function printStats(stats: Awaited<ReturnType<typeof migrateGeneralRewards>>) {
+  for (const [collectionName, result] of Object.entries(stats)) {
+    console.info(
+      `${collectionName}: scanned=${result.scanned}, migrated=${result.migrated}, skipped=${result.skipped}, malformed=${result.malformed.length}`,
+    );
+    result.malformed.forEach((message) => console.error(`  ${message}`));
+  }
+}
 
 if (wantsHelp) {
   console.info(`Usage: npm run migrate:challenges -- [options]
 
 Options:
   --project=<firebase-project-id>  Override the ADC Firebase project
-  --apply                          Write changes (default is dry-run)
-  --help                           Show this message
-
-Copies legacy bounties to challenges and renames challenge references in
-submissions and transactions. The legacy bounties collection is retained as a
-recovery copy. Authentication uses Application Default Credentials.`);
+  --apply                          Back up and write changes (default: dry-run)
+  --help                           Show this message`);
 } else {
-  await migrateChallenges();
-}
-
-function toChallengeData(data: FirebaseFirestore.DocumentData) {
-  const { bountyBTC, rewardBTC, ...challengeData } = data;
-  const deadline =
-    typeof data.deadline === 'string' &&
-    !Number.isNaN(Date.parse(data.deadline))
-      ? Timestamp.fromDate(new Date(data.deadline))
-      : data.deadline;
-
-  return {
-    ...challengeData,
-    deadline,
-    schemaVersion: 2,
-    outcome: {
-      type: 'monetary',
-      amountMinor: Math.round((rewardBTC ?? bountyBTC) * 100_000_000),
-      currency: 'BTC',
-      deliveryTerms: 'Legacy Bitcoin reward arranged directly with the company.',
-    },
-    winnerCount: Number.isInteger(data.winnerCount) ? data.winnerCount : 1,
-    eligibility: data.eligibility ?? 'See the original challenge terms.',
-    geographicRestrictions: data.geographicRestrictions ?? 'Not specified in the legacy challenge.',
-    status: data.status === 'in-progress' ? 'in_review' : (data.status ?? 'open'),
-    legacy: { rewardBTC: rewardBTC ?? bountyBTC },
-    searchTerms: createChallengeSearchTerms(
-      data.title,
-      data.description,
-      data.category,
-    ),
-    filterFacets: createChallengeFilterFacets(data.category, data.difficulty),
-    searchSchemaVersion: CHALLENGE_SEARCH_SCHEMA_VERSION,
-  };
-}
-
-async function migrateChallenges() {
   const app =
     getApps()[0] ??
     initializeApp({
       credential: applicationDefault(),
       ...(projectId ? { projectId } : {}),
     });
-  const firestore = getFirestore(app);
-
-  let copiedChallenges = 0;
-  let migratedSubmissions = 0;
-  let migratedTransactions = 0;
-  let skipped = 0;
-  let cursor: FirebaseFirestore.QueryDocumentSnapshot | undefined;
-
-  do {
-    let legacyQuery = firestore
-      .collection('bounties')
-      .orderBy(FieldPath.documentId())
-      .limit(PAGE_SIZE);
-    if (cursor) legacyQuery = legacyQuery.startAfter(cursor);
-
-    const snapshot = await legacyQuery.get();
-    if (snapshot.empty) break;
-    const targetSnapshots = await firestore.getAll(
-      ...snapshot.docs.map((document) =>
-        firestore.collection('challenges').doc(document.id),
-      ),
-    );
-    const batch = firestore.batch();
-    let batchWrites = 0;
-
-    snapshot.docs.forEach((legacyChallenge, index) => {
-      const data = legacyChallenge.data();
-      if (
-        targetSnapshots[index].exists ||
-        typeof data.title !== 'string' ||
-        typeof data.description !== 'string' ||
-        typeof data.category !== 'string' ||
-        typeof data.difficulty !== 'string' ||
-        typeof (data.rewardBTC ?? data.bountyBTC) !== 'number'
-      ) {
-        if (!targetSnapshots[index].exists) skipped += 1;
-        return;
-      }
-
-      copiedChallenges += 1;
-      if (shouldApply) {
-        batch.set(targetSnapshots[index].ref, toChallengeData(data));
-        batchWrites += 1;
-      }
-    });
-
-    if (batchWrites > 0) await batch.commit();
-    cursor = snapshot.docs[snapshot.docs.length - 1];
-  } while (cursor);
-
-  // Convert documents that already live in the current challenges collection.
-  // This also converts records copied from the legacy collection above.
-  cursor = undefined;
-  do {
-    let challengeQuery = firestore.collection('challenges').orderBy(FieldPath.documentId()).limit(PAGE_SIZE);
-    if (cursor) challengeQuery = challengeQuery.startAfter(cursor);
-    const snapshot = await challengeQuery.get();
-    if (snapshot.empty) break;
-    const batch = firestore.batch();
-    let batchWrites = 0;
-    for (const document of snapshot.docs) {
-      const data = document.data();
-      if (data.schemaVersion === 2) continue;
-      if (typeof (data.rewardBTC ?? data.bountyBTC) !== 'number') {
-        skipped += 1;
-        continue;
-      }
-      if (shouldApply) {
-        batch.set(document.ref, toChallengeData(data));
-        batchWrites += 1;
-      }
-    }
-    if (batchWrites > 0) await batch.commit();
-    cursor = snapshot.docs[snapshot.docs.length - 1];
-  } while (cursor);
-
-  const referenceMigrations = [
-    {
-      collection: 'submissions',
-      legacyField: 'bountyId',
-      targetField: 'challengeId',
-      convert: (data: FirebaseFirestore.DocumentData) => ({
-        challengeId: data.bountyId,
-        challengeTitle: data.bountyTitle ?? null,
-        challengeDescription: data.bountyDescription ?? null,
-        schemaVersion: 2,
-        challengeOutcome: {
-          type: 'monetary',
-          amountMinor: Math.round((data.bountyRewardBTC ?? 0) * 100_000_000),
-          currency: 'BTC',
-          deliveryTerms: 'Legacy Bitcoin reward arranged directly with the company.',
-        },
-      }),
-    },
-    {
-      collection: 'transactions',
-      legacyField: 'bountyId',
-      targetField: 'challengeId',
-      convert: (data: FirebaseFirestore.DocumentData) => ({
-        challengeId: data.bountyId,
-        challengeTitle: data.bountyTitle ?? null,
-      }),
-    },
-  ] as const;
-
-  for (const migration of referenceMigrations) {
-    cursor = undefined;
-    do {
-      let referenceQuery = firestore
-        .collection(migration.collection)
-        .orderBy(FieldPath.documentId())
-        .limit(PAGE_SIZE);
-      if (cursor) referenceQuery = referenceQuery.startAfter(cursor);
-
-      const snapshot = await referenceQuery.get();
-      if (snapshot.empty) break;
-      const batch = firestore.batch();
-      for (const document of snapshot.docs) {
-        const data = document.data();
-        if (!(migration.legacyField in data) || migration.targetField in data) {
-          continue;
-        }
-        if (migration.collection === 'submissions') migratedSubmissions += 1;
-        else migratedTransactions += 1;
-        if (shouldApply) {
-          batch.update(document.ref, migration.convert(data));
-        }
-      }
-      if (shouldApply) await batch.commit();
-      cursor = snapshot.docs[snapshot.docs.length - 1];
-    } while (cursor);
-  }
-
-  console.info(
-    `${shouldApply ? 'Applied' : 'Dry run complete'}: ` +
-      `${copiedChallenges} challenges to copy, ` +
-      `${migratedSubmissions} submissions to update, ` +
-      `${migratedTransactions} transactions to update, ${skipped} malformed.`,
-  );
-  if (!shouldApply) {
-    console.info('Run the apply script after reviewing this result.');
-  }
+  const stats = await migrateGeneralRewards(getFirestore(app), shouldApply);
+  printStats(stats);
+  if (!shouldApply) console.info('Dry run only: no documents were written.');
 }

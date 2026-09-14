@@ -5,7 +5,11 @@ const config = {
   setupFiles: ['<rootDir>/src/test/polyfills.ts'],
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  testMatch: ['<rootDir>/src/**/*.test.ts', '<rootDir>/src/**/*.test.tsx'],
+  testMatch: [
+    '<rootDir>/scripts/**/*.test.ts',
+    '<rootDir>/src/**/*.test.ts',
+    '<rootDir>/src/**/*.test.tsx',
+  ],
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
