@@ -1,36 +1,28 @@
 {
   "indexes": [
     {
-      "collectionGroup": "transactions",
+      "collectionGroup": "challenges",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "fromUserId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
     {
-      "collectionGroup": "transactions",
+      "collectionGroup": "challenges",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "toUserId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "filterFacets", "arrayConfig": "CONTAINS" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
     {
-      "collectionGroup": "transactions",
+      "collectionGroup": "challenges",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "fromUserId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "transactions",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "toUserId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "searchTerms", "arrayConfig": "CONTAINS" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
@@ -65,7 +57,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "companyUid", "order": "ASCENDING" },
-        { "fieldPath": "rewardBTC", "order": "ASCENDING" }
+        { "fieldPath": "outcome.amountMinor", "order": "ASCENDING" }
       ]
     },
     {
@@ -73,6 +65,15 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "filterFacets", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "challenges",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "deadline", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },

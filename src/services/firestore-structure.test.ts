@@ -4,7 +4,6 @@ import { Timestamp } from 'firebase/firestore';
 import {
   challengeDocumentSchema,
   submissionDocumentSchema,
-  transactionDocumentSchema,
   userDocumentSchema,
 } from './firestore-structure';
 
@@ -22,13 +21,17 @@ describe('Firestore document schemas', () => {
     expect(result.success).toBe(false);
   });
 
-  it('provides safe search defaults for legacy challenge records', () => {
+  it('provides safe search defaults for a challenge record', () => {
     const result = challengeDocumentSchema.parse({
       title: 'Legacy challenge',
       description: 'A valid legacy challenge description.',
       category: 'Coding',
       difficulty: 'Beginner',
-      rewardBTC: 0.01,
+      schemaVersion: 2,
+      outcome: { type: 'recognition', recognitionLabel: 'Winner' },
+      winnerCount: 1,
+      eligibility: 'Open to all developers.',
+      geographicRestrictions: 'None',
       deadline: timestamp,
       companyName: 'Example Company',
       companyUid: 'company-1',
@@ -48,9 +51,9 @@ describe('Firestore document schemas', () => {
       companyUid: 'company-1',
       challengeTitle: 'Challenge',
       challengeDescription: 'Description',
-      challengeRewardBTC: 0.01,
+      schemaVersion: 2,
+      challengeOutcome: { type: 'recognition', recognitionLabel: 'Winner' },
       githubUrl: 'https://example.com/not-github',
-      bitcoinAddress: 'bc1qexampleaddress',
       developerUid: 'developer-1',
       developerName: 'Developer',
       developerEmail: 'developer@example.com',
@@ -61,17 +64,4 @@ describe('Firestore document schemas', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects invalid financial records', () => {
-    const result = transactionDocumentSchema.safeParse({
-      challengeId: 'challenge-1',
-      fromUserId: 'company-1',
-      toUserId: 'developer-1',
-      amount: -1,
-      currency: 'BTC',
-      status: 'completed',
-      createdAt: timestamp,
-    });
-
-    expect(result.success).toBe(false);
-  });
 });

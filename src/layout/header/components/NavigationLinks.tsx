@@ -1,4 +1,4 @@
-import { FileCheck2, ReceiptText, SquareKanban } from 'lucide-react';
+import { FileCheck2, SquareKanban } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppContext } from '../../../hooks/useAppContext';
 
@@ -21,7 +21,6 @@ export const NavigationLinks = ({
   const isChallenges = pathname.startsWith('/challenges');
   const isSubmissions = pathname === '/submissions';
   const isCompanySubmissions = pathname === '/company-submissions';
-  const isTransactions = pathname === '/transactions';
 
   const linkClass = (active: boolean) =>
     `flex w-full items-center gap-3.5 text-[15px] transition-colors ${
@@ -70,18 +69,6 @@ export const NavigationLinks = ({
         </Link>
       </li>
 
-      <li>
-        <Link
-          to="/transactions"
-          onClick={onLinkClick}
-          aria-current={isTransactions ? 'page' : undefined}
-          className={linkClass(isTransactions)}
-          title={collapsed ? 'Transactions' : undefined}
-        >
-          <ReceiptText className="size-5 shrink-0" strokeWidth={1.8} />
-          {!collapsed && <span>Transactions</span>}
-        </Link>
-      </li>
     </ul>
   );
 };

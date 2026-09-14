@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { format } from 'date-fns';
 
-import { Bitcoin, CalendarDays, ChevronDownIcon, Plus } from 'lucide-react';
+import { CalendarDays, ChevronDownIcon, Plus } from 'lucide-react';
 
 import { toast } from 'sonner';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
@@ -39,6 +39,7 @@ import {
 
 import { useTypedForm } from '../../../hooks/useTypedForm';
 import { FormErrorSummary } from '../../../components/common/FormErrorSummary';
+import { ChallengeOutcomeFields } from './ChallengeOutcomeFields';
 
 import {
   hasFormErrors,
@@ -51,7 +52,15 @@ const initialForm: ChallengeFormValues = {
   description: '',
   category: '',
   difficulty: '',
-  rewardBTC: 0.0001,
+  outcomeType: 'recognition',
+  recognitionLabel: 'Winner',
+  amountMajor: '',
+  currency: 'USD',
+  rewardDescription: '',
+  deliveryTerms: '',
+  winnerCount: 1,
+  eligibility: 'Open to all developers.',
+  geographicRestrictions: 'None',
   deadline: undefined,
 };
 
@@ -72,7 +81,27 @@ export const CreateChallengeDialog = () => {
       description: form.values.description.trim(),
       category: form.values.category,
       difficulty: form.values.difficulty,
-      rewardBTC: form.values.rewardBTC,
+      outcome: {
+        type: form.values.outcomeType,
+        ...(form.values.recognitionLabel.trim()
+          ? { recognitionLabel: form.values.recognitionLabel.trim() }
+          : {}),
+        ...(form.values.amountMajor.trim()
+          ? {
+              amountMinor: Math.round(Number(form.values.amountMajor) * 100),
+              currency: form.values.currency.trim().toUpperCase(),
+            }
+          : {}),
+        ...(form.values.rewardDescription.trim()
+          ? { rewardDescription: form.values.rewardDescription.trim() }
+          : {}),
+        ...(form.values.deliveryTerms.trim()
+          ? { deliveryTerms: form.values.deliveryTerms.trim() }
+          : {}),
+      },
+      winnerCount: form.values.winnerCount,
+      eligibility: form.values.eligibility.trim(),
+      geographicRestrictions: form.values.geographicRestrictions.trim(),
       deadline: form.values.deadline,
     };
 
@@ -181,60 +210,64 @@ export const CreateChallengeDialog = () => {
             </div>
           </div>
 
-          {/* amount && deadline */}
+          <ChallengeOutcomeFields
+            values={form.values}
+            setField={form.setField}
+          />
           <div className="grid gap-4 sm:grid-cols-2">
-            {/* challenge amount */}
             <div className="space-y-2">
-              <Label htmlFor="challenge-amount">Challenge amount</Label>
-              <div className="relative">
-                <Bitcoin className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400" />
-                <Input
-                  id="challenge-amount"
-                  disabled
-                  value={form.values.rewardBTC}
-                  className="pl-9"
-                  aria-describedby="challenge-amount-note"
+              <Label htmlFor="eligibility">Eligibility</Label>
+              <Textarea
+                id="eligibility"
+                value={form.values.eligibility}
+                onChange={(event) =>
+                  form.setField('eligibility', event.target.value)
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="geography">Geographic restrictions</Label>
+              <Textarea
+                id="geography"
+                value={form.values.geographicRestrictions}
+                onChange={(event) =>
+                  form.setField('geographicRestrictions', event.target.value)
+                }
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="challenge-deadline">Deadline</Label>
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  id="challenge-deadline"
+                  className="w-full justify-start font-normal text-gray-500"
+                >
+                  <CalendarDays className="mr-2 size-4" />
+                  {form.values.deadline
+                    ? format(form.values.deadline, 'PPP')
+                    : 'Select deadline'}
+                  <ChevronDownIcon className="ml-auto size-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={form.values.deadline}
+                  captionLayout="dropdown"
+                  onSelect={(date) => {
+                    form.setField('deadline', date);
+                    setCalendarOpen(false);
+                  }}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
                 />
-              </div>
-              <p id="challenge-amount-note" className="text-xs text-gray-500">
-                BTC reward amount
-              </p>
-            </div>
-
-            {/* deadline */}
-            <div className="space-y-2">
-              <Label htmlFor="challenge-deadline">Deadline</Label>
-              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    id="challenge-deadline"
-                    className="w-full justify-start font-normal text-gray-500"
-                  >
-                    <CalendarDays className="mr-2 size-4" />
-                    {form.values.deadline
-                      ? format(form.values.deadline, 'PPP')
-                      : 'Select deadline'}
-                    <ChevronDownIcon className="ml-auto size-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={form.values.deadline}
-                    captionLayout="dropdown"
-                    onSelect={(date) => {
-                      form.setField('deadline', date);
-                      setCalendarOpen(false);
-                    }}
-                    disabled={(date) => date < new Date()}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <DialogFooter>
             <Button

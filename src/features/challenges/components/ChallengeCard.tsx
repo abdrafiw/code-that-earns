@@ -1,4 +1,5 @@
-import { Bitcoin, CalendarDays, Code } from 'lucide-react';
+import { Award, CalendarDays, Code } from 'lucide-react';
+import { formatOutcome } from '../utils/formatOutcome';
 import { Link } from 'react-router-dom';
 
 import {
@@ -51,8 +52,8 @@ export const ChallengeCard = ({ challenge }: { challenge: TChallenge }) => {
           <div className="min-w-0">
             <p className="text-xs text-gray-500">Reward</p>
             <p className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold text-gray-950">
-              <Bitcoin className="size-4 text-emerald-500" />
-              {challenge.rewardBTC} BTC
+              <Award className="size-4 text-emerald-500" />
+              {formatOutcome(challenge.outcome)} · {challenge.winnerCount} {challenge.winnerCount === 1 ? 'winner' : 'winners'}
             </p>
           </div>
 

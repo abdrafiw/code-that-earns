@@ -74,14 +74,7 @@ export function DeveloperSubmissionsPage() {
                   </a>
                 </div>
 
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-600">
-                    Bitcoin Address:
-                  </p>
-                  <span className="ml-2 font-mono text-sm break-all text-gray-900">
-                    {submission.bitcoinAddress}
-                  </span>
-                </div>
+                {submission.liveDemoUrl && <a href={submission.liveDemoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">View live demo</a>}
               </div>
             </div>
           </li>

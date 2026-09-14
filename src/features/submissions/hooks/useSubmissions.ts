@@ -91,3 +91,22 @@ export function useSubmitSolution() {
     },
   });
 }
+
+export function useMarkUnderReview() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (submissionId: string) => submissionService.markUnderReview(submissionId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: submissionKeys.all }),
+  });
+}
+
+export function useFinalizeWinners() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ challengeId, submissionIds }: { challengeId: string; submissionIds: string[] }) => {
+      await submissionService.beginChallengeReview(challengeId);
+      return submissionService.finalizeWinners(challengeId, submissionIds);
+    },
+    onSuccess: () => queryClient.invalidateQueries(),
+  });
+}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bitcoin, Code2, Search, Users } from 'lucide-react';
+import { Award, Code2, Search, Users } from 'lucide-react';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { CreateChallengeDialog } from '../components/CreateChallengeDialog';
 import { EmptyChallengesState } from '../components/EmptyChallengesState';
@@ -25,6 +25,7 @@ import {
   useGetCompanyChallengeMetrics,
 } from '../hooks/useChallenges';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
+import { formatOutcome } from '../utils/formatOutcome';
 
 const difficultyStyles: Record<string, string> = {
   beginner: 'bg-green-50 text-green-700',
@@ -99,10 +100,10 @@ export const CompanyChallengesPage = () => {
                 iconClassName="bg-indigo-50 text-indigo-500"
               />
               <KpiCard
-                icon={Bitcoin}
+                icon={Award}
                 label="Total reward pool"
-                value={(metricsQuery.data?.totalRewards ?? 0).toFixed(4)}
-                suffix="BTC"
+                value={metricsQuery.data?.totalRewards ?? 0}
+                suffix=" minor units"
                 iconClassName="bg-green-50 text-green-600"
               />
               <KpiCard
@@ -233,7 +234,7 @@ export const CompanyChallengesPage = () => {
                               </span>
                             </td>
                             <td className="px-5 py-5 font-semibold text-gray-900">
-                              {challenge.rewardBTC} BTC
+                              {formatOutcome(challenge.outcome)}
                             </td>
                             <td className="px-5 py-5 text-gray-500">
                               <span className="whitespace-nowrap">

@@ -1,6 +1,6 @@
 import {
   ArrowRight,
-  Bitcoin,
+  Award,
   Check,
   Code2,
   Github,
@@ -25,10 +25,10 @@ const features = [
       'Share your repository directly. Your code stays easy to review and simple to verify.',
   },
   {
-    icon: Bitcoin,
-    title: 'Earn in Bitcoin',
+    icon: Award,
+    title: 'Earn recognition and rewards',
     description:
-      'Win a challenge and receive the published BTC reward at your submitted address.',
+      'Win a challenge and receive recognition or an optional reward directly from the company.',
   },
 ];
 
@@ -62,7 +62,7 @@ export const HomePage = () => {
             <h1 className="text-5xl leading-[1.02] font-semibold tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-7xl">
               Solve real problems.
               <span className="mt-1 block text-indigo-500">
-                Earn real Bitcoin.
+                Earn real recognition.
               </span>
             </h1>
 
@@ -99,7 +99,7 @@ export const HomePage = () => {
               </span>
               <span className="inline-flex items-center gap-2">
                 <Check className="size-4 text-emerald-600" />
-                BTC rewards
+                Clear outcomes
               </span>
             </div>
           </div>
@@ -147,8 +147,8 @@ export const HomePage = () => {
                       Reward
                     </p>
                     <p className="mt-2 flex items-center gap-2 text-lg font-semibold text-slate-900">
-                      <Bitcoin className="size-5 text-emerald-500" />
-                      0.025 BTC
+                      <Award className="size-5 text-emerald-500" />
+                      $250.00
                     </p>
                   </div>
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">

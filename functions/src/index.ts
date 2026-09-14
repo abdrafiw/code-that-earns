@@ -1,0 +1,35 @@
+import { initializeApp } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { finalizeWinnersTransaction } from './finalizeWinners';
+
+initializeApp();
+
+type FinalizeWinnersRequest = {
+  challengeId?: unknown;
+  submissionIds?: unknown;
+};
+
+export const finalizeWinners = onCall<FinalizeWinnersRequest>(
+  async (request) => {
+    if (!request.auth)
+      throw new HttpsError('unauthenticated', 'Sign in to finalize winners.');
+    const challengeId = request.data.challengeId;
+    const submissionIds = request.data.submissionIds;
+    if (
+      typeof challengeId !== 'string' ||
+      !challengeId ||
+      !Array.isArray(submissionIds) ||
+      submissionIds.some((id) => typeof id !== 'string')
+    ) {
+      throw new HttpsError(
+        'invalid-argument',
+        'Provide a challenge ID and submission IDs.',
+      );
+    }
+    return finalizeWinnersTransaction(getFirestore(), request.auth.uid, {
+      challengeId,
+      submissionIds: submissionIds as string[],
+    });
+  },
+);

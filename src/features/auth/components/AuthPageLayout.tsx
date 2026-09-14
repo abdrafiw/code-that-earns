@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ArrowLeft, Bitcoin, Check, Code2, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Award, Check, Code2, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 type AuthPageLayoutProps = {
@@ -13,7 +13,7 @@ type AuthPageLayoutProps = {
 const benefits = [
   'Clear coding challenges',
   'GitHub-based submissions',
-  'Transparent Bitcoin rewards',
+  'Transparent challenge outcomes',
 ];
 
 export function AuthPageLayout({
@@ -28,7 +28,7 @@ export function AuthPageLayout({
       <section className="relative hidden overflow-hidden bg-slate-950 px-6 py-8 text-white sm:px-10 lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:px-14 lg:py-12">
         <div
           aria-hidden="true"
-          className="absolute -right-16 -bottom-20 size-64 rounded-full border-[38px] border-indigo-500/10"
+          className="absolute -right-16 -bottom-20 size-64 rounded-full border-38 border-indigo-500/10"
         />
 
         <Link
@@ -38,21 +38,24 @@ export function AuthPageLayout({
           <span className="flex size-10 items-center justify-center rounded-xl bg-indigo-500">
             <Code2 className="size-5" />
           </span>
-          <span>
-            CTE
+
+          <p className="">
+            <span>CTE</span>
             <span className="ml-2 font-normal text-slate-400">
               Code That Earns
             </span>
-          </span>
+          </p>
         </Link>
 
-        <div className="relative mt-14 max-w-lg lg:my-auto">
+        <div className="relative max-w-lg lg:my-auto">
           <p className="text-sm font-semibold text-indigo-400">
             Build. Submit. Earn.
           </p>
+
           <h1 className="mt-4 text-4xl leading-tight font-semibold tracking-[-0.04em] sm:text-5xl">
             Great code should open real opportunities.
           </h1>
+
           <p className="mt-5 max-w-md text-base leading-7 text-slate-300">
             Join companies and developers working together through focused
             challenges and transparent rewards.
@@ -70,21 +73,21 @@ export function AuthPageLayout({
           </ul>
         </div>
 
-        <div className="relative mt-12 hidden items-center gap-4 border-t border-white/10 pt-6 text-xs text-slate-400 lg:flex">
+        <div className="relative hidden items-center gap-4 border-t border-white/10 text-xs text-slate-400 lg:flex">
           <span className="inline-flex items-center gap-2">
             <ShieldCheck className="size-4 text-emerald-400" />
             Secure Firebase authentication
           </span>
           <span className="inline-flex items-center gap-2">
-            <Bitcoin className="size-4 text-emerald-400" />
-            BTC rewards
+            <Award className="size-4 text-emerald-400" />
+            Recognition and rewards
           </span>
         </div>
       </section>
 
       <section className="flex min-h-screen items-center justify-center px-4 py-5 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
         <div className={`w-full ${wide ? 'max-w-2xl' : 'max-w-md'}`}>
-          <nav className="mb-5 flex items-center justify-between sm:mb-7">
+          <nav className="flex items-center justify-between">
             <Link
               to="/"
               className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-950"
@@ -106,7 +109,7 @@ export function AuthPageLayout({
           </nav>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] sm:p-8 sm:shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-            <header>
+            <header className="">
               <p className="text-sm font-semibold text-indigo-500">{eyebrow}</p>
               <h2 className="mt-1.5 text-2xl font-semibold tracking-[-0.035em] text-slate-950 sm:mt-2 sm:text-3xl">
                 {title}
@@ -116,10 +119,10 @@ export function AuthPageLayout({
               </p>
             </header>
 
-            <div className="mt-5 sm:mt-7">{children}</div>
+            <div className="">{children}</div>
           </div>
 
-          <p className="mt-5 hidden text-center text-xs leading-5 text-slate-400 sm:block">
+          <p className="hidden text-center text-xs leading-5 text-slate-400 sm:block">
             By continuing, you agree to use CTE responsibly and submit work you
             are authorized to share.
           </p>

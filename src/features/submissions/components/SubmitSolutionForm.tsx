@@ -5,6 +5,7 @@ import { SiGithub } from 'react-icons/si';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
+import { Textarea } from '../../../components/ui/textarea';
 import { useSubmitSolution } from '../hooks/useSubmissions';
 import { useTypedForm } from '../../../hooks/useTypedForm';
 import {
@@ -16,7 +17,9 @@ import { getErrorMessage } from '../../../utils/getErrorMessage';
 
 const initialValues: SubmissionFormValues = {
   githubUrl: '',
-  bitcoinAddress: '',
+  liveDemoUrl: '',
+  notes: '',
+  publicWinnerConsent: false,
 };
 
 type SubmitSolutionFormProps = {
@@ -44,7 +47,9 @@ export const SubmitSolutionForm = ({
 
     const payload = {
       githubUrl: form.values.githubUrl.trim(),
-      bitcoinAddress: form.values.bitcoinAddress.trim(),
+      liveDemoUrl: form.values.liveDemoUrl.trim() || undefined,
+      notes: form.values.notes.trim() || undefined,
+      publicWinnerConsent: form.values.publicWinnerConsent,
       challengeID,
     };
 
@@ -70,7 +75,7 @@ export const SubmitSolutionForm = ({
           Submit your solution
         </h2>
         <p className="mt-1 text-sm leading-6 text-gray-500">
-          Share your repository and payout address for review.
+          Share your repository and optional supporting details for review.
         </p>
       </header>
 
@@ -100,27 +105,22 @@ export const SubmitSolutionForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="btc-address">Bitcoin payout address</Label>
+          <Label htmlFor="demo-url">Live demo (optional)</Label>
           <Input
-            id="btc-address"
-            type="text"
-            value={form.values.bitcoinAddress}
-            onChange={(e) => form.setField('bitcoinAddress', e.target.value)}
-            placeholder="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
-            aria-invalid={!!form.errors.bitcoinAddress}
-            aria-describedby={
-              form.errors.bitcoinAddress ? 'btc-address-error' : undefined
-            }
+            id="demo-url"
+            type="url"
+            value={form.values.liveDemoUrl}
+            onChange={(e) => form.setField('liveDemoUrl', e.target.value)}
+            placeholder="https://example.com/demo"
+            aria-invalid={!!form.errors.liveDemoUrl}
           />
-          <p className="text-xs text-gray-500">
-            Rewards will be sent to this address if your solution is selected.
-          </p>
-          {form.errors.bitcoinAddress && (
-            <p id="btc-address-error" className="text-destructive text-sm">
-              {form.errors.bitcoinAddress}
-            </p>
-          )}
+          {form.errors.liveDemoUrl && <p className="text-destructive text-sm">{form.errors.liveDemoUrl}</p>}
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="submission-notes">Notes (optional)</Label>
+          <Textarea id="submission-notes" value={form.values.notes} onChange={(e) => form.setField('notes', e.target.value)} maxLength={2000} />
+        </div>
+        <label className="flex items-start gap-2 text-sm text-gray-600"><input type="checkbox" checked={form.values.publicWinnerConsent} onChange={(event) => form.setField('publicWinnerConsent', event.target.checked)} />Show my display name publicly if I win. I can otherwise be shown as “Private winner”.</label>
 
         <div className="flex flex-col gap-3">
           <Button

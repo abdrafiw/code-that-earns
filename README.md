@@ -1,6 +1,6 @@
 # CTE — Code That Earns
 
-CTE (Code That Earns) is a role-based web application for connecting companies with developers through paid coding challenges. Companies publish challenges, developers browse and submit solutions through GitHub repository links, and companies can review submissions.
+CTE (Code That Earns) is a role-based platform where companies publish technical challenges, developers submit solutions, and companies select winners for recognition or optional off-platform rewards.
 
 The project currently provides the core challenge, authentication, and submission workflows. Transaction history is read-only in the browser. Payment execution is intentionally unavailable until it can be implemented by a trusted backend.
 
@@ -11,13 +11,13 @@ The project currently provides the core challenge, authentication, and submissio
 - Create an account as a developer and sign in with email and password.
 - Browse open challenges with pagination.
 - View a challenge and submit a GitHub repository URL.
-- Provide a Bitcoin address/hash with a submission.
+- Optionally include a live demo and submission notes.
 - Review personal submission history.
 
 ### Companies
 
 - Create an account as a company and sign in with email and password.
-- Create challenges with a title, description, category, difficulty, BTC amount, and deadline.
+- Create provider-neutral recognition, monetary, or non-monetary challenges.
 - View challenges created by the company.
 - Review submissions associated with company challenges.
 
@@ -26,7 +26,7 @@ The project currently provides the core challenge, authentication, and submissio
 - Firebase Authentication and Firestore-backed application state.
 - Role-aware navigation and access-denied, loading, empty, and error states.
 - Responsive interface built with Tailwind CSS and Radix-based UI primitives.
-- Read-only, authenticated Firestore transaction history.
+- Provider-neutral outcomes with configurable winner counts.
 
 ## Current limitations
 
@@ -99,10 +99,25 @@ The project currently provides the core challenge, authentication, and submissio
 | npm test                         | Run the Jest test suite                           |
 | npm run test:watch               | Run Jest in watch mode                            |
 | npm run test:coverage            | Generate Jest coverage output                     |
+| npm run test:rules               | Test Firestore rules against the local emulator    |
+| npm run test:backend             | Test backend transactions against the emulator     |
 | npm run migrate:challenges       | Preview the legacy challenge data migration       |
 | npm run migrate:challenges:apply | Apply the legacy challenge data migration         |
 | npm run format                   | Format source files with Prettier                 |
 | npm run format:check             | Check formatting without changing files           |
+
+### Trusted backend
+
+Winner finalization runs in Firebase Functions and never transfers rewards.
+
+```bash
+npm install --prefix functions
+npm --prefix functions run build
+firebase emulators:start --only functions,firestore
+```
+
+Deploy it with `firebase deploy --only functions`. Deploy Firestore rules and
+indexes before deploying the provider-neutral client.
 
 ## Application routes
 
@@ -115,16 +130,14 @@ The project currently provides the core challenge, authentication, and submissio
 | /challenges/:challengeId | View challenge details and submit a solution                |
 | /submissions             | View developer submissions                                  |
 | /company-submissions     | View submissions for company challenges                     |
-| /transactions            | View authenticated, read-only transaction history           |
 
 ## Firestore
 
 The application uses these collections:
 
 - users: Firebase user profile, role, email, developer name or company name, and timestamps.
-- challenges: title, description, category, difficulty, BTC amount, deadline, company name/UID, and timestamps.
-- submissions: challenge ID, GitHub URL, Bitcoin address/hash, developer UID, and creation timestamp.
-- transactions: reserved for transaction records; the current transactions page uses local sample data instead.
+- challenges: challenge details, provider-neutral outcome, winner count, lifecycle status, company ownership, and timestamps.
+- submissions: challenge ID, repository/demo links, notes, developer ownership, lifecycle status, and timestamps.
 
 The deployed rules are in firestore.rules. Authenticated users can read user profiles and challenges. Companies can create, update, and delete their own challenges; developers can create submissions; and submission access is limited to the submitting developer or the company that owns the related challenge.
 
@@ -171,7 +184,6 @@ src/
 │   ├── challenges/         Challenge browsing and creation
 │   ├── home/             Home page
 │   ├── submissions/      Submission and review workflows
-│   └── transactions/     Transaction-history UI and utilities
 ├── hooks/                Shared hooks
 ├── layout/               App shell and header navigation
 ├── lib/                  General utilities

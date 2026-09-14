@@ -73,7 +73,7 @@ export const DevChallengesPage = () => {
             Browse challenges
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-            Find a challenge, submit your solution, and earn Bitcoin.
+            Find a challenge, submit your solution, and earn recognition or a stated reward.
           </p>
         </header>
 

@@ -7,7 +7,6 @@ export type PageSkeletonVariant =
   | 'company-submissions'
   | 'submissions'
   | 'solution'
-  | 'transactions'
   | 'login'
   | 'signup'
   | 'home';
@@ -288,7 +287,7 @@ export function PageSkeleton({ variant }: { variant: PageSkeletonVariant }) {
         <Metrics />
         <Skeleton className="h-7 w-40" />
         <Filters />
-        <Table columns={variant === 'transactions' ? 4 : 5} />
+        <Table columns={5} />
       </div>
     </LoadingRegion>
   );
@@ -306,7 +305,6 @@ export function getPageSkeletonVariant(pathname: string): PageSkeletonVariant {
     '/dev-challenges': 'dev-challenges',
     '/company-submissions': 'company-submissions',
     '/submissions': 'submissions',
-    '/transactions': 'transactions',
   };
   return pages[path] || 'home';
 }

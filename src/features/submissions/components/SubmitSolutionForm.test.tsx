@@ -47,9 +47,7 @@ describe('SubmitSolutionForm', () => {
     ).toBeInTheDocument();
 
     expect(screen.getByLabelText(/github repository/i)).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(/bitcoin payout address/i),
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/live demo/i)).toBeInTheDocument();
 
     expect(
       screen.getByRole('button', {
@@ -86,10 +84,10 @@ describe('SubmitSolutionForm', () => {
     RenderSubmitSolutionForm();
     const user = userEvent.setup();
     const githubInput = screen.getByLabelText(/github repository/i);
-    const addressInput = screen.getByLabelText(/bitcoin payout address/i);
+    const demoInput = screen.getByLabelText(/live demo/i);
 
     await user.type(githubInput, 'https://github.com/user/repository');
-    await user.type(addressInput, '1BoatSLRHtKNngkdXEeobR76b53LETtpyT');
+    await user.type(demoInput, 'https://example.com/demo');
     await user.click(screen.getByRole('button', { name: /submit solution/i }));
 
     const options = mockMutate.mock.calls[0][1] as {
@@ -101,7 +99,7 @@ describe('SubmitSolutionForm', () => {
       'Network unavailable',
     );
     expect(githubInput).toHaveValue('https://github.com/user/repository');
-    expect(addressInput).toHaveValue('1BoatSLRHtKNngkdXEeobR76b53LETtpyT');
+    expect(demoInput).toHaveValue('https://example.com/demo');
   });
 
   it('shows success feedback after a successful submission', async () => {
@@ -111,10 +109,6 @@ describe('SubmitSolutionForm', () => {
     await user.type(
       screen.getByLabelText(/github repository/i),
       'https://github.com/user/repository',
-    );
-    await user.type(
-      screen.getByLabelText(/bitcoin payout address/i),
-      '1BoatSLRHtKNngkdXEeobR76b53LETtpyT',
     );
     await user.click(screen.getByRole('button', { name: /submit solution/i }));
 

@@ -32,7 +32,7 @@ recovery copy. Authentication uses Application Default Credentials.`);
 }
 
 function toChallengeData(data: FirebaseFirestore.DocumentData) {
-  const { bountyBTC, ...challengeData } = data;
+  const { bountyBTC, rewardBTC, ...challengeData } = data;
   const deadline =
     typeof data.deadline === 'string' &&
     !Number.isNaN(Date.parse(data.deadline))
@@ -42,7 +42,18 @@ function toChallengeData(data: FirebaseFirestore.DocumentData) {
   return {
     ...challengeData,
     deadline,
-    rewardBTC: data.rewardBTC ?? bountyBTC,
+    schemaVersion: 2,
+    outcome: {
+      type: 'monetary',
+      amountMinor: Math.round((rewardBTC ?? bountyBTC) * 100_000_000),
+      currency: 'BTC',
+      deliveryTerms: 'Legacy Bitcoin reward arranged directly with the company.',
+    },
+    winnerCount: Number.isInteger(data.winnerCount) ? data.winnerCount : 1,
+    eligibility: data.eligibility ?? 'See the original challenge terms.',
+    geographicRestrictions: data.geographicRestrictions ?? 'Not specified in the legacy challenge.',
+    status: data.status === 'in-progress' ? 'in_review' : (data.status ?? 'open'),
+    legacy: { rewardBTC: rewardBTC ?? bountyBTC },
     searchTerms: createChallengeSearchTerms(
       data.title,
       data.description,
@@ -110,6 +121,32 @@ async function migrateChallenges() {
     cursor = snapshot.docs[snapshot.docs.length - 1];
   } while (cursor);
 
+  // Convert documents that already live in the current challenges collection.
+  // This also converts records copied from the legacy collection above.
+  cursor = undefined;
+  do {
+    let challengeQuery = firestore.collection('challenges').orderBy(FieldPath.documentId()).limit(PAGE_SIZE);
+    if (cursor) challengeQuery = challengeQuery.startAfter(cursor);
+    const snapshot = await challengeQuery.get();
+    if (snapshot.empty) break;
+    const batch = firestore.batch();
+    let batchWrites = 0;
+    for (const document of snapshot.docs) {
+      const data = document.data();
+      if (data.schemaVersion === 2) continue;
+      if (typeof (data.rewardBTC ?? data.bountyBTC) !== 'number') {
+        skipped += 1;
+        continue;
+      }
+      if (shouldApply) {
+        batch.set(document.ref, toChallengeData(data));
+        batchWrites += 1;
+      }
+    }
+    if (batchWrites > 0) await batch.commit();
+    cursor = snapshot.docs[snapshot.docs.length - 1];
+  } while (cursor);
+
   const referenceMigrations = [
     {
       collection: 'submissions',
@@ -119,7 +156,13 @@ async function migrateChallenges() {
         challengeId: data.bountyId,
         challengeTitle: data.bountyTitle ?? null,
         challengeDescription: data.bountyDescription ?? null,
-        challengeRewardBTC: data.bountyRewardBTC ?? null,
+        schemaVersion: 2,
+        challengeOutcome: {
+          type: 'monetary',
+          amountMinor: Math.round((data.bountyRewardBTC ?? 0) * 100_000_000),
+          currency: 'BTC',
+          deliveryTerms: 'Legacy Bitcoin reward arranged directly with the company.',
+        },
       }),
     },
     {

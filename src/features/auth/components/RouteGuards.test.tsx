@@ -51,7 +51,7 @@ function renderRoutes(authState: AuthState, initialPath: string) {
             <Route path="/login" element={<p>Login page</p>} />
           </Route>
           <Route element={<ProtectedRoute />}>
-            <Route path="/transactions" element={<p>Transactions page</p>} />
+            <Route path="/protected" element={<p>Protected page</p>} />
             <Route path="/challenges" element={<p>Challenges page</p>} />
           </Route>
           <Route element={<ProtectedRoute allowedRoles={['COMPANY']} />}>
@@ -65,7 +65,7 @@ function renderRoutes(authState: AuthState, initialPath: string) {
 
 describe('route guards', () => {
   it('redirects anonymous users to login', () => {
-    renderRoutes(anonymousState, '/transactions');
+    renderRoutes(anonymousState, '/protected');
 
     expect(screen.getByText('Login page')).toBeInTheDocument();
   });

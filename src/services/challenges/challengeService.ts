@@ -68,7 +68,7 @@ class ChallengeService {
       const [totals, ...categoryCounts] = await Promise.all([
         getAggregateFromServer(companyQuery, {
           published: count(),
-          totalRewards: sum('rewardBTC'),
+          totalRewards: sum('outcome.amountMinor'),
         }),
         ...categories.map((category) =>
           getAggregateFromServer(
@@ -96,7 +96,10 @@ class ChallengeService {
     description,
     category,
     difficulty,
-    rewardBTC,
+    outcome,
+    winnerCount,
+    eligibility,
+    geographicRestrictions,
     deadline,
   }: CreateChallengePayload): Promise<{ id: string }> {
     const user = auth.currentUser;
@@ -126,7 +129,13 @@ class ChallengeService {
         description,
         category,
         difficulty,
-        rewardBTC,
+        schemaVersion: 2 as const,
+        outcome,
+        winnerCount,
+        eligibility,
+        geographicRestrictions,
+        status: 'open' as const,
+        submissions: 0,
         deadline: toChallengeDeadlineTimestamp(deadline),
         searchTerms: createChallengeSearchTerms(title, description, category),
         searchSchemaVersion: CHALLENGE_SEARCH_SCHEMA_VERSION,
@@ -155,7 +164,7 @@ class ChallengeService {
     cursor?: QueryDocumentSnapshot<DocumentData>,
   ) {
     try {
-      const constraints: QueryConstraint[] = [];
+      const constraints: QueryConstraint[] = [where('status', '==', 'open')];
       const search = normalizeChallengeFilter(filters.search ?? '');
       if (search) {
         constraints.push(where('searchTerms', 'array-contains', search));

@@ -100,14 +100,6 @@ export const router = createBrowserRouter([
             path: 'company-challenges',
             element: <Navigate to="/challenges" replace />,
           },
-          {
-            path: 'transactions',
-            lazy: async () => {
-              const { TransactionsPage } =
-                await import('./features/transactions/pages/TransactionsPage');
-              return { Component: TransactionsPage };
-            },
-          },
         ],
       },
       {

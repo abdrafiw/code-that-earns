@@ -13,9 +13,12 @@ import {
   startAfter,
   type QueryConstraint,
   type QueryDocumentSnapshot,
+  updateDoc,
 } from 'firebase/firestore';
 
-import { auth, db } from '../../config/firebase';
+import { httpsCallable } from 'firebase/functions';
+
+import { auth, db, functions } from '../../config/firebase';
 import {
   challengeConverter,
   COLLECTIONS,
@@ -33,9 +36,39 @@ export type CompanySubmissionPage = {
 };
 
 class SubmissionService {
+  async markUnderReview(submissionId: string) {
+    await updateDoc(doc(db, COLLECTIONS.SUBMISSIONS, submissionId), {
+      status: 'under_review',
+      reviewedAt: serverTimestamp(),
+    });
+  }
+
+  async beginChallengeReview(challengeId: string) {
+    const challengeRef = doc(db, COLLECTIONS.CHALLENGES, challengeId);
+    const challengeSnapshot = await getDoc(
+      challengeRef.withConverter(challengeConverter),
+    );
+    if (!challengeSnapshot.exists()) throw new Error('Challenge not found.');
+    if (challengeSnapshot.data().status === 'in_review') return;
+    if (challengeSnapshot.data().status !== 'open') {
+      throw new Error('This challenge can no longer enter review.');
+    }
+    await updateDoc(challengeRef, {
+      status: 'in_review',
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  async finalizeWinners(challengeId: string, submissionIds: string[]) {
+    const finalize = httpsCallable(functions, 'finalizeWinners');
+    await finalize({ challengeId, submissionIds });
+  }
+
   async submitSolution({
     githubUrl,
-    bitcoinAddress,
+    liveDemoUrl,
+    notes,
+    publicWinnerConsent,
     challengeID,
   }: SubmitSolutionPayload): Promise<void> {
     const user = auth.currentUser;
@@ -94,9 +127,12 @@ class SubmissionService {
         companyUid: challenge.companyUid,
         challengeTitle: challenge.title ?? null,
         challengeDescription: challenge.description ?? null,
-        challengeRewardBTC: challenge.rewardBTC ?? null,
+        schemaVersion: 2 as const,
+        challengeOutcome: challenge.outcome,
         githubUrl,
-        bitcoinAddress,
+        ...(liveDemoUrl ? { liveDemoUrl } : {}),
+        ...(notes ? { notes } : {}),
+        publicWinnerConsent,
         developerUid: user.uid,
         developerName: developer.name,
         developerEmail: developer.email,

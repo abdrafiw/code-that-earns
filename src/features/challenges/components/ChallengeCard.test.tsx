@@ -7,7 +7,10 @@ import { MemoryRouter } from 'react-router-dom';
 const mockChallenge = {
   id: '1',
   title: 'build a react dashboard',
-  rewardBTC: 0.1,
+  outcome: { type: 'monetary', amountMinor: 10000, currency: 'USD' },
+  winnerCount: 1,
+  eligibility: 'Open to all developers.',
+  geographicRestrictions: 'None',
   deadline: new Date().toISOString(),
   description: 'Test Challenge Description',
   category: 'Test Category',
@@ -40,9 +43,7 @@ describe('Challenge card', () => {
 
     expect(screen.getByText(mockChallenge.difficulty)).toBeInTheDocument();
     expect(screen.getByText(mockChallenge.description)).toBeInTheDocument();
-    expect(
-      screen.getByText(`${mockChallenge.rewardBTC} BTC`),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/\$100\.00 · 1 winner/)).toBeInTheDocument();
     expect(screen.getByText(`${mockChallenge.company}`)).toBeInTheDocument();
     expect(
       screen.getByText(formatChallengeDeadline(mockChallenge.deadline)),

@@ -37,10 +37,12 @@ service cloud.firestore {
 
     function hasValidChallengeFields(data) {
       return data.keys().hasOnly([
-          'title', 'description', 'category', 'difficulty', 'rewardBTC',
+          'schemaVersion', 'title', 'description', 'category', 'difficulty',
+          'outcome', 'winnerCount', 'eligibility', 'geographicRestrictions',
           'deadline', 'searchTerms', 'searchSchemaVersion', 'filterFacets',
-          'companyName', 'companyUid', 'createdAt', 'updatedAt'
+          'companyName', 'companyUid', 'status', 'submissions', 'createdAt', 'updatedAt'
         ])
+        && data.schemaVersion == 2
         && data.title is string
         && data.title.size() >= 3
         && data.title.size() <= 120
@@ -49,9 +51,15 @@ service cloud.firestore {
         && data.description.size() <= 5000
         && data.category in ['Coding', 'Data Analysis', 'Blockchain']
         && data.difficulty in ['Beginner', 'Intermediate', 'Advanced']
-        && data.rewardBTC is number
-        && data.rewardBTC > 0
-        && data.rewardBTC <= 21
+        && data.outcome is map
+        && data.outcome.keys().hasOnly(['type', 'recognitionLabel', 'amountMinor', 'currency', 'rewardDescription', 'deliveryTerms'])
+        && data.outcome.type in ['recognition', 'monetary', 'non_monetary', 'recognition_and_reward']
+        && data.winnerCount is int && data.winnerCount >= 1 && data.winnerCount <= 10
+        && data.eligibility is string && data.eligibility.size() > 0 && data.eligibility.size() <= 2000
+        && data.geographicRestrictions is string && data.geographicRestrictions.size() > 0 && data.geographicRestrictions.size() <= 1000
+        && (data.outcome.type != 'recognition' || (data.outcome.recognitionLabel is string && data.outcome.recognitionLabel.size() > 0))
+        && (data.outcome.type != 'monetary' && data.outcome.type != 'recognition_and_reward' || (data.outcome.amountMinor is int && data.outcome.amountMinor > 0 && data.outcome.currency is string && data.outcome.currency.matches('^[A-Z]{3}$') && data.outcome.deliveryTerms is string && data.outcome.deliveryTerms.size() > 0))
+        && (data.outcome.type != 'non_monetary' || (data.outcome.rewardDescription is string && data.outcome.rewardDescription.size() > 0 && data.outcome.deliveryTerms is string && data.outcome.deliveryTerms.size() > 0))
         && data.searchTerms is list
         && data.searchTerms.size() <= 100
         && data.searchSchemaVersion == 1
@@ -64,6 +72,8 @@ service cloud.firestore {
         ])
         && data.deadline is timestamp
         && data.deadline > request.time
+        && data.status == 'open'
+        && data.submissions == 0
         && data.createdAt == request.time
         && data.updatedAt == request.time;
     }
@@ -73,22 +83,24 @@ service cloud.firestore {
       let developer = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
       return submissionId == data.challengeId + '_' + request.auth.uid
         && data.keys().hasOnly([
-          'challengeId', 'companyUid', 'challengeTitle', 'challengeDescription',
-          'challengeRewardBTC', 'githubUrl', 'bitcoinAddress', 'developerUid',
+          'schemaVersion', 'challengeId', 'companyUid', 'challengeTitle', 'challengeDescription',
+          'challengeOutcome', 'githubUrl', 'liveDemoUrl', 'notes', 'publicWinnerConsent', 'developerUid',
           'developerName', 'developerEmail', 'status', 'createdAt'
         ])
+        && data.schemaVersion == 2
         && data.challengeId is string
         && data.developerUid == request.auth.uid
         && data.companyUid == challenge.companyUid
         && data.challengeTitle == challenge.title
         && data.challengeDescription == challenge.description
-        && data.challengeRewardBTC == challenge.rewardBTC
+        && data.challengeOutcome == challenge.outcome
         && data.developerName == developer.name
         && data.developerEmail == developer.email
         && data.githubUrl is string
         && data.githubUrl.matches('^https://github[.]com/[^/]+/[^/]+/?$')
-        && data.bitcoinAddress is string
-        && data.bitcoinAddress.matches('^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}$')
+        && (!data.keys().hasAny(['liveDemoUrl']) || (data.liveDemoUrl is string && data.liveDemoUrl.matches('^https://.+')))
+        && (!data.keys().hasAny(['notes']) || (data.notes is string && data.notes.size() <= 2000))
+        && data.publicWinnerConsent is bool
         && data.status == 'submitted'
         && data.createdAt == request.time
         && challenge.deadline > request.time
@@ -98,13 +110,12 @@ service cloud.firestore {
     function hasValidSubmissionStatusTransition(currentStatus, nextStatus) {
       return currentStatus == nextStatus
         || (currentStatus == 'submitted'
-          && nextStatus in ['reviewed', 'rejected'])
-        || (currentStatus == 'reviewed'
-          && nextStatus in ['winner', 'rejected']);
+          && nextStatus in ['under_review', 'rejected'])
+        || (currentStatus == 'under_review' && nextStatus == 'rejected');
     }
 
     function hasValidSubmissionReview(data) {
-      return data.status in ['submitted', 'reviewed', 'winner', 'rejected']
+      return data.status in ['submitted', 'under_review', 'rejected']
         && data.reviewedAt == request.time
         && (!data.keys().hasAny(['reviewNotes'])
           || (data.reviewNotes is string && data.reviewNotes.size() <= 2000))
@@ -160,11 +171,13 @@ service cloud.firestore {
         && resource.data.companyUid == request.auth.uid
         && request.resource.data.companyUid == resource.data.companyUid
         && request.resource.data.companyName == resource.data.companyName
-        && request.resource.data.createdAt == resource.data.createdAt;
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && resource.data.status == 'open'
+        && request.resource.data.status in ['in_review', 'cancelled']
+        && request.resource.data.updatedAt == request.time;
       
-      // Only the creator can delete their own challenges
-      allow delete: if isAuthenticated() 
-        && resource.data.companyUid == request.auth.uid;
+      allow delete: if false;
     }
     
     // Submissions collection
@@ -196,16 +209,6 @@ service cloud.firestore {
         && hasValidSubmissionReview(request.resource.data);
     }
     
-    // Transactions collection
-    match /transactions/{transactionId} {
-      // Users can read transactions they're involved in
-      allow read: if isAuthenticated() 
-        && (resource.data.fromUserId == request.auth.uid 
-            || resource.data.toUserId == request.auth.uid);
-      
-      // Financial records are written only by trusted Admin SDK backends,
-      // which bypass client security rules after provider verification.
-      allow create, update, delete: if false;
-    }
+    match /transactions/{transactionId} { allow read, write: if false; }
   }
 }

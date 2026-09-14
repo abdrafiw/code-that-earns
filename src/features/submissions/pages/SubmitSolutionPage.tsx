@@ -1,4 +1,4 @@
-import { ArrowLeft, Bitcoin, Building2, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Award, Building2, CalendarDays } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { SubmitSolutionForm } from '../components/SubmitSolutionForm';
 import { SubmitSolutionLoadingState } from '../components/SubmitSolutionLoadingState';
@@ -10,6 +10,7 @@ import { ChallengeNotFoundError } from '../../../services/challenges/challengeSe
 import { Button } from '../../../components/ui/button';
 import { formatChallengeDeadline } from '../../challenges/utils/challengeDeadline';
 import { normalizeChallengeFilter } from '../../challenges/utils/challengeFilters';
+import { formatOutcome } from '../../challenges/utils/formatOutcome';
 
 const difficultyStyles: Record<string, string> = {
   beginner: 'bg-emerald-100 text-emerald-800',
@@ -104,11 +105,11 @@ export const SubmitSolutionPage = () => {
               <dl className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                   <dt className="flex items-center gap-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    <Bitcoin className="size-4 text-emerald-500" />
+                    <Award className="size-4 text-emerald-500" />
                     Reward
                   </dt>
                   <dd className="mt-2 text-xl font-semibold text-gray-950">
-                    {challenge.rewardBTC} BTC
+                    {formatOutcome(challenge.outcome)}
                   </dd>
                 </div>
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
@@ -121,6 +122,15 @@ export const SubmitSolutionPage = () => {
                   </dd>
                 </div>
               </dl>
+              {challenge.status === 'completed' && challenge.results && (
+                <section className="rounded-lg border border-emerald-200 bg-emerald-50 p-5">
+                  <h2 className="font-semibold text-emerald-950">Challenge results</h2>
+                  <ul className="mt-2 list-inside list-disc text-sm text-emerald-900">
+                    {challenge.results.map((winner) => <li key={winner.submissionId}>{winner.displayName} — {challenge.outcome.recognitionLabel ?? 'Winner'}</li>)}
+                  </ul>
+                  {challenge.outcome.type !== 'recognition' && <p className="mt-3 text-xs text-emerald-800">Any reward is delivered directly by the company outside CTE and is not verified or guaranteed by CTE.</p>}
+                </section>
+              )}
             </div>
           </article>
 
