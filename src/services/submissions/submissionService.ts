@@ -67,7 +67,7 @@ class SubmissionService {
   }
 
   async submitSolution({
-    githubUrl,
+    submissionUrl,
     liveDemoUrl,
     notes,
     publicWinnerConsent,
@@ -132,7 +132,7 @@ class SubmissionService {
         throw new Error('Complete your developer profile before submitting.');
       }
 
-      if (!isValidSubmissionUrl(githubUrl, challenge.category)) {
+      if (!isValidSubmissionUrl(submissionUrl, challenge.category)) {
         throw new Error(
           isDesignChallenge(challenge.category)
             ? 'Submit a valid Figma, Behance, or Dribbble project URL.'
@@ -145,9 +145,9 @@ class SubmissionService {
         companyUid: challenge.companyUid,
         challengeTitle: challenge.title ?? null,
         challengeDescription: challenge.description ?? null,
-        schemaVersion: 2 as const,
+        schemaVersion: 3 as const,
         challengeOutcome: challenge.outcome,
-        githubUrl,
+        submissionUrl,
         ...(liveDemoUrl ? { liveDemoUrl } : {}),
         ...(notes ? { notes } : {}),
         publicWinnerConsent,

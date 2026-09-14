@@ -62,4 +62,36 @@ describe('Firestore document schemas', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('accepts current design submissions and legacy GitHub submissions', () => {
+    const common = {
+      challengeId: 'challenge-1',
+      companyUid: 'company-1',
+      challengeTitle: 'Challenge',
+      challengeDescription: 'Description',
+      challengeOutcome: { type: 'recognition', recognitionLabel: 'Winner' },
+      publicWinnerConsent: false,
+      developerUid: 'developer-1',
+      developerName: 'Developer',
+      developerEmail: 'developer@example.com',
+      status: 'submitted',
+      createdAt: timestamp,
+    };
+
+    expect(
+      submissionDocumentSchema.safeParse({
+        ...common,
+        schemaVersion: 3,
+        submissionUrl:
+          'https://www.behance.net/gallery/123456789/Product-Design',
+      }).success,
+    ).toBe(true);
+    expect(
+      submissionDocumentSchema.safeParse({
+        ...common,
+        schemaVersion: 2,
+        githubUrl: 'https://github.com/example/project',
+      }).success,
+    ).toBe(true);
+  });
 });

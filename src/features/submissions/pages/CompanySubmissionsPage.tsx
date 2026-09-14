@@ -11,9 +11,20 @@ import { Button } from '../../../components/ui/button';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { toast } from 'sonner';
 import { CompanySubmissionCard } from '../components/CompanySubmissionCard';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../../components/ui/alert-dialog';
 
 export function CompanySubmissionsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const reviewMutation = useMarkUnderReview();
   const finalizeMutation = useFinalizeWinners();
   const submissionsQuery = useGetCompanySubmissions();
@@ -28,7 +39,7 @@ export function CompanySubmissionsPage() {
     });
   };
 
-  const finalizeSelection = () => {
+  const requestFinalization = () => {
     const chosen = submissions.filter((submission) =>
       selected.has(submission.id),
     );
@@ -39,14 +50,24 @@ export function CompanySubmissionsPage() {
       toast.error('Select winners from one challenge at a time.');
       return;
     }
+    setIsConfirmOpen(true);
+  };
+
+  const finalizeSelection = () => {
+    const chosen = submissions.filter((submission) =>
+      selected.has(submission.id),
+    );
+    const challengeId = chosen[0]?.challengeId;
+    if (!challengeId) return;
     finalizeMutation.mutate(
       {
-        challengeId: challengeIds[0],
+        challengeId,
         submissionIds: chosen.map((submission) => submission.id),
       },
       {
         onSuccess: () => {
           setSelected(new Set());
+          setIsConfirmOpen(false);
           toast.success('Winners finalized.');
         },
         onError: (error) => toast.error(getErrorMessage(error)),
@@ -90,7 +111,11 @@ export function CompanySubmissionsPage() {
             key={submission.id}
             submission={submission}
             selected={selected.has(submission.id)}
-            onReview={(submissionId) => reviewMutation.mutate(submissionId)}
+            onReview={(submissionId) =>
+              reviewMutation.mutate(submissionId, {
+                onError: (error) => toast.error(getErrorMessage(error)),
+              })
+            }
             onToggleWinner={toggleWinner}
           />
         ))}
@@ -99,13 +124,39 @@ export function CompanySubmissionsPage() {
       {selected.size > 0 && (
         <Button
           disabled={finalizeMutation.isPending}
-          onClick={finalizeSelection}
+          onClick={requestFinalization}
         >
           {finalizeMutation.isPending
             ? 'Finalizing…'
             : `Finalize ${selected.size} winner${selected.size === 1 ? '' : 's'}`}
         </Button>
       )}
+
+      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Finalize these winners?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently marks the selected submissions as winners,
+              rejects all other submissions for the challenge, and closes the
+              challenge. This action cannot be reversed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={finalizeMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={finalizeMutation.isPending}
+              onClick={finalizeSelection}
+            >
+              {finalizeMutation.isPending
+                ? 'Finalizing…'
+                : 'Confirm finalization'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {submissionsQuery.hasNextPage && (
         <div className="flex justify-center pt-2">

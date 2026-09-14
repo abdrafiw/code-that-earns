@@ -126,13 +126,13 @@ describe('Firestore marketplace rules', () => {
       .firestore();
     const submissionRef = doc(db, 'submissions/challenge-1_developer-1');
     const submission = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       challengeId: 'challenge-1',
       companyUid: 'company-1',
       challengeTitle: 'Provider-neutral challenge',
       challengeDescription: 'Build and document a useful working solution.',
       challengeOutcome: challenge().outcome,
-      githubUrl: 'https://github.com/example/project',
+      submissionUrl: 'https://github.com/example/project',
       publicWinnerConsent: false,
       developerUid: 'developer-1',
       developerName: 'Dev',
@@ -154,6 +154,45 @@ describe('Firestore marketplace rules', () => {
       updateDoc(doc(otherDeveloper, 'submissions/challenge-1_developer-1'), {
         notes: 'Tampered',
       }),
+    );
+  });
+
+  it('allows supported UI/UX project links and rejects repository links', async () => {
+    await environment.withSecurityRulesDisabled(async (context) =>
+      setDoc(doc(context.firestore(), 'challenges/design-1'), {
+        ...challenge(),
+        category: 'UI/UX Design',
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      }),
+    );
+    const db = environment
+      .authenticatedContext('developer-1', { email: 'developer@example.com' })
+      .firestore();
+    const submission = {
+      schemaVersion: 3,
+      challengeId: 'design-1',
+      companyUid: 'company-1',
+      challengeTitle: 'Provider-neutral challenge',
+      challengeDescription: 'Build and document a useful working solution.',
+      challengeOutcome: challenge().outcome,
+      submissionUrl: 'https://www.behance.net/gallery/123456789/Product-Design',
+      publicWinnerConsent: false,
+      developerUid: 'developer-1',
+      developerName: 'Dev',
+      developerEmail: 'developer@example.com',
+      status: 'submitted',
+      createdAt: serverTimestamp(),
+    };
+
+    await assertFails(
+      setDoc(doc(db, 'submissions/design-1_developer-1'), {
+        ...submission,
+        submissionUrl: 'https://github.com/example/project',
+      }),
+    );
+    await assertSucceeds(
+      setDoc(doc(db, 'submissions/design-1_developer-1'), submission),
     );
   });
 
@@ -183,13 +222,13 @@ describe('Firestore marketplace rules', () => {
       .authenticatedContext('developer-1', { email: 'developer@example.com' })
       .firestore();
     const submission = (challengeId: string) => ({
-      schemaVersion: 2,
+      schemaVersion: 3,
       challengeId,
       companyUid: 'company-1',
       challengeTitle: 'Provider-neutral challenge',
       challengeDescription: 'Build and document a useful working solution.',
       challengeOutcome: challenge().outcome,
-      githubUrl: 'https://github.com/example/project',
+      submissionUrl: 'https://github.com/example/project',
       publicWinnerConsent: false,
       developerUid: 'developer-1',
       developerName: 'Dev',
@@ -201,7 +240,7 @@ describe('Firestore marketplace rules', () => {
     await assertFails(
       setDoc(doc(db, 'submissions/open_developer-1'), {
         ...submission('open'),
-        githubUrl: 'https://example.com/not-a-repository',
+        submissionUrl: 'https://example.com/not-a-repository',
       }),
     );
     await assertFails(
@@ -227,13 +266,13 @@ describe('Firestore marketplace rules', () => {
         updatedAt: Timestamp.now(),
       });
       await setDoc(doc(db, 'submissions/challenge-1_developer-1'), {
-        schemaVersion: 2,
+        schemaVersion: 3,
         challengeId: 'challenge-1',
         companyUid: 'company-1',
         challengeTitle: 'Provider-neutral challenge',
         challengeDescription: 'Build and document a useful working solution.',
         challengeOutcome: challenge().outcome,
-        githubUrl: 'https://github.com/example/project',
+        submissionUrl: 'https://github.com/example/project',
         publicWinnerConsent: false,
         developerUid: 'developer-1',
         developerName: 'Dev',

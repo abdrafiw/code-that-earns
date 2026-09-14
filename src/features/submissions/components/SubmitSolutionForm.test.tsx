@@ -134,4 +134,54 @@ describe('SubmitSolutionForm', () => {
       'Solution submitted successfully.',
     );
   });
+
+  it('accepts a supported project link for a UI/UX Design challenge', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <SubmitSolutionForm
+          challengeID="design-1"
+          challengeCategory="UI/UX Design"
+        />
+      </MemoryRouter>,
+    );
+
+    const designLink = screen.getByLabelText(/design project link/i);
+    await user.type(
+      designLink,
+      'https://www.behance.net/gallery/123456789/Design-System',
+    );
+    await user.click(screen.getByRole('button', { name: /submit solution/i }));
+
+    expect(mockMutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        submissionUrl:
+          'https://www.behance.net/gallery/123456789/Design-System',
+      }),
+      expect.any(Object),
+    );
+  });
+
+  it('rejects unsupported links for a UI/UX Design challenge', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <SubmitSolutionForm
+          challengeID="design-1"
+          challengeCategory="UI/UX Design"
+        />
+      </MemoryRouter>,
+    );
+
+    await user.type(
+      screen.getByLabelText(/design project link/i),
+      'https://example.com/design',
+    );
+    await user.click(screen.getByRole('button', { name: /submit solution/i }));
+
+    expect(
+      screen.getByText(/valid figma, behance, or dribbble project url/i),
+    ).toBeInTheDocument();
+    expect(mockMutate).not.toHaveBeenCalled();
+  });
 });

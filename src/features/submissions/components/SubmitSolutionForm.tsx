@@ -2,6 +2,7 @@ import { type SubmitEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { SiGithub } from 'react-icons/si';
+import { ExternalLink } from 'lucide-react';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
@@ -14,9 +15,10 @@ import {
   type SubmissionFormValues,
 } from '../../../utils/formSchemas';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
+import { isDesignChallenge } from '../../challenges/constants';
 
 const initialValues: SubmissionFormValues = {
-  githubUrl: '',
+  submissionUrl: '',
   liveDemoUrl: '',
   notes: '',
   publicWinnerConsent: false,
@@ -24,11 +26,13 @@ const initialValues: SubmissionFormValues = {
 
 type SubmitSolutionFormProps = {
   challengeID: string;
+  challengeCategory?: string;
   unavailableReason?: string;
 };
 
 export const SubmitSolutionForm = ({
   challengeID,
+  challengeCategory,
   unavailableReason,
 }: SubmitSolutionFormProps) => {
   const form = useTypedForm(initialValues);
@@ -36,8 +40,9 @@ export const SubmitSolutionForm = ({
   const navigate = useNavigate();
 
   const submitSolutionMutation = useSubmitSolution();
+  const requiresDesignLink = isDesignChallenge(challengeCategory);
   const hasRequiredFields = Boolean(
-    form.values.githubUrl.trim() && !unavailableReason,
+    form.values.submissionUrl.trim() && !unavailableReason,
   );
 
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
@@ -48,7 +53,7 @@ export const SubmitSolutionForm = ({
       return;
     }
 
-    const errors = validateSubmission(form.values);
+    const errors = validateSubmission(form.values, challengeCategory);
     form.setErrors(errors);
     if (hasFormErrors(errors)) {
       toast.error('Please fill in all fields.');
@@ -56,7 +61,7 @@ export const SubmitSolutionForm = ({
     }
 
     const payload = {
-      githubUrl: form.values.githubUrl.trim(),
+      submissionUrl: form.values.submissionUrl.trim(),
       liveDemoUrl: form.values.liveDemoUrl.trim() || undefined,
       notes: form.values.notes.trim() || undefined,
       publicWinnerConsent: form.values.publicWinnerConsent,
@@ -85,33 +90,51 @@ export const SubmitSolutionForm = ({
           Submit your solution
         </h2>
         <p className="text-sm leading-6 text-gray-500">
-          Share your repository and optional supporting details for review.
+          {requiresDesignLink
+            ? 'Share a Figma, Behance, or Dribbble project for review.'
+            : 'Share your repository and optional supporting details for review.'}
         </p>
       </header>
 
       <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="github-url">GitHub repository</Label>
+          <Label htmlFor="submission-url">
+            {requiresDesignLink ? 'Design project link' : 'GitHub repository'}
+          </Label>
           <div className="relative">
-            <SiGithub className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            {requiresDesignLink ? (
+              <ExternalLink
+                aria-hidden="true"
+                className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+              />
+            ) : (
+              <SiGithub
+                aria-hidden="true"
+                className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+              />
+            )}
             <Input
-              id="github-url"
+              id="submission-url"
               type="url"
               required
               maxLength={2048}
-              value={form.values.githubUrl}
-              onChange={(e) => form.setField('githubUrl', e.target.value)}
+              value={form.values.submissionUrl}
+              onChange={(e) => form.setField('submissionUrl', e.target.value)}
               className="pl-10"
-              placeholder="https://github.com/username/project"
-              aria-invalid={!!form.errors.githubUrl}
+              placeholder={
+                requiresDesignLink
+                  ? 'https://www.figma.com/design/...'
+                  : 'https://github.com/username/project'
+              }
+              aria-invalid={!!form.errors.submissionUrl}
               aria-describedby={
-                form.errors.githubUrl ? 'github-url-error' : undefined
+                form.errors.submissionUrl ? 'submission-url-error' : undefined
               }
             />
           </div>
-          {form.errors.githubUrl && (
-            <p id="github-url-error" className="text-destructive text-sm">
-              {form.errors.githubUrl}
+          {form.errors.submissionUrl && (
+            <p id="submission-url-error" className="text-destructive text-sm">
+              {form.errors.submissionUrl}
             </p>
           )}
         </div>

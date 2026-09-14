@@ -4,12 +4,15 @@ import {
   getSubmissionStatusColor,
   getSubmissionStatusIcon,
 } from '../utils/submissionStatus';
+import { getStoredSubmissionUrl } from '../../../utils/submissionUrl';
 
 export function DeveloperSubmissionCard({
   submission,
 }: {
   submission: SubmissionRecord;
 }) {
+  const submissionUrl = getStoredSubmissionUrl(submission);
+
   return (
     <li className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
       <header className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
@@ -35,15 +38,15 @@ export function DeveloperSubmissionCard({
 
       <dl className="mt-5 space-y-3 text-sm">
         <div>
-          <dt className="font-medium text-gray-600">Repository</dt>
+          <dt className="font-medium text-gray-600">Submission link</dt>
           <dd>
             <a
-              href={submission.githubUrl}
+              href={submissionUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 break-all text-blue-600 underline hover:text-blue-800"
             >
-              {submission.githubUrl}
+              {submissionUrl}
               <ExternalLink aria-hidden="true" className="size-3" />
             </a>
           </dd>

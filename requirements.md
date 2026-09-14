@@ -202,7 +202,7 @@ Acceptance criteria:
 - Invalid URLs and excessive text are rejected.
 - Developers cannot read or change another developer's submission.
 
-### MVP-009 — Complete review and winner selection
+### [x] MVP-009 — Complete review and winner selection
 
 - Let companies view only submissions to their own challenges.
 - Show repository, demo, notes, developer display name, and status.

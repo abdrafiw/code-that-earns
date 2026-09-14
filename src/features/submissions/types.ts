@@ -1,5 +1,5 @@
 export type SubmitSolutionPayload = {
-  githubUrl: string;
+  submissionUrl: string;
   liveDemoUrl?: string;
   notes?: string;
   publicWinnerConsent: boolean;
@@ -9,6 +9,5 @@ export type SubmitSolutionPayload = {
 export type SubmissionRecord = Partial<SubmissionDocument> & {
   id: string;
   challengeId: string;
-  githubUrl: string;
 };
 import type { SubmissionDocument } from '../../services/firestore-structure';

@@ -136,6 +136,7 @@ export const SubmitSolutionPage = () => {
           <aside className="lg:sticky lg:top-6">
             <SubmitSolutionForm
               challengeID={challengeId}
+              challengeCategory={challenge.category}
               unavailableReason={submissionUnavailableReason}
             />
           </aside>

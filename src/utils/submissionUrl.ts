@@ -9,6 +9,8 @@ const DESIGN_HOSTS = new Set([
   'www.dribbble.com',
 ]);
 
+const FIGMA_PROJECT_PATHS = new Set(['design', 'file', 'proto', 'board']);
+
 export function isValidSubmissionUrl(value: string, category?: string) {
   try {
     const trimmedValue = value.trim();
@@ -18,7 +20,20 @@ export function isValidSubmissionUrl(value: string, category?: string) {
     if (trimmedValue.length > 2048 || url.protocol !== 'https:') return false;
 
     if (isDesignChallenge(category)) {
-      return DESIGN_HOSTS.has(url.hostname) && pathSegments.length > 0;
+      if (!DESIGN_HOSTS.has(url.hostname)) return false;
+      if (url.hostname.endsWith('figma.com')) {
+        return (
+          (FIGMA_PROJECT_PATHS.has(pathSegments[0]) &&
+            pathSegments.length >= 2) ||
+          (pathSegments[0] === 'community' &&
+            pathSegments[1] === 'file' &&
+            pathSegments.length >= 3)
+        );
+      }
+      if (url.hostname.endsWith('behance.net')) {
+        return pathSegments[0] === 'gallery' && pathSegments.length >= 3;
+      }
+      return pathSegments[0] === 'shots' && pathSegments.length >= 2;
     }
 
     return (
@@ -34,7 +49,13 @@ export function isValidSubmissionUrl(value: string, category?: string) {
 
 export function isSupportedStoredSubmissionUrl(value: string) {
   return (
-    isValidSubmissionUrl(value) ||
-    isValidSubmissionUrl(value, 'UI/UX Design')
+    isValidSubmissionUrl(value) || isValidSubmissionUrl(value, 'UI/UX Design')
   );
+}
+
+export function getStoredSubmissionUrl(submission: {
+  submissionUrl?: string;
+  githubUrl?: string;
+}) {
+  return submission.submissionUrl ?? submission.githubUrl ?? '';
 }

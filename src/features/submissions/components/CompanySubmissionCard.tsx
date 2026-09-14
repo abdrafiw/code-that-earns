@@ -6,6 +6,7 @@ import {
   getSubmissionStatusColor,
   getSubmissionStatusIcon,
 } from '../utils/submissionStatus';
+import { getStoredSubmissionUrl } from '../../../utils/submissionUrl';
 
 type CompanySubmission = CompanySubmissionPage['submissions'][number];
 
@@ -24,6 +25,7 @@ export function CompanySubmissionCard({
 }: CompanySubmissionCardProps) {
   const canSelect =
     submission.status === 'submitted' || submission.status === 'under_review';
+  const submissionUrl = getStoredSubmissionUrl(submission);
 
   return (
     <li className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
@@ -83,15 +85,15 @@ export function CompanySubmissionCard({
         </p>
 
         <p>
-          <span className="font-medium text-gray-600">Repository:</span>{' '}
+          <span className="font-medium text-gray-600">Submission link:</span>{' '}
           <a
-            href={submission.githubUrl}
+            href={submissionUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 break-all text-blue-600 underline"
           >
-            {submission.githubUrl}
-            <ExternalLink className="size-3" />
+            {submissionUrl}
+            <ExternalLink aria-hidden="true" className="size-3" />
           </a>
         </p>
 

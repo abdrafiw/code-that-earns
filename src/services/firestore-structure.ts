@@ -116,40 +116,67 @@ export const challengeDocumentSchema = z.object({
   updatedAt: timestampSchema,
 });
 
-export const submissionDocumentSchema = z.object({
-  schemaVersion: z.literal(2),
-  challengeId: z.string().min(1),
-  companyUid: z.string().min(1),
-  challengeTitle: nullableString,
-  challengeDescription: nullableString,
-  challengeOutcome: challengeOutcomeSchema,
-  githubUrl: z
-    .string()
-    .max(2048)
-    .url()
-    .refine(
-      isSupportedStoredSubmissionUrl,
-      'Expected a supported HTTPS submission URL',
-    ),
-  liveDemoUrl: z
-    .string()
-    .max(2048)
-    .url()
-    .refine((value) => new URL(value).protocol === 'https:', {
-      message: 'Expected an HTTPS live demo URL',
-    })
-    .optional(),
-  notes: z.string().trim().max(2000).optional(),
-  publicWinnerConsent: z.boolean(),
-  developerUid: z.string().min(1),
-  developerName: nullableString,
-  developerEmail: z.email().nullable(),
-  status: z.enum(['submitted', 'under_review', 'winner', 'rejected']),
-  reviewNotes: z.string().max(5000).optional(),
-  reviewedAt: timestampSchema.optional(),
-  score: z.number().finite().optional(),
-  createdAt: timestampSchema,
-});
+export const submissionDocumentSchema = z
+  .object({
+    schemaVersion: z.union([z.literal(2), z.literal(3)]),
+    challengeId: z.string().min(1),
+    companyUid: z.string().min(1),
+    challengeTitle: nullableString,
+    challengeDescription: nullableString,
+    challengeOutcome: challengeOutcomeSchema,
+    githubUrl: z
+      .string()
+      .max(2048)
+      .url()
+      .refine(
+        isSupportedStoredSubmissionUrl,
+        'Expected a supported HTTPS submission URL',
+      )
+      .optional(),
+    submissionUrl: z
+      .string()
+      .max(2048)
+      .url()
+      .refine(
+        isSupportedStoredSubmissionUrl,
+        'Expected a supported HTTPS submission URL',
+      )
+      .optional(),
+    liveDemoUrl: z
+      .string()
+      .max(2048)
+      .url()
+      .refine((value) => new URL(value).protocol === 'https:', {
+        message: 'Expected an HTTPS live demo URL',
+      })
+      .optional(),
+    notes: z.string().trim().max(2000).optional(),
+    publicWinnerConsent: z.boolean(),
+    developerUid: z.string().min(1),
+    developerName: nullableString,
+    developerEmail: z.email().nullable(),
+    status: z.enum(['submitted', 'under_review', 'winner', 'rejected']),
+    reviewNotes: z.string().max(5000).optional(),
+    reviewedAt: timestampSchema.optional(),
+    score: z.number().finite().optional(),
+    createdAt: timestampSchema,
+  })
+  .superRefine((submission, context) => {
+    if (submission.schemaVersion === 2 && !submission.githubUrl) {
+      context.addIssue({
+        code: 'custom',
+        path: ['githubUrl'],
+        message: 'Version 2 submissions require githubUrl',
+      });
+    }
+    if (submission.schemaVersion === 3 && !submission.submissionUrl) {
+      context.addIssue({
+        code: 'custom',
+        path: ['submissionUrl'],
+        message: 'Version 3 submissions require submissionUrl',
+      });
+    }
+  });
 
 export type UserDocument = z.infer<typeof userDocumentSchema>;
 export type ChallengeDocument = z.infer<typeof challengeDocumentSchema>;

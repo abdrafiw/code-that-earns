@@ -32,7 +32,7 @@ export type ChallengeFormValues = {
   deadline?: Date;
 };
 export type SubmissionFormValues = {
-  githubUrl: string;
+  submissionUrl: string;
   liveDemoUrl: string;
   notes: string;
   publicWinnerConsent: boolean;
@@ -120,8 +120,8 @@ export function validateSubmission(
   category?: string,
 ) {
   const errors: FormErrors<SubmissionFormValues> = {};
-  if (!isValidSubmissionUrl(values.githubUrl, category))
-    errors.githubUrl = isDesignChallenge(category)
+  if (!isValidSubmissionUrl(values.submissionUrl, category))
+    errors.submissionUrl = isDesignChallenge(category)
       ? 'Enter a valid Figma, Behance, or Dribbble project URL.'
       : 'Enter a valid HTTPS GitHub repository URL.';
   if (values.liveDemoUrl.trim()) {

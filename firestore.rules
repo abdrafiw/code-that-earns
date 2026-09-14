@@ -41,10 +41,10 @@ service cloud.firestore {
       return submissionId == data.challengeId + '_' + request.auth.uid
         && data.keys().hasOnly([
           'schemaVersion', 'challengeId', 'companyUid', 'challengeTitle', 'challengeDescription',
-          'challengeOutcome', 'githubUrl', 'liveDemoUrl', 'notes', 'publicWinnerConsent', 'developerUid',
+          'challengeOutcome', 'submissionUrl', 'liveDemoUrl', 'notes', 'publicWinnerConsent', 'developerUid',
           'developerName', 'developerEmail', 'status', 'createdAt'
         ])
-        && data.schemaVersion == 2
+        && data.schemaVersion == 3
         && data.challengeId is string
         && data.developerUid == request.auth.uid
         && data.companyUid == challenge.companyUid
@@ -53,9 +53,15 @@ service cloud.firestore {
         && data.challengeOutcome == challenge.outcome
         && data.developerName == developer.name
         && data.developerEmail == developer.email
-        && data.githubUrl is string
-        && data.githubUrl.size() <= 2048
-        && data.githubUrl.matches('^https://github[.]com/[^/]+/[^/]+/?$')
+        && data.submissionUrl is string
+        && data.submissionUrl.size() <= 2048
+        && ((challenge.category == 'UI/UX Design'
+            && (data.submissionUrl.matches('^https://(www[.])?figma[.]com/(design|file|proto|board)/[^/]+.*')
+              || data.submissionUrl.matches('^https://(www[.])?figma[.]com/community/file/[^/]+.*')
+              || data.submissionUrl.matches('^https://(www[.])?behance[.]net/gallery/[^/]+/[^/]+.*')
+              || data.submissionUrl.matches('^https://(www[.])?dribbble[.]com/shots/[^/]+.*')))
+          || (challenge.category != 'UI/UX Design'
+            && data.submissionUrl.matches('^https://github[.]com/[^/]+/[^/]+/?$')))
         && (!data.keys().hasAny(['liveDemoUrl']) || (data.liveDemoUrl is string && data.liveDemoUrl.size() <= 2048 && data.liveDemoUrl.matches('^https://.+')))
         && (!data.keys().hasAny(['notes']) || (data.notes is string && data.notes.size() <= 2000))
         && data.publicWinnerConsent is bool
