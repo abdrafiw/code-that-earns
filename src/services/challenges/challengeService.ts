@@ -14,6 +14,7 @@ import {
   getAggregateFromServer,
   count,
   sum,
+  Timestamp,
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 
@@ -126,7 +127,10 @@ class ChallengeService {
     cursor?: QueryDocumentSnapshot<DocumentData>,
   ) {
     try {
-      const constraints: QueryConstraint[] = [where('status', '==', 'open')];
+      const constraints: QueryConstraint[] = [
+        where('status', '==', 'open'),
+        where('deadline', '>', Timestamp.now()),
+      ];
       const search = normalizeChallengeFilter(filters.search ?? '');
       if (search) {
         constraints.push(where('searchTerms', 'array-contains', search));
@@ -141,7 +145,11 @@ class ChallengeService {
           );
         }
       }
-      constraints.push(orderBy('createdAt', 'desc'), limit(pageSize));
+      constraints.push(
+        orderBy('deadline', 'asc'),
+        orderBy('createdAt', 'desc'),
+        limit(pageSize),
+      );
 
       let challengeQuery = query(
         collection(db, COLLECTIONS.CHALLENGES).withConverter(

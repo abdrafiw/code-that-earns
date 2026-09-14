@@ -173,7 +173,7 @@ Acceptance criteria:
 - Invalid deadlines, winner counts, amounts, and missing terms produce actionable
   messages.
 
-### MVP-007 — Update discovery and challenge details
+### [x] MVP-007 — Update discovery and challenge details
 
 - Remove Bitcoin-specific wording and visuals.
 - Show company, deadline, status, outcome, per-winner reward, winner count,

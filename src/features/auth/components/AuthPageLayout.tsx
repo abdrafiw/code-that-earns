@@ -25,7 +25,7 @@ export function AuthPageLayout({
 }: AuthPageLayoutProps) {
   return (
     <main className="auth-page min-h-screen bg-slate-50 lg:grid lg:grid-cols-[0.9fr_1.1fr]">
-      <section className="relative hidden overflow-hidden bg-slate-950 px-6 py-8 text-white sm:px-10 lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:px-14 lg:py-12">
+      <div className="relative hidden overflow-hidden bg-slate-950 px-6 py-8 text-white sm:px-10 lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:px-14 lg:py-12">
         <div
           aria-hidden="true"
           className="absolute -right-16 -bottom-20 size-64 rounded-full border-38 border-indigo-500/10"
@@ -86,9 +86,9 @@ export function AuthPageLayout({
             Recognition and rewards
           </span>
         </div>
-      </section>
+      </div>
 
-      <section className="flex min-h-screen items-center justify-center px-4 py-5 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
+      <div className="flex min-h-screen items-center justify-center px-4 py-5 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
         <div className={`w-full space-y-6 ${wide ? 'max-w-2xl' : 'max-w-md'}`}>
           <nav className="flex items-center justify-between">
             <Link
@@ -130,7 +130,7 @@ export function AuthPageLayout({
             are authorized to share.
           </p>
         </div>
-      </section>
+      </div>
     </main>
   );
 }

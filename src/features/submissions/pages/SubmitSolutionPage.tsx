@@ -1,4 +1,4 @@
-import { ArrowLeft, Award, Building2, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Building2 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { SubmitSolutionForm } from '../components/SubmitSolutionForm';
 import { SubmitSolutionLoadingState } from '../components/SubmitSolutionLoadingState';
@@ -8,9 +8,8 @@ import { PageErrorState } from '../../../components/common/PageErrorState';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { ChallengeNotFoundError } from '../../../services/challenges/challengeService';
 import { Button } from '../../../components/ui/button';
-import { formatChallengeDeadline } from '../../challenges/utils/challengeDeadline';
 import { normalizeChallengeFilter } from '../../challenges/utils/challengeFilters';
-import { formatOutcome } from '../../challenges/utils/formatOutcome';
+import { ChallengeTerms } from '../../challenges/components/ChallengeTerms';
 
 const difficultyStyles: Record<string, string> = {
   beginner: 'bg-emerald-100 text-emerald-800',
@@ -102,26 +101,7 @@ export const SubmitSolutionPage = () => {
                 </p>
               </section>
 
-              <dl className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                  <dt className="flex items-center gap-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    <Award className="size-4 text-emerald-500" />
-                    Reward
-                  </dt>
-                  <dd className="mt-2 text-xl font-semibold text-gray-950">
-                    {formatOutcome(challenge.outcome)}
-                  </dd>
-                </div>
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                  <dt className="flex items-center gap-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    <CalendarDays className="size-4 text-amber-500" />
-                    Deadline
-                  </dt>
-                  <dd className="mt-2 text-base font-semibold text-gray-950">
-                    {formatChallengeDeadline(challenge.deadline)}
-                  </dd>
-                </div>
-              </dl>
+              <ChallengeTerms challenge={challenge} />
               {challenge.status === 'completed' && challenge.results && (
                 <section className="rounded-lg border border-emerald-200 bg-emerald-50 p-5">
                   <h2 className="font-semibold text-emerald-950">

@@ -19,8 +19,8 @@ export function AuthProfileState({
   const isMissing = status === 'profile-missing';
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-16">
-      <section
+    <section className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-16">
+      <div
         aria-labelledby="auth-profile-state-title"
         className="w-full max-w-lg space-y-5 rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm"
       >
@@ -56,7 +56,7 @@ export function AuthProfileState({
             Retry profile
           </Button>
         </div>
-      </section>
-    </main>
+      </div>
+    </section>
   );
 }
