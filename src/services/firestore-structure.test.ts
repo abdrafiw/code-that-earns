@@ -44,6 +44,30 @@ describe('Firestore document schemas', () => {
     expect(result.status).toBe('open');
   });
 
+  it('normalizes legacy challenge fields for read compatibility', () => {
+    const result = challengeDocumentSchema.parse({
+      title: 'Legacy challenge',
+      description: 'A valid legacy challenge description.',
+      category: 'Coding',
+      difficulty: 'Beginner',
+      rewardBTC: 0.25,
+      deadline: timestamp,
+      companyName: 'Example Company',
+      companyUid: 'company-1',
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    expect(result.schemaVersion).toBe(2);
+    expect(result.outcome).toMatchObject({
+      type: 'monetary',
+      amountMinor: 25_000_000,
+      currency: 'BTC',
+    });
+    expect(result.winnerCount).toBe(1);
+    expect(result.eligibility).toBe('See the original challenge terms.');
+  });
+
   it('rejects malformed submission content', () => {
     const result = submissionDocumentSchema.safeParse({
       challengeId: 'challenge-1',

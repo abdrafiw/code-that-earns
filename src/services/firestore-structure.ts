@@ -88,33 +88,63 @@ export const challengeOutcomeSchema = z
     }
   });
 
-export const challengeDocumentSchema = z.object({
-  schemaVersion: z.literal(2),
-  title: z.string().trim().min(3).max(120),
-  description: z.string().trim().min(10).max(5000),
-  category: z.string().trim().min(1),
-  difficulty: z.string().trim().min(1),
-  outcome: challengeOutcomeSchema,
-  winnerCount: z.number().int().min(1).max(10),
-  eligibility: z.string().trim().min(1).max(2000),
-  deadline: timestampSchema,
-  searchTerms: z.array(z.string()).max(100).default([]),
-  searchSchemaVersion: z.number().int().nonnegative().default(0),
-  filterFacets: z.array(z.string()).max(3).default([]),
-  companyName: nullableString,
-  companyUid: z.string().min(1),
-  status: z
-    .enum(['open', 'in_review', 'completed', 'cancelled'])
-    .default('open'),
-  submissions: z.number().int().nonnegative().default(0),
-  results: z
-    .array(z.object({ submissionId: z.string(), displayName: z.string() }))
-    .max(10)
-    .optional(),
-  completedAt: timestampSchema.optional(),
-  createdAt: timestampSchema,
-  updatedAt: timestampSchema,
-});
+const normalizeLegacyChallenge = (value: unknown) => {
+  if (!value || typeof value !== 'object') return value;
+  const data = value as Record<string, unknown>;
+  if (data.schemaVersion !== undefined) return value;
+  const legacyReward = data.rewardBTC ?? data.bountyBTC;
+  const amountMinor =
+    typeof legacyReward === 'number' && Number.isFinite(legacyReward)
+      ? Math.round(legacyReward * 100_000_000)
+      : undefined;
+  return {
+    ...data,
+    schemaVersion: 2,
+    outcome:
+      data.outcome ??
+      (amountMinor && amountMinor > 0
+        ? {
+            type: 'monetary',
+            amountMinor,
+            currency: 'BTC',
+            deliveryTerms: 'Legacy reward arranged directly with the company.',
+          }
+        : undefined),
+    winnerCount: data.winnerCount ?? 1,
+    eligibility: data.eligibility ?? 'See the original challenge terms.',
+  };
+};
+
+export const challengeDocumentSchema = z.preprocess(
+  normalizeLegacyChallenge,
+  z.object({
+    schemaVersion: z.literal(2),
+    title: z.string().trim().min(3).max(120),
+    description: z.string().trim().min(10).max(5000),
+    category: z.string().trim().min(1),
+    difficulty: z.string().trim().min(1),
+    outcome: challengeOutcomeSchema,
+    winnerCount: z.number().int().min(1).max(10),
+    eligibility: z.string().trim().min(1).max(2000),
+    deadline: timestampSchema,
+    searchTerms: z.array(z.string()).max(100).default([]),
+    searchSchemaVersion: z.number().int().nonnegative().default(0),
+    filterFacets: z.array(z.string()).max(3).default([]),
+    companyName: nullableString,
+    companyUid: z.string().min(1),
+    status: z
+      .enum(['open', 'in_review', 'completed', 'cancelled'])
+      .default('open'),
+    submissions: z.number().int().nonnegative().default(0),
+    results: z
+      .array(z.object({ submissionId: z.string(), displayName: z.string() }))
+      .max(10)
+      .optional(),
+    completedAt: timestampSchema.optional(),
+    createdAt: timestampSchema,
+    updatedAt: timestampSchema,
+  }),
+);
 
 export const submissionDocumentSchema = z
   .object({
