@@ -39,31 +39,46 @@ export type CompanySubmissionPage = {
 
 class SubmissionService {
   async markUnderReview(submissionId: string) {
-    await updateDoc(doc(db, COLLECTIONS.SUBMISSIONS, submissionId), {
-      status: 'under_review',
-      reviewedAt: serverTimestamp(),
-    });
+    try {
+      await updateDoc(doc(db, COLLECTIONS.SUBMISSIONS, submissionId), {
+        status: 'under_review',
+        reviewedAt: serverTimestamp(),
+      });
+    } catch (error: unknown) {
+      throw new Error(getErrorMessage(error));
+    }
   }
 
   async beginChallengeReview(challengeId: string) {
-    const challengeRef = doc(db, COLLECTIONS.CHALLENGES, challengeId);
-    const challengeSnapshot = await getDoc(
-      challengeRef.withConverter(challengeConverter),
-    );
-    if (!challengeSnapshot.exists()) throw new Error('Challenge not found.');
-    if (challengeSnapshot.data().status === 'in_review') return;
-    if (challengeSnapshot.data().status !== 'open') {
-      throw new Error('This challenge can no longer enter review.');
+    try {
+      const challengeRef = doc(db, COLLECTIONS.CHALLENGES, challengeId);
+      const challengeSnapshot = await getDoc(
+        challengeRef.withConverter(challengeConverter),
+      );
+      if (!challengeSnapshot.exists()) throw new Error('Challenge not found.');
+      if (challengeSnapshot.data().status === 'in_review') return;
+      if (challengeSnapshot.data().status !== 'open') {
+        throw new Error('This challenge can no longer enter review.');
+      }
+      await updateDoc(challengeRef, {
+        status: 'in_review',
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error: unknown) {
+      throw new Error(getErrorMessage(error));
     }
-    await updateDoc(challengeRef, {
-      status: 'in_review',
-      updatedAt: serverTimestamp(),
-    });
   }
 
-  async finalizeWinners(challengeId: string, submissionIds: string[]) {
-    const finalize = httpsCallable(functions, 'finalizeWinners');
-    await finalize({ challengeId, submissionIds });
+  async finalizeWinners(
+    challengeId: string,
+    submissionIds: string[],
+  ): Promise<void> {
+    try {
+      const finalize = httpsCallable(functions, 'finalizeWinners');
+      await finalize({ challengeId, submissionIds });
+    } catch (error: unknown) {
+      throw new Error(getErrorMessage(error));
+    }
   }
 
   async submitSolution({

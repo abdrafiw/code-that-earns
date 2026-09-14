@@ -22,9 +22,14 @@ export const finalizeWinners = onCall<FinalizeWinnersRequest>(
     const submissionIds = request.data.submissionIds;
     if (
       typeof challengeId !== 'string' ||
-      !challengeId ||
+      challengeId.trim().length === 0 ||
+      challengeId.length > 256 ||
       !Array.isArray(submissionIds) ||
-      submissionIds.some((id) => typeof id !== 'string')
+      submissionIds.length > 10 ||
+      submissionIds.some(
+        (id) =>
+          typeof id !== 'string' || id.trim().length === 0 || id.length > 256,
+      )
     ) {
       throw new HttpsError(
         'invalid-argument',
