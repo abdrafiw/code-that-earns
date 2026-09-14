@@ -41,7 +41,10 @@ export const challengeOutcomeSchema = z
     type: z.enum(OUTCOME_TYPES),
     recognitionLabel: z.string().trim().min(1).max(80).optional(),
     amountMinor: z.number().int().positive().optional(),
-    currency: z.string().regex(/^[A-Z]{3}$/).optional(),
+    currency: z
+      .string()
+      .regex(/^[A-Z]{3}$/)
+      .optional(),
     rewardDescription: z.string().trim().min(1).max(1000).optional(),
     deliveryTerms: z.string().trim().min(1).max(2000).optional(),
   })
@@ -50,19 +53,37 @@ export const challengeOutcomeSchema = z
       outcome.type === 'recognition' ||
       outcome.type === 'recognition_and_reward';
     const hasReward =
-      outcome.type === 'monetary' ||
-      outcome.type === 'recognition_and_reward';
+      outcome.type === 'monetary' || outcome.type === 'recognition_and_reward';
     if (hasRecognition && !outcome.recognitionLabel) {
-      context.addIssue({ code: 'custom', path: ['recognitionLabel'], message: 'Required' });
+      context.addIssue({
+        code: 'custom',
+        path: ['recognitionLabel'],
+        message: 'Required',
+      });
     }
     if (hasReward && !outcome.amountMinor && !outcome.rewardDescription) {
-      context.addIssue({ code: 'custom', path: ['amountMinor'], message: 'A reward is required' });
+      context.addIssue({
+        code: 'custom',
+        path: ['amountMinor'],
+        message: 'A reward is required',
+      });
     }
     if (outcome.amountMinor && !outcome.currency) {
-      context.addIssue({ code: 'custom', path: ['currency'], message: 'Required' });
+      context.addIssue({
+        code: 'custom',
+        path: ['currency'],
+        message: 'Required',
+      });
     }
-    if (outcome.type === 'non_monetary' && (!outcome.rewardDescription || !outcome.deliveryTerms)) {
-      context.addIssue({ code: 'custom', path: ['deliveryTerms'], message: 'Description and delivery terms are required' });
+    if (
+      outcome.type === 'non_monetary' &&
+      (!outcome.rewardDescription || !outcome.deliveryTerms)
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['deliveryTerms'],
+        message: 'Description and delivery terms are required',
+      });
     }
   });
 
@@ -86,7 +107,10 @@ export const challengeDocumentSchema = z.object({
     .enum(['open', 'in_review', 'completed', 'cancelled'])
     .default('open'),
   submissions: z.number().int().nonnegative().default(0),
-  results: z.array(z.object({ submissionId: z.string(), displayName: z.string() })).max(10).optional(),
+  results: z
+    .array(z.object({ submissionId: z.string(), displayName: z.string() }))
+    .max(10)
+    .optional(),
   completedAt: timestampSchema.optional(),
   createdAt: timestampSchema,
   updatedAt: timestampSchema,

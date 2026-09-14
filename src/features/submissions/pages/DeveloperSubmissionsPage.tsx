@@ -74,7 +74,16 @@ export function DeveloperSubmissionsPage() {
                   </a>
                 </div>
 
-                {submission.liveDemoUrl && <a href={submission.liveDemoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">View live demo</a>}
+                {submission.liveDemoUrl && (
+                  <a
+                    href={submission.liveDemoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  >
+                    View live demo
+                  </a>
+                )}
               </div>
             </div>
           </li>

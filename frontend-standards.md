@@ -16,8 +16,6 @@ Apply these rules to every new or changed frontend feature.
   through one component boundary.
 - Keep context providers narrowly scoped and memoize provider values containing
   functions or derived objects.
-- Keep mutations in services/hooks, invalidate domain query keys deliberately,
-  and render pending, error, empty, unauthorized, and success states.
 - Validate user input at the UI boundary and again at the trusted data boundary.
 - Use semantic HTML, associated labels, keyboard-accessible controls, and safe
   external links.

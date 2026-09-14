@@ -1,9 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-import { LoginForm } from './LoginForm';
+import { LoginForm } from '../components/LoginForm';
 import { useLogin } from '../hooks/useAuth';
 
 // mock useLogin
@@ -123,40 +123,41 @@ describe('Login Form', () => {
     expect(passwordInput).toHaveAttribute('type', 'password');
   });
 
-  //   it("shows a toast when email and password are empty", async () => {
-  //     const user = userEvent.setup();
+  it('shows validation errors when email and password are empty', () => {
+    renderLoginForm();
 
-  //     renderLoginForm();
+    const submitButton = screen.getByRole('button', { name: /sign in/i });
+    const form = submitButton.closest('form');
 
-  //     await user.click(
-  //       screen.getByRole("button", {
-  //         name: /sign in/i,
-  //       }),
-  //     );
+    expect(form).not.toBeNull();
+    fireEvent.submit(form!);
 
-  //     expect(toast.error).toHaveBeenCalledWith("Please add email and password");
+    expect(
+      screen.getByText('Please enter a valid email address'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Enter your password.')).toBeInTheDocument();
 
-  //     expect(mockMutate).not.toHaveBeenCalled();
-  //   });
+    expect(mockMutate).not.toHaveBeenCalled();
+  });
 
-  //   it("shows a toast when the email is invalid", async () => {
-  //     const user = userEvent.setup();
+  it('shows a toast when the email is invalid', async () => {
+    const user = userEvent.setup();
 
-  //     renderLoginForm();
+    renderLoginForm();
 
-  //     await user.type(screen.getByLabelText(/email/i), "invalid-email");
+    await user.type(screen.getByLabelText(/email/i), 'invalid-email');
 
-  //     await user.type(screen.getByLabelText(/^password$/i), "password123");
+    await user.type(screen.getByLabelText(/^password$/i), 'password123');
 
-  //     // The component disables the submit button when emailError exists.
-  //     expect(
-  //       screen.getByRole("button", {
-  //         name: /sign in/i,
-  //       }),
-  //     ).toBeDisabled();
+    // The component disables the submit button when emailError exists.
+    expect(
+      screen.getByRole('button', {
+        name: /sign in/i,
+      }),
+    ).toBeDisabled();
 
-  //     expect(mockMutate).not.toHaveBeenCalled();
-  //   });
+    expect(mockMutate).not.toHaveBeenCalled();
+  });
 
   it('calls login with the correct credentials', async () => {
     const user = userEvent.setup();
@@ -180,22 +181,6 @@ describe('Login Form', () => {
       password: 'password123',
     });
   });
-
-  //   it("shows the loading state while signing in", () => {
-  //     jest.mocked(useLogin).mockReturnValue({
-  //       mutate: mockMutate,
-  //       isPending: true,
-  //     } as unknown as ReturnType<typeof useLogin>);
-
-  //     renderLoginForm();
-
-  //     const submitButton = screen.getByRole("button", {
-  //       name: /signing in/i,
-  //     });
-
-  //     expect(submitButton).toBeInTheDocument();
-  //     expect(submitButton).toBeDisabled();
-  //   });
 
   it('disables the submit button when there is an email error', async () => {
     const user = userEvent.setup();

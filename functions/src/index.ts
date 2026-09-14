@@ -2,6 +2,10 @@ import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { finalizeWinnersTransaction } from './finalizeWinners';
+import {
+  publishChallengeOperation,
+  type PublishChallengeInput,
+} from './publishChallenge';
 
 initializeApp();
 
@@ -31,5 +35,20 @@ export const finalizeWinners = onCall<FinalizeWinnersRequest>(
       challengeId,
       submissionIds: submissionIds as string[],
     });
+  },
+);
+
+export const publishChallenge = onCall<PublishChallengeInput>(
+  async (request) => {
+    if (!request.auth)
+      throw new HttpsError(
+        'unauthenticated',
+        'Sign in to publish a challenge.',
+      );
+    return publishChallengeOperation(
+      getFirestore(),
+      request.auth.uid,
+      request.data,
+    );
   },
 );

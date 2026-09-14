@@ -1,5 +1,8 @@
 import type { ChallengeDeadline } from './utils/challengeDeadline';
-import type { ChallengeDocument, ChallengeOutcome } from '../../services/firestore-structure';
+import type {
+  ChallengeDocument,
+  ChallengeOutcome,
+} from '../../services/firestore-structure';
 
 export type TChallenge = Omit<
   Partial<ChallengeDocument>,
@@ -27,5 +30,6 @@ export type CreateChallengePayload = {
   winnerCount: number;
   eligibility: string;
   geographicRestrictions: string;
+  responsibilityAccepted: true;
   deadline: Date;
 };

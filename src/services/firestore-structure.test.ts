@@ -63,5 +63,4 @@ describe('Firestore document schemas', () => {
 
     expect(result.success).toBe(false);
   });
-
 });

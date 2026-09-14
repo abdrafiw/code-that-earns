@@ -76,3 +76,11 @@ export const useSignUp = () => {
     },
   });
 };
+
+export const useSignOut = () =>
+  useMutation({
+    mutationFn: () => authService.signOut(),
+    onError: (error: Error) => {
+      toast.error(getErrorMessage(error));
+    },
+  });

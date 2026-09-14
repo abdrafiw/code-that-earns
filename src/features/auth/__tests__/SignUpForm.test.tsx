@@ -5,7 +5,7 @@ import { beforeEach, describe, it, jest } from '@jest/globals';
 import type { ChangeEvent, ReactNode } from 'react';
 
 import { useSignUp } from '../hooks/useAuth';
-import { SignUpForm } from './SignUpForm';
+import { SignUpForm } from '../components/SignUpForm';
 
 // mock useSignPp
 jest.mock('../hooks/useAuth', () => ({

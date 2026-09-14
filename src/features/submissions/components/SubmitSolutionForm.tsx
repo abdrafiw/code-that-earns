@@ -1,4 +1,4 @@
-import { type FormEvent } from 'react';
+import { type SubmitEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { SiGithub } from 'react-icons/si';
@@ -34,8 +34,9 @@ export const SubmitSolutionForm = ({
   const navigate = useNavigate();
 
   const submitSolutionMutation = useSubmitSolution();
+  const hasRequiredFields = Boolean(form.values.githubUrl.trim());
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const errors = validateSubmission(form.values);
@@ -70,11 +71,11 @@ export const SubmitSolutionForm = ({
       onSubmit={handleSubmit}
       className="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
     >
-      <header>
+      <header className="space-y-1">
         <h2 className="text-xl font-semibold text-gray-950">
           Submit your solution
         </h2>
-        <p className="mt-1 text-sm leading-6 text-gray-500">
+        <p className="text-sm leading-6 text-gray-500">
           Share your repository and optional supporting details for review.
         </p>
       </header>
@@ -87,6 +88,7 @@ export const SubmitSolutionForm = ({
             <Input
               id="github-url"
               type="url"
+              required
               value={form.values.githubUrl}
               onChange={(e) => form.setField('githubUrl', e.target.value)}
               className="pl-10"
@@ -114,18 +116,37 @@ export const SubmitSolutionForm = ({
             placeholder="https://example.com/demo"
             aria-invalid={!!form.errors.liveDemoUrl}
           />
-          {form.errors.liveDemoUrl && <p className="text-destructive text-sm">{form.errors.liveDemoUrl}</p>}
+          {form.errors.liveDemoUrl && (
+            <p className="text-destructive text-sm">
+              {form.errors.liveDemoUrl}
+            </p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="submission-notes">Notes (optional)</Label>
-          <Textarea id="submission-notes" value={form.values.notes} onChange={(e) => form.setField('notes', e.target.value)} maxLength={2000} />
+          <Textarea
+            id="submission-notes"
+            value={form.values.notes}
+            onChange={(e) => form.setField('notes', e.target.value)}
+            maxLength={2000}
+          />
         </div>
-        <label className="flex items-start gap-2 text-sm text-gray-600"><input type="checkbox" checked={form.values.publicWinnerConsent} onChange={(event) => form.setField('publicWinnerConsent', event.target.checked)} />Show my display name publicly if I win. I can otherwise be shown as “Private winner”.</label>
+        <label className="flex items-start gap-2 text-sm text-gray-600">
+          <input
+            type="checkbox"
+            checked={form.values.publicWinnerConsent}
+            onChange={(event) =>
+              form.setField('publicWinnerConsent', event.target.checked)
+            }
+          />
+          Show my display name publicly if I win. I can otherwise be shown as
+          “Private winner”.
+        </label>
 
         <div className="flex flex-col gap-3">
           <Button
             type="submit"
-            disabled={submitSolutionMutation.isPending}
+            disabled={submitSolutionMutation.isPending || !hasRequiredFields}
             className="flex-1"
             size="lg"
           >

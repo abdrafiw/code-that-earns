@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { AppContext } from '../../../context/AppContext';
 import type { AppContextType, AuthState } from '../../../context/types';
-import { GuestOnlyRoute, ProtectedRoute } from './RouteGuards';
+import { GuestOnlyRoute, ProtectedRoute } from '../components/RouteGuards';
 
 jest.mock('../../../config/firebase', () => ({
   auth: {},
@@ -12,6 +12,7 @@ jest.mock('../../../config/firebase', () => ({
 }));
 
 const anonymousState: AuthState = { status: 'anonymous' };
+
 const developerState: AuthState = {
   status: 'authenticated',
   user: {
@@ -23,6 +24,7 @@ const developerState: AuthState = {
     },
   },
 };
+
 const companyState: AuthState = {
   status: 'authenticated',
   user: {

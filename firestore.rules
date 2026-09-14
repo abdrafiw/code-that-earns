@@ -35,49 +35,6 @@ service cloud.firestore {
             .hasOnly(['companyName', 'updatedAt']));
     }
 
-    function hasValidChallengeFields(data) {
-      return data.keys().hasOnly([
-          'schemaVersion', 'title', 'description', 'category', 'difficulty',
-          'outcome', 'winnerCount', 'eligibility', 'geographicRestrictions',
-          'deadline', 'searchTerms', 'searchSchemaVersion', 'filterFacets',
-          'companyName', 'companyUid', 'status', 'submissions', 'createdAt', 'updatedAt'
-        ])
-        && data.schemaVersion == 2
-        && data.title is string
-        && data.title.size() >= 3
-        && data.title.size() <= 120
-        && data.description is string
-        && data.description.size() >= 10
-        && data.description.size() <= 5000
-        && data.category in ['Coding', 'Data Analysis', 'Blockchain']
-        && data.difficulty in ['Beginner', 'Intermediate', 'Advanced']
-        && data.outcome is map
-        && data.outcome.keys().hasOnly(['type', 'recognitionLabel', 'amountMinor', 'currency', 'rewardDescription', 'deliveryTerms'])
-        && data.outcome.type in ['recognition', 'monetary', 'non_monetary', 'recognition_and_reward']
-        && data.winnerCount is int && data.winnerCount >= 1 && data.winnerCount <= 10
-        && data.eligibility is string && data.eligibility.size() > 0 && data.eligibility.size() <= 2000
-        && data.geographicRestrictions is string && data.geographicRestrictions.size() > 0 && data.geographicRestrictions.size() <= 1000
-        && (data.outcome.type != 'recognition' || (data.outcome.recognitionLabel is string && data.outcome.recognitionLabel.size() > 0))
-        && (data.outcome.type != 'monetary' && data.outcome.type != 'recognition_and_reward' || (data.outcome.amountMinor is int && data.outcome.amountMinor > 0 && data.outcome.currency is string && data.outcome.currency.matches('^[A-Z]{3}$') && data.outcome.deliveryTerms is string && data.outcome.deliveryTerms.size() > 0))
-        && (data.outcome.type != 'non_monetary' || (data.outcome.rewardDescription is string && data.outcome.rewardDescription.size() > 0 && data.outcome.deliveryTerms is string && data.outcome.deliveryTerms.size() > 0))
-        && data.searchTerms is list
-        && data.searchTerms.size() <= 100
-        && data.searchSchemaVersion == 1
-        && data.filterFacets is list
-        && data.filterFacets.size() == 3
-        && data.filterFacets.hasAll([
-          'category:' + data.category,
-          'difficulty:' + data.difficulty,
-          'category:' + data.category + '|difficulty:' + data.difficulty
-        ])
-        && data.deadline is timestamp
-        && data.deadline > request.time
-        && data.status == 'open'
-        && data.submissions == 0
-        && data.createdAt == request.time
-        && data.updatedAt == request.time;
-    }
-
     function hasValidSubmissionFields(submissionId, data) {
       let challenge = get(/databases/$(database)/documents/challenges/$(data.challengeId)).data;
       let developer = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
@@ -158,13 +115,8 @@ service cloud.firestore {
       // Anyone authenticated can read challenges
       allow read: if isAuthenticated();
       
-      // Only companies can create challenges
-      allow create: if isAuthenticated() 
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'COMPANY'
-        && request.resource.data.companyUid == request.auth.uid
-        && request.resource.data.companyName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyName
-        && hasValidChallengeFields(request.resource.data);
+      // Publication is performed by the trusted backend Admin SDK.
+      allow create: if false;
       
       // Only the creator can update their own challenges
       allow update: if isAuthenticated() 

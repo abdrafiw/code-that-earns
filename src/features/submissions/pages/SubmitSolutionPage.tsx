@@ -124,11 +124,23 @@ export const SubmitSolutionPage = () => {
               </dl>
               {challenge.status === 'completed' && challenge.results && (
                 <section className="rounded-lg border border-emerald-200 bg-emerald-50 p-5">
-                  <h2 className="font-semibold text-emerald-950">Challenge results</h2>
+                  <h2 className="font-semibold text-emerald-950">
+                    Challenge results
+                  </h2>
                   <ul className="mt-2 list-inside list-disc text-sm text-emerald-900">
-                    {challenge.results.map((winner) => <li key={winner.submissionId}>{winner.displayName} — {challenge.outcome.recognitionLabel ?? 'Winner'}</li>)}
+                    {challenge.results.map((winner) => (
+                      <li key={winner.submissionId}>
+                        {winner.displayName} —{' '}
+                        {challenge.outcome.recognitionLabel ?? 'Winner'}
+                      </li>
+                    ))}
                   </ul>
-                  {challenge.outcome.type !== 'recognition' && <p className="mt-3 text-xs text-emerald-800">Any reward is delivered directly by the company outside CTE and is not verified or guaranteed by CTE.</p>}
+                  {challenge.outcome.type !== 'recognition' && (
+                    <p className="mt-3 text-xs text-emerald-800">
+                      Any reward is delivered directly by the company outside
+                      CTE and is not verified or guaranteed by CTE.
+                    </p>
+                  )}
                 </section>
               )}
             </div>

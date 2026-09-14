@@ -62,22 +62,13 @@ describe('SubmitSolutionForm', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows error when submitting empty fields', async () => {
+  it('disables submission when the required repository URL is empty', () => {
     RenderSubmitSolutionForm();
 
-    const user = userEvent.setup();
-
-    await user.click(
-      screen.getByRole('button', {
-        name: /submit solution/i,
-      }),
-    );
-
-    // expect(mockToastError).toHaveBeenCalledWith('Please fill in all fields.');
-
-    expect(jest.mocked(toast.error)).toHaveBeenCalledWith(
-      'Please fill in all fields.',
-    );
+    expect(
+      screen.getByRole('button', { name: /submit solution/i }),
+    ).toBeDisabled();
+    expect(mockMutate).not.toHaveBeenCalled();
   });
 
   it('shows backend errors and retains entered values', async () => {

@@ -1,12 +1,10 @@
 import {
   doc,
   getDoc,
-  addDoc,
   collection,
   query,
   where,
   getDocs,
-  serverTimestamp,
   type DocumentData,
   type QueryDocumentSnapshot,
   orderBy,
@@ -17,25 +15,18 @@ import {
   count,
   sum,
 } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 
-import { auth, db } from '../../config/firebase';
-import {
-  challengeConverter,
-  COLLECTIONS,
-  userConverter,
-} from '../firestore-structure';
+import { auth, db, functions } from '../../config/firebase';
+import { challengeConverter, COLLECTIONS } from '../firestore-structure';
 
 import type { CreateChallengePayload } from '../../features/challenges/types';
 
 import {
-  createChallengeSearchTerms,
-  CHALLENGE_SEARCH_SCHEMA_VERSION,
-  createChallengeFilterFacets,
   getChallengeFilterFacet,
   normalizeChallengeFilter,
 } from '../../features/challenges/utils/challengeFilters';
 import { getErrorMessage } from '../../utils/getErrorMessage';
-import { toChallengeDeadlineTimestamp } from '../../features/challenges/utils/challengeDeadline';
 
 export type CompanyChallengeFilters = {
   search?: string;
@@ -100,59 +91,30 @@ class ChallengeService {
     winnerCount,
     eligibility,
     geographicRestrictions,
+    responsibilityAccepted,
     deadline,
   }: CreateChallengePayload): Promise<{ id: string }> {
     const user = auth.currentUser;
     if (!user) throw new Error('User not authenticated');
 
     try {
-      // The user's role is stored in Firestore during signup. Do not rely on
-      // custom auth claims here because the client never creates those claims.
-      const userSnapshot = await getDoc(
-        doc(db, COLLECTIONS.USERS, user.uid).withConverter(userConverter),
+      const publish = httpsCallable<Record<string, unknown>, { id: string }>(
+        functions,
+        'publishChallenge',
       );
-
-      if (!userSnapshot.exists()) {
-        throw new Error('Company profile not found. Please sign in again.');
-      }
-
-      const userData = userSnapshot.data();
-
-      if (userData.role !== 'COMPANY') {
-        throw new Error('Only companies can create challenges');
-      }
-
-      const companyName = userData.companyName;
-
-      const challengeData = {
+      const result = await publish({
         title,
         description,
         category,
         difficulty,
-        schemaVersion: 2 as const,
         outcome,
         winnerCount,
         eligibility,
         geographicRestrictions,
-        status: 'open' as const,
-        submissions: 0,
-        deadline: toChallengeDeadlineTimestamp(deadline),
-        searchTerms: createChallengeSearchTerms(title, description, category),
-        searchSchemaVersion: CHALLENGE_SEARCH_SCHEMA_VERSION,
-        filterFacets: createChallengeFilterFacets(category, difficulty),
-        companyName: companyName ?? null,
-        companyUid: user.uid,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
-
-      const docRef = await addDoc(
-        collection(db, COLLECTIONS.CHALLENGES).withConverter(
-          challengeConverter,
-        ),
-        challengeData,
-      );
-      return { id: docRef.id };
+        responsibilityAccepted,
+        deadline: deadline.toISOString(),
+      });
+      return result.data;
     } catch (error: unknown) {
       throw new Error(getErrorMessage(error));
     }

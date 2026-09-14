@@ -68,7 +68,6 @@ export const NavigationLinks = ({
           {!collapsed && <span>Submissions</span>}
         </Link>
       </li>
-
     </ul>
   );
 };

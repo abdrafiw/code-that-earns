@@ -1,5 +1,5 @@
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
@@ -20,8 +20,10 @@ export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const loginMutation = useLogin();
+  const hasRequiredFields =
+    Boolean(form.values.email.trim()) && Boolean(form.values.password);
 
-  const handleLogin = (e: FormEvent) => {
+  const handleLogin = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errors = validateLogin(form.values);
     form.setErrors(errors);
@@ -34,14 +36,17 @@ export const LoginForm = () => {
 
   return (
     <form onSubmit={handleLogin} className="space-y-6">
-      <div className="space-y-5">
+      <div className="space-y-4">
         {/* email */}
         <div className="space-y-2">
           <Label htmlFor="email" className="text-sm font-medium text-slate-700">
             Email address
           </Label>
           <div className="relative">
-            <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Mail
+              aria-hidden="true"
+              className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+            />
             <Input
               id="email"
               type="email"
@@ -81,7 +86,10 @@ export const LoginForm = () => {
             Password
           </Label>
           <div className="relative">
-            <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Lock
+              aria-hidden="true"
+              className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+            />
             <Input
               id="password"
               type={showPassword ? 'text' : 'password'}
@@ -103,11 +111,12 @@ export const LoginForm = () => {
               onClick={() => setShowPassword(!showPassword)}
               className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-pressed={showPassword}
             >
               {showPassword ? (
-                <EyeOff className="h-4 w-4" />
+                <EyeOff aria-hidden="true" className="h-4 w-4" />
               ) : (
-                <Eye className="h-4 w-4" />
+                <Eye aria-hidden="true" className="h-4 w-4" />
               )}
             </button>
           </div>
@@ -121,7 +130,11 @@ export const LoginForm = () => {
 
       <Button
         type="submit"
-        disabled={loginMutation.isPending || Boolean(form.errors.email)}
+        disabled={
+          loginMutation.isPending ||
+          !hasRequiredFields ||
+          Boolean(form.errors.email)
+        }
         className="h-11 w-full cursor-pointer bg-indigo-500 font-semibold hover:bg-indigo-600"
         size="lg"
       >

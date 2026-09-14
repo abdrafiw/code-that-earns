@@ -53,7 +53,8 @@ export const ChallengeCard = ({ challenge }: { challenge: TChallenge }) => {
             <p className="text-xs text-gray-500">Reward</p>
             <p className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold text-gray-950">
               <Award className="size-4 text-emerald-500" />
-              {formatOutcome(challenge.outcome)} · {challenge.winnerCount} {challenge.winnerCount === 1 ? 'winner' : 'winners'}
+              {formatOutcome(challenge.outcome)} · {challenge.winnerCount}{' '}
+              {challenge.winnerCount === 1 ? 'winner' : 'winners'}
             </p>
           </div>
 

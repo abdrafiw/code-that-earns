@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { format } from 'date-fns';
 
 import { CalendarDays, ChevronDownIcon, Plus } from 'lucide-react';
@@ -40,6 +40,7 @@ import {
 import { useTypedForm } from '../../../hooks/useTypedForm';
 import { FormErrorSummary } from '../../../components/common/FormErrorSummary';
 import { ChallengeOutcomeFields } from './ChallengeOutcomeFields';
+import { parseMoneyToMinorUnits } from '../utils/formatOutcome';
 
 import {
   hasFormErrors,
@@ -61,6 +62,7 @@ const initialForm: ChallengeFormValues = {
   winnerCount: 1,
   eligibility: 'Open to all developers.',
   geographicRestrictions: 'None',
+  acceptsOffPlatformResponsibility: false,
   deadline: undefined,
 };
 
@@ -69,8 +71,32 @@ export const CreateChallengeDialog = () => {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const form = useTypedForm(initialForm);
   const createChallengeMutation = useCreateChallenge();
+  const offersRecognition =
+    form.values.outcomeType === 'recognition' ||
+    form.values.outcomeType === 'recognition_and_reward';
+  const offersMoney =
+    form.values.outcomeType === 'monetary' ||
+    form.values.outcomeType === 'recognition_and_reward';
+  const offersNonMonetaryReward = form.values.outcomeType === 'non_monetary';
+  const offersReward = form.values.outcomeType !== 'recognition';
+  const hasRequiredFields = Boolean(
+    form.values.title.trim() &&
+    form.values.description.trim() &&
+    form.values.category &&
+    form.values.difficulty &&
+    form.values.winnerCount &&
+    form.values.eligibility.trim() &&
+    form.values.geographicRestrictions.trim() &&
+    form.values.deadline &&
+    form.values.acceptsOffPlatformResponsibility &&
+    (!offersRecognition || form.values.recognitionLabel.trim()) &&
+    (!offersMoney ||
+      (form.values.amountMajor.trim() && form.values.currency.trim())) &&
+    (!offersNonMonetaryReward || form.values.rewardDescription.trim()) &&
+    (!offersReward || form.values.deliveryTerms.trim()),
+  );
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const errors = validateChallenge(form.values);
     form.setErrors(errors);
@@ -88,7 +114,10 @@ export const CreateChallengeDialog = () => {
           : {}),
         ...(form.values.amountMajor.trim()
           ? {
-              amountMinor: Math.round(Number(form.values.amountMajor) * 100),
+              amountMinor: parseMoneyToMinorUnits(
+                form.values.amountMajor,
+                form.values.currency.trim().toUpperCase(),
+              ),
               currency: form.values.currency.trim().toUpperCase(),
             }
           : {}),
@@ -102,6 +131,7 @@ export const CreateChallengeDialog = () => {
       winnerCount: form.values.winnerCount,
       eligibility: form.values.eligibility.trim(),
       geographicRestrictions: form.values.geographicRestrictions.trim(),
+      responsibilityAccepted: true as const,
       deadline: form.values.deadline,
     };
 
@@ -141,7 +171,7 @@ export const CreateChallengeDialog = () => {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <FormErrorSummary errors={form.errors} />
           {/* title */}
           <div className="space-y-2">
@@ -269,6 +299,23 @@ export const CreateChallengeDialog = () => {
               </PopoverContent>
             </Popover>
           </div>
+          <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={form.values.acceptsOffPlatformResponsibility}
+              onChange={(event) =>
+                form.setField(
+                  'acceptsOffPlatformResponsibility',
+                  event.target.checked,
+                )
+              }
+            />
+            <span>
+              I confirm that my company is responsible for delivering any stated
+              reward directly to selected winners outside CTE. CTE does not
+              process or guarantee rewards.
+            </span>
+          </label>
           <DialogFooter>
             <Button
               type="button"
@@ -279,7 +326,10 @@ export const CreateChallengeDialog = () => {
               Cancel
             </Button>
 
-            <Button type="submit" disabled={createChallengeMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={createChallengeMutation.isPending || !hasRequiredFields}
+            >
               {createChallengeMutation.isPending
                 ? 'Publishing challenge…'
                 : 'Publish challenge'}

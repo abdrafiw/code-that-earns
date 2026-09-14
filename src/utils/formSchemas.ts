@@ -1,6 +1,10 @@
 import type { UserRole } from '../services/firestore-structure';
 import type { FormErrors } from '../hooks/useTypedForm';
 import type { OutcomeType } from '../services/firestore-structure';
+import {
+  isSupportedCurrency,
+  parseMoneyToMinorUnits,
+} from '../features/challenges/utils/formatOutcome';
 
 export type LoginFormValues = { email: string; password: string };
 export type SignUpFormValues = LoginFormValues & {
@@ -23,6 +27,7 @@ export type ChallengeFormValues = {
   winnerCount: number;
   eligibility: string;
   geographicRestrictions: string;
+  acceptsOffPlatformResponsibility: boolean;
   deadline?: Date;
 };
 export type SubmissionFormValues = {
@@ -67,17 +72,45 @@ export function validateChallenge(values: ChallengeFormValues) {
       'Description must contain between 10 and 5,000 characters.';
   if (!values.category) errors.category = 'Select a category.';
   if (!values.difficulty) errors.difficulty = 'Select a difficulty.';
-  if (!Number.isInteger(values.winnerCount) || values.winnerCount < 1 || values.winnerCount > 10)
+  if (
+    !Number.isInteger(values.winnerCount) ||
+    values.winnerCount < 1 ||
+    values.winnerCount > 10
+  )
     errors.winnerCount = 'Winner count must be between 1 and 10.';
-  if (!values.eligibility.trim()) errors.eligibility = 'Describe who is eligible.';
-  if (!values.geographicRestrictions.trim()) errors.geographicRestrictions = 'Enter restrictions or “None”.';
-  const recognition = values.outcomeType === 'recognition' || values.outcomeType === 'recognition_and_reward';
-  const rewarded = values.outcomeType === 'monetary' || values.outcomeType === 'recognition_and_reward';
-  if (recognition && !values.recognitionLabel.trim()) errors.recognitionLabel = 'Enter a recognition label.';
-  if (rewarded && !/^\d+(\.\d{1,2})?$/.test(values.amountMajor.trim())) errors.amountMajor = 'Enter a positive amount with at most two decimals.';
-  if (rewarded && !/^[A-Z]{3}$/.test(values.currency.trim().toUpperCase())) errors.currency = 'Enter a three-letter ISO currency code.';
-  if (values.outcomeType === 'non_monetary' && !values.rewardDescription.trim()) errors.rewardDescription = 'Describe the reward.';
-  if ((rewarded || values.outcomeType === 'non_monetary') && !values.deliveryTerms.trim()) errors.deliveryTerms = 'Describe how and when the company will deliver the reward.';
+  if (!values.eligibility.trim())
+    errors.eligibility = 'Describe who is eligible.';
+  if (!values.geographicRestrictions.trim())
+    errors.geographicRestrictions = 'Enter restrictions or “None”.';
+  const recognition =
+    values.outcomeType === 'recognition' ||
+    values.outcomeType === 'recognition_and_reward';
+  const rewarded =
+    values.outcomeType === 'monetary' ||
+    values.outcomeType === 'recognition_and_reward';
+  if (recognition && !values.recognitionLabel.trim())
+    errors.recognitionLabel = 'Enter a recognition label.';
+  const currency = values.currency.trim().toUpperCase();
+  if (rewarded && !isSupportedCurrency(currency))
+    errors.currency = 'Enter a supported three-letter ISO currency code.';
+  if (rewarded && isSupportedCurrency(currency)) {
+    try {
+      parseMoneyToMinorUnits(values.amountMajor, currency);
+    } catch {
+      errors.amountMajor = `Enter a positive amount valid for ${currency}.`;
+    }
+  }
+  if (values.outcomeType === 'non_monetary' && !values.rewardDescription.trim())
+    errors.rewardDescription = 'Describe the reward.';
+  if (
+    (rewarded || values.outcomeType === 'non_monetary') &&
+    !values.deliveryTerms.trim()
+  )
+    errors.deliveryTerms =
+      'Describe how and when the company will deliver the reward.';
+  if (!values.acceptsOffPlatformResponsibility)
+    errors.acceptsOffPlatformResponsibility =
+      'Confirm that your company is responsible for the stated outcome.';
   if (!values.deadline || values.deadline < new Date())
     errors.deadline = 'Select a future deadline.';
   return errors;
@@ -94,10 +127,14 @@ export function validateSubmission(values: SubmissionFormValues) {
   }
   if (values.liveDemoUrl.trim()) {
     try {
-      if (new URL(values.liveDemoUrl.trim()).protocol !== 'https:') throw Error();
-    } catch { errors.liveDemoUrl = 'Enter a valid HTTPS demo URL.'; }
+      if (new URL(values.liveDemoUrl.trim()).protocol !== 'https:')
+        throw Error();
+    } catch {
+      errors.liveDemoUrl = 'Enter a valid HTTPS demo URL.';
+    }
   }
-  if (values.notes.trim().length > 2000) errors.notes = 'Notes must be 2,000 characters or fewer.';
+  if (values.notes.trim().length > 2000)
+    errors.notes = 'Notes must be 2,000 characters or fewer.';
   return errors;
 }
 

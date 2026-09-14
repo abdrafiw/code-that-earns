@@ -137,6 +137,8 @@ Acceptance criteria:
 
 ### MVP-005 — Migrate existing data
 
+Status: Deferred until production deployment; implementation and runbook are ready.
+
 Replace the current migration with an idempotent dry-run/apply migration:
 
 - Convert BTC rewards to monetary outcomes using `BTC` as the legacy asset code
@@ -152,7 +154,7 @@ Acceptance criteria:
 - Record counts and original economic values are verified.
 - Rollback steps are documented before production use.
 
-### MVP-006 — Update challenge creation
+### [x] MVP-006 — Update challenge creation
 
 Collect title, description, category, difficulty, deadline, outcome type, winner
 count, eligibility, and geographic restrictions. Conditionally collect:
