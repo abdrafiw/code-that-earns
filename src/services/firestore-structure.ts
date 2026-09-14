@@ -91,7 +91,7 @@ export const challengeOutcomeSchema = z
 const normalizeLegacyChallenge = (value: unknown) => {
   if (!value || typeof value !== 'object') return value;
   const data = value as Record<string, unknown>;
-  if (data.schemaVersion !== undefined) return value;
+  if (data.schemaVersion === 2) return value;
   const legacyReward = data.rewardBTC ?? data.bountyBTC;
   const amountMinor =
     typeof legacyReward === 'number' && Number.isFinite(legacyReward)
@@ -109,7 +109,7 @@ const normalizeLegacyChallenge = (value: unknown) => {
             currency: 'BTC',
             deliveryTerms: 'Legacy reward arranged directly with the company.',
           }
-        : undefined),
+        : { type: 'recognition', recognitionLabel: 'Winner' }),
     winnerCount: data.winnerCount ?? 1,
     eligibility: data.eligibility ?? 'See the original challenge terms.',
   };

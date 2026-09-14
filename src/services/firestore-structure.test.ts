@@ -68,6 +68,25 @@ describe('Firestore document schemas', () => {
     expect(result.eligibility).toBe('See the original challenge terms.');
   });
 
+  it('normalizes legacy challenges without reward fields', () => {
+    const result = challengeDocumentSchema.parse({
+      title: 'Legacy recognition challenge',
+      description: 'A valid legacy challenge description.',
+      category: 'Coding',
+      difficulty: 'Beginner',
+      deadline: timestamp,
+      companyName: 'Example Company',
+      companyUid: 'company-1',
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    expect(result.outcome).toEqual({
+      type: 'recognition',
+      recognitionLabel: 'Winner',
+    });
+  });
+
   it('rejects malformed submission content', () => {
     const result = submissionDocumentSchema.safeParse({
       challengeId: 'challenge-1',
