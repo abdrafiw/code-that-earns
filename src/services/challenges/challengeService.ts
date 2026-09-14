@@ -13,7 +13,6 @@ import {
   type QueryConstraint,
   getAggregateFromServer,
   count,
-  sum,
   Timestamp,
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
@@ -58,11 +57,8 @@ class ChallengeService {
       );
       const categories = CHALLENGE_CATEGORIES;
 
-      const [totals, ...categoryCounts] = await Promise.all([
-        getAggregateFromServer(companyQuery, {
-          published: count(),
-          totalRewards: sum('outcome.amountMinor'),
-        }),
+      const [companyChallenges, ...categoryCounts] = await Promise.all([
+        getDocs(companyQuery),
         ...categories.map((category) =>
           getAggregateFromServer(
             query(companyQuery, where('category', '==', category)),
@@ -70,11 +66,15 @@ class ChallengeService {
           ),
         ),
       ]);
-      const totalsData = totals.data();
+      const totalRewards = companyChallenges.docs.reduce(
+        (total, challenge) =>
+          total + (challenge.data().outcome.amountMinor ?? 0),
+        0,
+      );
 
       return {
-        published: totalsData.published,
-        totalRewards: totalsData.totalRewards,
+        published: companyChallenges.size,
+        totalRewards,
         categoriesUsed: categoryCounts.filter(
           (result) => result.data().count > 0,
         ).length,

@@ -20,7 +20,9 @@ export function RouteErrorPage() {
         <h1 className="mt-2 text-2xl font-semibold text-gray-950">
           Something went wrong
         </h1>
-        <p className="mt-3 text-sm leading-6 text-gray-600">{message}</p>
+        <p className="mt-3 text-sm leading-6 break-words text-gray-600">
+          {message}
+        </p>
         <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
           <Button
             type="button"

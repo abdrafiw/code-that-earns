@@ -19,9 +19,9 @@ export const PageErrorState = ({
     >
       <div className="flex items-start gap-3">
         <WifiOff aria-hidden="true" className="mt-0.5 size-5 text-red-600" />
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <h3 className="font-medium text-red-900">Something went wrong</h3>
-          <p className="mt-1 text-sm text-red-700">{message}</p>
+          <p className="mt-1 text-sm break-words text-red-700">{message}</p>
           {onRetry && (
             <Button
               type="button"
