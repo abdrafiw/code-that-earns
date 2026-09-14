@@ -64,16 +64,10 @@ class AuthService {
           ...userData,
           displayName: user.displayName,
         };
-      } catch (profileError: unknown) {
-        console.error('Error provisioning account profile:', profileError);
-
+      } catch {
         try {
           await deleteUser(user);
-        } catch (cleanupError: unknown) {
-          console.error(
-            'Error rolling back Firebase Auth account:',
-            cleanupError,
-          );
+        } catch {
           throw new Error(
             'Account setup failed and automatic cleanup could not be confirmed. Try signing in to recover the profile, or contact support.',
           );
