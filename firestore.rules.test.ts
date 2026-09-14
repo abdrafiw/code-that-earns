@@ -34,7 +34,6 @@ const challenge = (companyUid = 'company-1') => ({
   },
   winnerCount: 2,
   eligibility: 'Open to all developers.',
-  geographicRestrictions: 'None',
   deadline: future,
   searchTerms: ['provider'],
   searchSchemaVersion: 1,

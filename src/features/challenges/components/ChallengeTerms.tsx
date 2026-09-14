@@ -1,4 +1,4 @@
-import { Award, CalendarDays, MapPin, ShieldCheck, Users } from 'lucide-react';
+import { Award, CalendarDays, ShieldCheck, Users } from 'lucide-react';
 import type { TChallenge } from '../types';
 import { formatChallengeDeadline } from '../utils/challengeDeadline';
 import { formatOutcome } from '../utils/formatOutcome';
@@ -60,9 +60,6 @@ export function ChallengeTerms({ challenge }: { challenge: TChallenge }) {
         </Term>
         <Term icon={Users} label="Eligibility">
           {challenge.eligibility}
-        </Term>
-        <Term icon={MapPin} label="Geographic restrictions">
-          {challenge.geographicRestrictions}
         </Term>
         {recognition && outcome.type === 'recognition_and_reward' && (
           <Term icon={Award} label="Recognition">

@@ -11,7 +11,6 @@ export const transformChallenge = (doc: ChallengeSource): TChallenge => {
     outcome: doc.outcome || { type: 'recognition', recognitionLabel: 'Winner' },
     winnerCount: doc.winnerCount || 1,
     eligibility: doc.eligibility || 'Open to eligible developers.',
-    geographicRestrictions: doc.geographicRestrictions || 'None',
     category: doc.category || '',
     difficulty: doc.difficulty || '',
     company: doc.companyName || '',

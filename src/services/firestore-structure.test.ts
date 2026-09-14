@@ -31,7 +31,6 @@ describe('Firestore document schemas', () => {
       outcome: { type: 'recognition', recognitionLabel: 'Winner' },
       winnerCount: 1,
       eligibility: 'Open to all developers.',
-      geographicRestrictions: 'None',
       deadline: timestamp,
       companyName: 'Example Company',
       companyUid: 'company-1',

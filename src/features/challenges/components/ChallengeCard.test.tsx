@@ -10,7 +10,6 @@ const mockChallenge = {
   outcome: { type: 'monetary', amountMinor: 10000, currency: 'USD' },
   winnerCount: 1,
   eligibility: 'Open to all developers.',
-  geographicRestrictions: 'None',
   deadline: new Date().toISOString(),
   description: 'Test Challenge Description',
   category: 'Test Category',

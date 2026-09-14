@@ -61,7 +61,6 @@ const initialForm: ChallengeFormValues = {
   deliveryTerms: '',
   winnerCount: 1,
   eligibility: 'Open to all developers.',
-  geographicRestrictions: 'None',
   acceptsOffPlatformResponsibility: false,
   deadline: undefined,
 };
@@ -86,7 +85,6 @@ export const CreateChallengeDialog = () => {
     form.values.difficulty &&
     form.values.winnerCount &&
     form.values.eligibility.trim() &&
-    form.values.geographicRestrictions.trim() &&
     form.values.deadline &&
     form.values.acceptsOffPlatformResponsibility &&
     (!offersRecognition || form.values.recognitionLabel.trim()) &&
@@ -130,7 +128,6 @@ export const CreateChallengeDialog = () => {
       },
       winnerCount: form.values.winnerCount,
       eligibility: form.values.eligibility.trim(),
-      geographicRestrictions: form.values.geographicRestrictions.trim(),
       responsibilityAccepted: true as const,
       deadline: form.values.deadline,
     };
@@ -244,27 +241,15 @@ export const CreateChallengeDialog = () => {
             values={form.values}
             setField={form.setField}
           />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="eligibility">Eligibility</Label>
-              <Textarea
-                id="eligibility"
-                value={form.values.eligibility}
-                onChange={(event) =>
-                  form.setField('eligibility', event.target.value)
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="geography">Geographic restrictions</Label>
-              <Textarea
-                id="geography"
-                value={form.values.geographicRestrictions}
-                onChange={(event) =>
-                  form.setField('geographicRestrictions', event.target.value)
-                }
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="eligibility">Eligibility</Label>
+            <Textarea
+              id="eligibility"
+              value={form.values.eligibility}
+              onChange={(event) =>
+                form.setField('eligibility', event.target.value)
+              }
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="challenge-deadline">Deadline</Label>

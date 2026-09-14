@@ -91,7 +91,6 @@ class ChallengeService {
     outcome,
     winnerCount,
     eligibility,
-    geographicRestrictions,
     responsibilityAccepted,
     deadline,
   }: CreateChallengePayload): Promise<{ id: string }> {
@@ -111,7 +110,6 @@ class ChallengeService {
         outcome,
         winnerCount,
         eligibility,
-        geographicRestrictions,
         responsibilityAccepted,
         deadline: deadline.toISOString(),
       });

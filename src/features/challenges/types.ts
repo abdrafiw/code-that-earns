@@ -17,7 +17,6 @@ export type TChallenge = Omit<
   outcome: ChallengeOutcome;
   winnerCount: number;
   eligibility: string;
-  geographicRestrictions: string;
   deadline: ChallengeDeadline;
 };
 
@@ -29,7 +28,6 @@ export type CreateChallengePayload = {
   outcome: ChallengeOutcome;
   winnerCount: number;
   eligibility: string;
-  geographicRestrictions: string;
   responsibilityAccepted: true;
   deadline: Date;
 };

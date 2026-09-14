@@ -96,7 +96,6 @@ export const challengeDocumentSchema = z.object({
   outcome: challengeOutcomeSchema,
   winnerCount: z.number().int().min(1).max(10),
   eligibility: z.string().trim().min(1).max(2000),
-  geographicRestrictions: z.string().trim().min(1).max(1000),
   deadline: timestampSchema,
   searchTerms: z.array(z.string()).max(100).default([]),
   searchSchemaVersion: z.number().int().nonnegative().default(0),

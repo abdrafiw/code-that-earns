@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Header } from './header';
 import { NavigationLinks } from './header/components/NavigationLinks';
 import { SettingsMenu } from './SettingsMenu';
 import { useAppContext } from '../hooks/useAppContext';
-import { Button } from '../components/ui/button';
 
 export const BaseLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -26,13 +24,15 @@ export const BaseLayout = () => {
           }`}
         >
           <div
-            className={`flex h-16 shrink-0 items-center justify-between border-b border-gray-200 ${
-              isSidebarCollapsed ? 'gap-1 px-1' : 'gap-3 px-4'
+            className={`flex h-16 shrink-0 items-center border-b border-gray-200 ${
+              isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
             }`}
           >
             <Link
               to="/"
-              className="flex min-w-0 flex-1 items-center gap-3 font-semibold text-gray-950"
+              className={`flex min-w-0 items-center font-semibold text-gray-950 ${
+                isSidebarCollapsed ? 'justify-center' : 'flex-1 gap-3'
+              }`}
               title={isSidebarCollapsed ? platformName : undefined}
             >
               <span
@@ -47,24 +47,6 @@ export const BaseLayout = () => {
                 </span>
               )}
             </Link>
-
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-8 shrink-0 text-gray-600 hover:bg-gray-100 hover:text-gray-950"
-              onClick={() => setIsSidebarCollapsed((collapsed) => !collapsed)}
-              aria-label={
-                isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
-              }
-              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              {isSidebarCollapsed ? (
-                <PanelLeftOpen aria-hidden="true" className="size-5" />
-              ) : (
-                <PanelLeftClose aria-hidden="true" className="size-5" />
-              )}
-            </Button>
           </div>
 
           <nav
@@ -87,7 +69,12 @@ export const BaseLayout = () => {
       )}
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <Header />
+        <Header
+          isSidebarCollapsed={isSidebarCollapsed}
+          onToggleSidebar={() =>
+            setIsSidebarCollapsed((collapsed) => !collapsed)
+          }
+        />
 
         <main className="dashboard-content min-w-0 flex-1 bg-gray-50">
           <Outlet />

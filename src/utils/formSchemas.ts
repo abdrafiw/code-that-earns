@@ -26,7 +26,6 @@ export type ChallengeFormValues = {
   deliveryTerms: string;
   winnerCount: number;
   eligibility: string;
-  geographicRestrictions: string;
   acceptsOffPlatformResponsibility: boolean;
   deadline?: Date;
 };
@@ -80,8 +79,6 @@ export function validateChallenge(values: ChallengeFormValues) {
     errors.winnerCount = 'Winner count must be between 1 and 10.';
   if (!values.eligibility.trim())
     errors.eligibility = 'Describe who is eligible.';
-  if (!values.geographicRestrictions.trim())
-    errors.geographicRestrictions = 'Enter restrictions or “None”.';
   const recognition =
     values.outcomeType === 'recognition' ||
     values.outcomeType === 'recognition_and_reward';

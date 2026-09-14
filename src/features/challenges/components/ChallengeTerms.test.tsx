@@ -13,7 +13,6 @@ const baseChallenge: TChallenge = {
   status: 'open',
   winnerCount: 2,
   eligibility: 'Developers with a public repository.',
-  geographicRestrictions: 'Ghana only.',
   outcome: { type: 'recognition', recognitionLabel: 'CTE Excellence Award' },
 };
 
@@ -28,7 +27,6 @@ describe('ChallengeTerms', () => {
     expect(
       screen.getByText('Developers with a public repository.'),
     ).toBeInTheDocument();
-    expect(screen.getByText('Ghana only.')).toBeInTheDocument();
     expect(
       screen.queryByText(/does not verify or guarantee delivery/i),
     ).not.toBeInTheDocument();

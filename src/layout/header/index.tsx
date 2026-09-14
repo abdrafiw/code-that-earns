@@ -1,8 +1,9 @@
-import { Menu } from 'lucide-react';
+import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAppContext } from '../../hooks/useAppContext';
 import { useState } from 'react';
 
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
+import { Button } from '../../components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +37,15 @@ import {
   AlertDialogTrigger,
 } from '../../components/ui/alert-dialog';
 
-export const Header = () => {
+type HeaderProps = {
+  isSidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
+};
+
+export const Header = ({
+  isSidebarCollapsed,
+  onToggleSidebar,
+}: HeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -73,11 +82,7 @@ export const Header = () => {
           : 'border-slate-200/80 bg-slate-50'
       }`}
     >
-      <div
-        className={`flex min-h-16 w-full items-center justify-between px-4 py-2 sm:px-6 lg:px-8 ${
-          user?.success ? 'lg:justify-end' : ''
-        }`}
-      >
+      <div className="flex min-h-16 w-full items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
         {/* logo */}
         <Link
           to="/"
@@ -96,6 +101,26 @@ export const Header = () => {
             {platformName}
           </span>
         </Link>
+
+        {user?.success && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="hidden size-9 shrink-0 text-gray-600 hover:bg-gray-100 hover:text-gray-950 lg:inline-flex"
+            onClick={onToggleSidebar}
+            aria-label={
+              isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
+            }
+            title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isSidebarCollapsed ? (
+              <PanelLeftOpen aria-hidden="true" className="size-5" />
+            ) : (
+              <PanelLeftClose aria-hidden="true" className="size-5" />
+            )}
+          </Button>
+        )}
 
         {/* right side - auth/user */}
         <div className="flex items-center gap-4">

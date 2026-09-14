@@ -63,8 +63,6 @@ export function convertLegacyChallenge(data: DocumentData) {
         ? Math.min(data.winnerCount, 10)
         : 1,
     eligibility: data.eligibility ?? 'See the original challenge terms.',
-    geographicRestrictions:
-      data.geographicRestrictions ?? 'Not specified in the legacy challenge.',
     status: mapChallengeStatus(data.status),
     submissions:
       Number.isInteger(data.submissions) && data.submissions >= 0

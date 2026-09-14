@@ -61,12 +61,6 @@ export async function publishChallengeOperation(
   const category = requiredText(input.category, 1, 80, 'Category');
   const difficulty = requiredText(input.difficulty, 1, 40, 'Difficulty');
   const eligibility = requiredText(input.eligibility, 1, 2000, 'Eligibility');
-  const geographicRestrictions = requiredText(
-    input.geographicRestrictions,
-    1,
-    1000,
-    'Geographic restrictions',
-  );
   if (
     !Number.isInteger(input.winnerCount) ||
     (input.winnerCount as number) < 1 ||
@@ -137,7 +131,6 @@ export async function publishChallengeOperation(
     outcome,
     winnerCount: input.winnerCount,
     eligibility,
-    geographicRestrictions,
     deadline: Timestamp.fromDate(deadlineDate),
     searchTerms: createSearchTerms(title, description, category),
     searchSchemaVersion: 1,

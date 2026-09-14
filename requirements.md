@@ -157,7 +157,7 @@ Acceptance criteria:
 ### [x] MVP-006 — Update challenge creation
 
 Collect title, description, category, difficulty, deadline, outcome type, winner
-count, eligibility, and geographic restrictions. Conditionally collect:
+count, and eligibility. Conditionally collect:
 
 - A recognition label when recognition is offered.
 - Integer amount and currency when money is offered.
@@ -177,7 +177,7 @@ Acceptance criteria:
 
 - Remove Bitcoin-specific wording and visuals.
 - Show company, deadline, status, outcome, per-winner reward, winner count,
-  eligibility, geographic restrictions, and delivery terms.
+  eligibility, and delivery terms.
 - List only open, unexpired challenges by default.
 - Retain search, category, difficulty, and stable pagination.
 - Handle loading, empty, error, and retry states.

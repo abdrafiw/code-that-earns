@@ -18,7 +18,6 @@ const validInput: PublishChallengeInput = {
   outcome: { type: 'recognition', recognitionLabel: 'Winner' },
   winnerCount: 1,
   eligibility: 'Open to all developers.',
-  geographicRestrictions: 'None',
   deadline: '2099-01-01T00:00:00.000Z',
   responsibilityAccepted: true,
 };

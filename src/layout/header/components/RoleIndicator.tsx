@@ -25,7 +25,7 @@ export const RoleIndicator = () => {
       ) : (
         <Code className="size-3.5" aria-hidden="true" />
       )}
-      <span>{isCompany ? 'Company' : 'Developer'}</span>
+      <span>{isCompany ? 'Organisation' : 'Developer'}</span>
     </div>
   );
 };
