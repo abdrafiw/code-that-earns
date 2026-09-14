@@ -4,7 +4,7 @@ import {
   CHALLENGE_SEARCH_SCHEMA_VERSION,
   createChallengeFilterFacets,
   createChallengeSearchTerms,
-} from './challengeFilters';
+} from '../utils/challengeFilters';
 
 describe('challenge search metadata', () => {
   it('creates normalized prefixes used by backend search', () => {

@@ -3,7 +3,7 @@ import {
   formatMoney,
   getCurrencyFractionDigits,
   parseMoneyToMinorUnits,
-} from './formatOutcome';
+} from '../utils/formatOutcome';
 
 describe('provider-neutral currency utilities', () => {
   it.each([

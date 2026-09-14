@@ -1,7 +1,7 @@
 import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { MemoryRouter } from 'react-router-dom';
-import { SubmitSolutionForm } from './SubmitSolutionForm';
+import { SubmitSolutionForm } from '../components/SubmitSolutionForm';
 import userEvent from '@testing-library/user-event';
 
 import { toast } from 'sonner';

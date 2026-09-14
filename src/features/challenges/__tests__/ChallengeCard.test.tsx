@@ -1,5 +1,5 @@
 import { screen, render } from '@testing-library/react';
-import { ChallengeCard } from './ChallengeCard';
+import { ChallengeCard } from '../components/ChallengeCard';
 import { formatChallengeDeadline } from '../utils/challengeDeadline';
 import type { TChallenge } from '../types';
 import { MemoryRouter } from 'react-router-dom';

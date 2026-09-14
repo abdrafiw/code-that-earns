@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { Timestamp } from 'firebase/firestore';
-import { DeveloperSubmissionCard } from './DeveloperSubmissionCard';
+import { DeveloperSubmissionCard } from '../components/DeveloperSubmissionCard';
 import type { SubmissionRecord } from '../types';
 
 const submission: SubmissionRecord = {

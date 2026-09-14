@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import type { TChallenge } from '../types';
-import { ChallengeTerms } from './ChallengeTerms';
+import { ChallengeTerms } from '../components/ChallengeTerms';
 
 const baseChallenge: TChallenge = {
   id: 'challenge-1',

@@ -3,16 +3,16 @@ import { describe, expect, it } from '@jest/globals';
 
 import { AppContext } from '../../../context/AppContext';
 import type { AppContextType, AuthState } from '../../../context/types';
-import { ChallengesPage } from './ChallengesPage';
+import { ChallengesPage } from '../pages/ChallengesPage';
 
 jest.mock('../../../config/firebase', () => ({
   auth: {},
   db: {},
 }));
-jest.mock('./CompanyChallengesPage', () => ({
+jest.mock('../pages/CompanyChallengesPage', () => ({
   CompanyChallengesPage: () => <p>Company challenges</p>,
 }));
-jest.mock('./DevChallengesPage', () => ({
+jest.mock('../pages/DevChallengesPage', () => ({
   DevChallengesPage: () => <p>Developer challenges</p>,
 }));
 
