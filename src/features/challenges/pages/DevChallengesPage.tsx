@@ -65,22 +65,22 @@ export const DevChallengesPage = () => {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <header className="border-b border-gray-200 pb-8">
+      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+        <header className="space-y-2 border-b border-gray-200 pb-6 sm:pb-8">
           <h1
             id="challenges-heading"
-            className="text-3xl font-semibold tracking-tight text-gray-950"
+            className="text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl"
           >
             Browse challenges
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
+          <p className="max-w-2xl text-sm leading-6 text-gray-500">
             Find a challenge, submit your solution, and earn recognition or a
             stated reward.
           </p>
         </header>
 
         <section className="space-y-5" aria-labelledby="challenges-heading">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex min-h-9 items-center justify-between gap-3">
             <p className="text-sm text-gray-500">
               {challenges.length}{' '}
               {challenges.length === 1 ? 'challenge' : 'challenges'} available
@@ -92,15 +92,21 @@ export const DevChallengesPage = () => {
             )}
           </div>
 
-          <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-3 lg:flex-row lg:items-center">
+          <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center">
             <div className="flex items-center gap-2 px-1 text-sm font-medium text-gray-600 lg:mr-auto">
-              <SlidersHorizontal className="size-4 text-indigo-500" />
+              <SlidersHorizontal
+                aria-hidden="true"
+                className="size-4 text-indigo-500"
+              />
               Filter challenges
             </div>
 
-            <div className="flex flex-1 flex-col gap-3 sm:flex-row lg:max-w-3xl">
+            <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:max-w-3xl lg:grid-cols-[minmax(0,1fr)_12rem_12rem]">
               <div className="relative flex-1">
-                <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400" />
+                <Search
+                  aria-hidden="true"
+                  className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
+                />
                 <Input
                   value={search}
                   onChange={(event) => {
@@ -112,7 +118,7 @@ export const DevChallengesPage = () => {
                   }}
                   placeholder="Search challenges"
                   aria-label="Search challenges"
-                  className="h-10 border-gray-200 pl-9 shadow-none"
+                  className="h-11 border-gray-200 pl-9 shadow-none"
                 />
               </div>
 
@@ -123,7 +129,7 @@ export const DevChallengesPage = () => {
                   setCategory(value);
                 }}
               >
-                <SelectTrigger className="h-10 w-full border-gray-200 bg-transparent shadow-none sm:w-48">
+                <SelectTrigger className="h-11 w-full border-gray-200 bg-transparent shadow-none data-[size=default]:h-11">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
 
@@ -144,7 +150,7 @@ export const DevChallengesPage = () => {
                   setDifficulty(value);
                 }}
               >
-                <SelectTrigger className="h-10 w-full border-gray-200 bg-transparent shadow-none sm:w-48">
+                <SelectTrigger className="h-11 w-full border-gray-200 bg-transparent shadow-none data-[size=default]:h-11">
                   <SelectValue placeholder="All Difficulties" />
                 </SelectTrigger>
 
@@ -159,26 +165,25 @@ export const DevChallengesPage = () => {
           </div>
 
           {challenges.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-gray-300 bg-white px-6 py-14 text-center">
-              <Code2 className="mx-auto size-9 text-gray-300" />
-              <h3 className="mt-4 font-medium text-gray-950">
+            <div className="space-y-4 rounded-xl border border-dashed border-gray-300 bg-white px-5 py-12 text-center">
+              <Code2
+                aria-hidden="true"
+                className="mx-auto size-9 text-gray-300"
+              />
+              <h3 className="font-medium text-gray-950">
                 No matching challenges
               </h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="text-sm text-gray-500">
                 Try a different search, category, or difficulty.
               </p>
               {hasActiveFilters && (
-                <Button
-                  variant="outline"
-                  className="mt-5"
-                  onClick={clearFilters}
-                >
+                <Button variant="outline" onClick={clearFilters}>
                   Clear filters
                 </Button>
               )}
             </div>
           ) : (
-            <div className="grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid items-start gap-4 md:grid-cols-2 lg:gap-5 xl:grid-cols-3">
               {challenges.map((challenge) => (
                 <ChallengeCard key={challenge.id} challenge={challenge} />
               ))}

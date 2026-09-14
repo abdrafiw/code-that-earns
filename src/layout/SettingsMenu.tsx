@@ -1,5 +1,6 @@
 import { Settings } from 'lucide-react';
 import { Button } from '../components/ui/button';
+
 import {
   Dialog,
   DialogContent,
@@ -8,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../components/ui/dialog';
+
 import { useAppContext } from '../hooks/useAppContext';
 
 export function SettingsMenu() {
@@ -27,11 +29,13 @@ export function SettingsMenu() {
           <Settings aria-hidden="true" className="size-5" />
         </Button>
       </DialogTrigger>
+
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>Your account details.</DialogDescription>
         </DialogHeader>
+
         {profile ? (
           <dl className="divide-y divide-gray-100 text-sm">
             {[
@@ -44,7 +48,7 @@ export function SettingsMenu() {
             ].map(([label, value]) => (
               <div key={label} className="py-3">
                 <dt className="text-gray-500">{label}</dt>
-                <dd className="mt-1 font-medium break-words text-gray-950">
+                <dd className="mt-1 font-medium wrap-break-word text-gray-950">
                   {value}
                 </dd>
               </div>

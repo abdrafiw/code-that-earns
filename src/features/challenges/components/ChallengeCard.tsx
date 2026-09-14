@@ -25,8 +25,8 @@ export const ChallengeCard = ({ challenge }: { challenge: TChallenge }) => {
 
   return (
     <Card className="flex flex-col gap-0 overflow-hidden border-gray-200 py-0 shadow-none transition hover:border-gray-300 hover:shadow-sm">
-      <CardHeader className="space-y-2.5 p-5 pb-0">
-        <div className="flex items-center justify-between gap-3">
+      <CardHeader className="space-y-3 p-4 pb-0 sm:p-5 sm:pb-0">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600">
             {challenge.category || 'General'}
           </span>
@@ -38,38 +38,46 @@ export const ChallengeCard = ({ challenge }: { challenge: TChallenge }) => {
             {challenge.difficulty || 'Unspecified'}
           </span>
         </div>
-        <h3 className="line-clamp-2 text-lg leading-6 font-semibold text-gray-950">
+        <h3 className="text-lg leading-6 font-semibold wrap-break-word text-gray-950 sm:line-clamp-2">
           {challenge.title}
         </h3>
       </CardHeader>
 
-      <CardContent className="flex-1 space-y-3 p-5 pt-3">
+      <CardContent className="flex-1 space-y-4 p-4 pt-3 sm:p-5 sm:pt-3">
         <p className="line-clamp-2 text-sm leading-5 text-gray-500">
           {challenge.description}
         </p>
 
-        <div className="flex items-center justify-between gap-4 rounded-lg bg-gray-50 px-3 py-2.5">
-          <div className="min-w-0">
+        <div className="grid grid-cols-2 divide-x divide-gray-200 rounded-lg bg-gray-50 px-3 py-3">
+          <div className="min-w-0 space-y-1 pr-3">
             <p className="text-xs text-gray-500">Reward</p>
-            <p className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold text-gray-950">
-              <Award className="size-4 text-emerald-500" />
-              {formatOutcome(challenge.outcome)} · {challenge.winnerCount}{' '}
-              {challenge.winnerCount === 1 ? 'winner' : 'winners'}
+            <p className="flex items-start gap-1.5 text-sm leading-5 font-semibold wrap-break-word text-gray-950">
+              <Award
+                aria-hidden="true"
+                className="size-4 shrink-0 text-emerald-500"
+              />
+              <span>
+                {formatOutcome(challenge.outcome)} · {challenge.winnerCount}{' '}
+                {challenge.winnerCount === 1 ? 'winner' : 'winners'}
+              </span>
             </p>
           </div>
 
-          <div className="min-w-0 text-right">
+          <div className="min-w-0 space-y-1 pl-3 text-right">
             <p className="text-xs text-gray-500">Deadline</p>
-            <p className="mt-0.5 flex items-center justify-end gap-1.5 text-sm font-medium text-gray-700">
-              <CalendarDays className="size-4 shrink-0 text-amber-500" />
-              <span className="truncate">
+            <p className="flex items-start justify-end gap-1.5 text-sm leading-5 font-medium text-gray-700">
+              <CalendarDays
+                aria-hidden="true"
+                className="size-4 shrink-0 text-amber-500"
+              />
+              <span className="wrap-break-word">
                 {formatChallengeDeadline(challenge.deadline)}
               </span>
             </p>
           </div>
         </div>
 
-        <p className="truncate text-xs text-gray-500">
+        <p className="text-xs wrap-break-word text-gray-500">
           Posted by{' '}
           <span className="font-medium text-gray-700">
             {challenge.company || 'Company'}

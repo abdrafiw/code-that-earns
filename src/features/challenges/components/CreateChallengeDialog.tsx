@@ -42,6 +42,7 @@ import { FormErrorSummary } from '../../../components/common/FormErrorSummary';
 import { ChallengeOutcomeFields } from './ChallengeOutcomeFields';
 import { parseMoneyToMinorUnits } from '../utils/formatOutcome';
 import { CHALLENGE_CATEGORIES } from '../constants';
+import { cn } from '../../../lib/utils';
 
 import {
   hasFormErrors,
@@ -66,7 +67,11 @@ const initialForm: ChallengeFormValues = {
   deadline: undefined,
 };
 
-export const CreateChallengeDialog = () => {
+export const CreateChallengeDialog = ({
+  triggerClassName,
+}: {
+  triggerClassName?: string;
+} = {}) => {
   const [open, setOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const form = useTypedForm(initialForm);
@@ -154,7 +159,7 @@ export const CreateChallengeDialog = () => {
       }}
     >
       <DialogTrigger asChild>
-        <Button className="cursor-pointer">
+        <Button className={cn('cursor-pointer', triggerClassName)}>
           <Plus className="size-4" />
           Create challenge
         </Button>

@@ -12,7 +12,7 @@ export function EmptyChallengesState({
   onClearFilters,
 }: EmptyChallengesStateProps) {
   return (
-    <div className="rounded-lg border border-dashed border-gray-300 bg-white px-6 py-14 text-center">
+    <div className="space-y-4 rounded-lg border border-dashed border-gray-300 bg-white px-6 py-12 text-center sm:py-14">
       <Code2 className="mx-auto size-8 text-gray-300" />
       <h3 className="font-medium text-gray-950">
         {hasActiveFilters ? 'No matching challenges' : 'No challenges yet'}
@@ -25,7 +25,7 @@ export function EmptyChallengesState({
       </p>
 
       {hasActiveFilters ? (
-        <Button variant="outline" className="mt-5" onClick={onClearFilters}>
+        <Button variant="outline" onClick={onClearFilters}>
           Clear filters
         </Button>
       ) : (

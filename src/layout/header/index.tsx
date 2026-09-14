@@ -1,30 +1,24 @@
-import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAppContext } from '../../hooks/useAppContext';
 import { useState } from 'react';
 
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
 import { Button } from '../../components/ui/button';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '../../components/ui/sheet';
 
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/auth/authService';
 import { toast } from 'sonner';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 import { RoleIndicator } from './components/RoleIndicator';
-import { NavigationLinks } from './components/NavigationLinks';
+import { MobileNavigationSheet } from './components/MobileNavigationSheet';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,10 +43,13 @@ export const Header = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigate = useNavigate();
+
   const { user } = useAppContext();
+
   const name = user?.success
     ? user.user.companyName || user.user.name || 'User'
     : '';
+
   const platformName =
     user?.success && user.user.role === 'COMPANY'
       ? user.user.companyName || 'Code That Earns'
@@ -60,7 +57,7 @@ export const Header = ({
 
   const handleLogout = async () => {
     try {
-      await toast.promise(authService.signOut(), {
+      toast.promise(authService.signOut(), {
         loading: 'Logging you out...',
         success: 'Logged out successfully!',
         error: 'Failed to log out.',
@@ -69,7 +66,6 @@ export const Header = ({
       navigate('/');
       setIsMobileMenuOpen(false);
     } catch (error) {
-      console.error('Logout failed:', error);
       toast.error(getErrorMessage(error));
     }
   };
@@ -97,7 +93,7 @@ export const Header = ({
           >
             CTE
           </span>
-          <span className="hidden max-w-[45vw] min-w-0 text-sm leading-5 font-bold tracking-wide break-words whitespace-normal uppercase sm:block lg:max-w-md">
+          <span className="hidden max-w-[45vw] min-w-0 text-sm leading-5 font-bold tracking-wide wrap-break-word whitespace-normal uppercase sm:block lg:max-w-md">
             {platformName}
           </span>
         </Link>
@@ -142,131 +138,70 @@ export const Header = ({
             </div>
           ) : (
             <>
-              <div className="hidden lg:block">
-                <div className="flex items-center gap-3">
-                  <RoleIndicator />
+              <div className="hidden items-center gap-3 lg:flex">
+                <RoleIndicator />
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      asChild
-                      className="flex cursor-pointer items-center gap-5"
-                    >
-                      <Avatar className="size-9 bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200">
-                        <AvatarFallback className="bg-transparent">
-                          {name && name[0].toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </DropdownMenuTrigger>
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    asChild
+                    className="flex cursor-pointer items-center gap-5"
+                  >
+                    <Avatar className="size-9 bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200">
+                      <AvatarFallback className="bg-transparent">
+                        {name && name[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
 
-                    <DropdownMenuContent>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem
-                            onSelect={(e) => e.preventDefault()}
+                  <DropdownMenuContent>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          Logout
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+
+                          <AlertDialogDescription>
+                            You will be logged out of your account. You can sign
+                            in again at any time.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+                          <AlertDialogAction
+                            onClick={handleLogout}
+                            className="bg-destructive text-white"
                           >
                             Logout
-                          </DropdownMenuItem>
-                        </AlertDialogTrigger>
-
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-
-                            <AlertDialogDescription>
-                              You will be logged out of your account. You can
-                              sign in again at any time.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-
-                            <AlertDialogAction
-                              onClick={handleLogout}
-                              className="bg-destructive text-white"
-                            >
-                              Logout
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* mobile menu button */}
               <div className="flex items-center gap-3 lg:hidden">
                 <RoleIndicator />
 
-                <Avatar className="hidden size-[35px] bg-slate-950 text-slate-50">
+                <Avatar className="hidden size-8.75 bg-slate-950 text-slate-50">
                   <AvatarFallback className="bg-transparent text-sm">
                     {name && name[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
 
-                <Sheet
+                <MobileNavigationSheet
                   open={isMobileMenuOpen}
                   onOpenChange={setIsMobileMenuOpen}
-                >
-                  <SheetTrigger asChild>
-                    <button
-                      className="p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
-                      aria-label="Open navigation menu"
-                    >
-                      <Menu className="h-6 w-6" />
-                    </button>
-                  </SheetTrigger>
-
-                  <SheetContent side="left" className="w-[300px] sm:w-[350px]">
-                    <SheetHeader className="sr-only">
-                      <SheetTitle>Dashboard navigation</SheetTitle>
-                      <SheetDescription>
-                        Navigate between your dashboard pages or sign out.
-                      </SheetDescription>
-                    </SheetHeader>
-
-                    <div className="mt-10 flex h-full flex-col">
-                      <nav className="flex-1 p-6">
-                        <NavigationLinks
-                          mobile={true}
-                          onLinkClick={() => setIsMobileMenuOpen(false)}
-                        />
-                      </nav>
-
-                      {/* mobile logout button */}
-                      <div className="border-t border-gray-200 p-4">
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <button className="text-sm font-medium text-red-600 transition-colors hover:text-red-700">
-                              Logout
-                            </button>
-                          </AlertDialogTrigger>
-
-                          <AlertDialogContent className="">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                You will be logged out of your account. You can
-                                sign in again at any time.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={handleLogout}
-                                className="bg-destructive text-white"
-                              >
-                                Logout
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </div>
-                  </SheetContent>
-                </Sheet>
+                  onLogout={handleLogout}
+                />
               </div>
             </>
           )}

@@ -27,6 +27,7 @@ import {
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import { formatOutcome } from '../utils/formatOutcome';
 import { CHALLENGE_CATEGORIES } from '../constants';
+import { CompanyChallengeMobileCard } from '../components/CompanyChallengeMobileCard';
 
 const difficultyStyles: Record<string, string> = {
   beginner: 'bg-green-50 text-green-700',
@@ -70,18 +71,18 @@ export const CompanyChallengesPage = () => {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <header className="flex flex-col justify-between gap-5 border-b border-gray-200 pb-8 sm:flex-row sm:items-end">
+      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+        <header className="flex flex-col justify-between gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-end sm:pb-8">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-gray-950">
+            <h1 className="text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">
               Challenges
             </h1>
           </div>
-          <CreateChallengeDialog />
+          <CreateChallengeDialog triggerClassName="w-full sm:w-auto" />
         </header>
 
         {error || metricsQuery.error ? (
-          <div className="mt-8">
+          <div>
             <PageErrorState
               message={getErrorMessage(error ?? metricsQuery.error)}
               onRetry={() => {
@@ -93,7 +94,7 @@ export const CompanyChallengesPage = () => {
           </div>
         ) : (
           <>
-            <div className="grid gap-4 py-8 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1">
               <KpiCard
                 icon={Code2}
                 label="Published challenges"
@@ -115,20 +116,23 @@ export const CompanyChallengesPage = () => {
               />
             </div>
 
-            <div className="space-y-4">
-              <div className="flex justify-end">
+            <div className="space-y-4 pt-6 sm:pt-8">
+              <div className="flex justify-start sm:justify-end">
                 <Link
                   to="/company-submissions"
-                  className="text-sm font-medium text-indigo-500 hover:text-indigo-600"
+                  className="inline-flex min-h-11 items-center rounded-md px-1 text-sm font-medium text-indigo-600 hover:text-indigo-700"
                 >
                   Review submissions
                 </Link>
               </div>
 
-              <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-3 sm:flex-row">
+              <div className="grid gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_11rem_11rem]">
                 <div className="flex-1">
                   <div className="relative">
-                    <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400" />
+                    <Search
+                      aria-hidden="true"
+                      className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
+                    />
                     <Input
                       value={search}
                       onChange={(event) => {
@@ -139,7 +143,8 @@ export const CompanyChallengesPage = () => {
                         }
                       }}
                       placeholder="Search challenges"
-                      className="h-10 border-gray-200 pl-9 shadow-none"
+                      aria-label="Search challenges"
+                      className="h-11 border-gray-200 pl-9 shadow-none"
                     />
                   </div>
                 </div>
@@ -151,7 +156,7 @@ export const CompanyChallengesPage = () => {
                     setCategory(value);
                   }}
                 >
-                  <SelectTrigger className="h-10 w-full border-gray-200 bg-transparent shadow-none sm:w-44">
+                  <SelectTrigger className="h-11 w-full border-gray-200 bg-transparent shadow-none data-[size=default]:h-11">
                     <SelectValue placeholder="All categories" />
                   </SelectTrigger>
                   <SelectContent>
@@ -171,7 +176,7 @@ export const CompanyChallengesPage = () => {
                     setDifficulty(value);
                   }}
                 >
-                  <SelectTrigger className="h-10 w-full border-gray-200 bg-transparent shadow-none sm:w-44">
+                  <SelectTrigger className="h-11 w-full border-gray-200 bg-transparent shadow-none data-[size=default]:h-11">
                     <SelectValue placeholder="All difficulties" />
                   </SelectTrigger>
                   <SelectContent>
@@ -193,66 +198,76 @@ export const CompanyChallengesPage = () => {
                   }}
                 />
               ) : (
-                <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-                  <table className="w-full min-w-180 text-left text-sm">
-                    <thead className="border-b border-gray-200 text-xs tracking-wide text-gray-500 uppercase">
-                      <tr className="bg-white">
-                        <th className="px-5 py-4 font-medium">Challenge</th>
-                        <th className="px-5 py-4 font-medium">Difficulty</th>
-                        <th className="px-5 py-4 font-medium">Reward</th>
-                        <th className="px-5 py-4 font-medium">Deadline</th>
-                        <th className="px-5 py-4 font-medium">Submissions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {challenges.map((challenge) => {
-                        const difficulty = normalizeChallengeFilter(
-                          challenge.difficulty,
-                        );
-                        const badgeClass =
-                          difficultyStyles[difficulty] ||
-                          'bg-gray-100 text-gray-600';
+                <>
+                  <ul className="space-y-3 md:hidden">
+                    {challenges.map((challenge) => (
+                      <CompanyChallengeMobileCard
+                        key={challenge.id}
+                        challenge={challenge}
+                      />
+                    ))}
+                  </ul>
+                  <div className="hidden overflow-x-auto rounded-lg border border-gray-200 bg-white md:block">
+                    <table className="w-full min-w-180 text-left text-sm">
+                      <thead className="border-b border-gray-200 text-xs tracking-wide text-gray-500 uppercase">
+                        <tr className="bg-white">
+                          <th className="px-5 py-4 font-medium">Challenge</th>
+                          <th className="px-5 py-4 font-medium">Difficulty</th>
+                          <th className="px-5 py-4 font-medium">Reward</th>
+                          <th className="px-5 py-4 font-medium">Deadline</th>
+                          <th className="px-5 py-4 font-medium">Submissions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {challenges.map((challenge) => {
+                          const difficulty = normalizeChallengeFilter(
+                            challenge.difficulty,
+                          );
+                          const badgeClass =
+                            difficultyStyles[difficulty] ||
+                            'bg-gray-100 text-gray-600';
 
-                        return (
-                          <tr
-                            key={challenge.id}
-                            className="transition-colors hover:bg-gray-50"
-                          >
-                            <td className="max-w-70 px-5 py-5">
-                              <p className="truncate font-semibold text-gray-950">
-                                {challenge.title}
-                              </p>
-                              <p className="mt-1 truncate text-xs text-gray-500">
-                                {challenge.category || 'General'}
-                              </p>
-                            </td>
-                            <td className="px-5 py-5">
-                              <span
-                                className={
-                                  'rounded-full px-2.5 py-1 text-xs font-medium capitalize ' +
-                                  badgeClass
-                                }
-                              >
-                                {challenge.difficulty || 'Unspecified'}
-                              </span>
-                            </td>
-                            <td className="px-5 py-5 font-semibold text-gray-900">
-                              {formatOutcome(challenge.outcome)}
-                            </td>
-                            <td className="px-5 py-5 text-gray-500">
-                              <span className="whitespace-nowrap">
-                                {formatChallengeDeadline(challenge.deadline)}
-                              </span>
-                            </td>
-                            <td className="px-5 py-5 text-gray-500">
-                              {challenge.submissions ?? 0}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                          return (
+                            <tr
+                              key={challenge.id}
+                              className="transition-colors hover:bg-gray-50"
+                            >
+                              <td className="max-w-70 space-y-1 px-5 py-5">
+                                <p className="truncate font-semibold text-gray-950">
+                                  {challenge.title}
+                                </p>
+                                <p className="truncate text-xs text-gray-500">
+                                  {challenge.category || 'General'}
+                                </p>
+                              </td>
+                              <td className="px-5 py-5">
+                                <span
+                                  className={
+                                    'rounded-full px-2.5 py-1 text-xs font-medium capitalize ' +
+                                    badgeClass
+                                  }
+                                >
+                                  {challenge.difficulty || 'Unspecified'}
+                                </span>
+                              </td>
+                              <td className="px-5 py-5 font-semibold text-gray-900">
+                                {formatOutcome(challenge.outcome)}
+                              </td>
+                              <td className="px-5 py-5 text-gray-500">
+                                <span className="whitespace-nowrap">
+                                  {formatChallengeDeadline(challenge.deadline)}
+                                </span>
+                              </td>
+                              <td className="px-5 py-5 text-gray-500">
+                                {challenge.submissions ?? 0}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           </>
