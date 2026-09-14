@@ -54,8 +54,9 @@ service cloud.firestore {
         && data.developerName == developer.name
         && data.developerEmail == developer.email
         && data.githubUrl is string
+        && data.githubUrl.size() <= 2048
         && data.githubUrl.matches('^https://github[.]com/[^/]+/[^/]+/?$')
-        && (!data.keys().hasAny(['liveDemoUrl']) || (data.liveDemoUrl is string && data.liveDemoUrl.matches('^https://.+')))
+        && (!data.keys().hasAny(['liveDemoUrl']) || (data.liveDemoUrl is string && data.liveDemoUrl.size() <= 2048 && data.liveDemoUrl.matches('^https://.+')))
         && (!data.keys().hasAny(['notes']) || (data.notes is string && data.notes.size() <= 2000))
         && data.publicWinnerConsent is bool
         && data.status == 'submitted'

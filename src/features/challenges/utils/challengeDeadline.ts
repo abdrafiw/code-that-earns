@@ -40,3 +40,14 @@ export function formatChallengeDeadline(
     timeZone: 'UTC',
   }).format(date);
 }
+
+export function isChallengeExpired(deadline?: ChallengeDeadline | null) {
+  if (!deadline) return true;
+  const date =
+    deadline instanceof Timestamp
+      ? deadline.toDate()
+      : deadline instanceof Date
+        ? deadline
+        : new Date(deadline);
+  return Number.isNaN(date.getTime()) || date.getTime() <= Date.now();
+}

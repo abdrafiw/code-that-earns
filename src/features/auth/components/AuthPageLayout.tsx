@@ -3,7 +3,7 @@ import { ArrowLeft, Award, Check, Code2, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 type AuthPageLayoutProps = {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   description: string;
   children: ReactNode;
@@ -24,7 +24,7 @@ export function AuthPageLayout({
   wide = false,
 }: AuthPageLayoutProps) {
   return (
-    <main className="auth-page min-h-screen bg-slate-50 lg:grid lg:grid-cols-[0.9fr_1.1fr]">
+    <section className="auth-page min-h-screen bg-slate-50 lg:grid lg:grid-cols-[0.9fr_1.1fr]">
       <div className="relative hidden overflow-hidden bg-slate-950 px-6 py-8 text-white sm:px-10 lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:px-14 lg:py-12">
         <div
           aria-hidden="true"
@@ -113,16 +113,22 @@ export function AuthPageLayout({
 
           <div className="space-y-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] sm:p-8 sm:shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
             <header className="space-y-2">
-              <p className="text-sm font-semibold text-indigo-500">{eyebrow}</p>
+              {eyebrow && (
+                <p className="text-sm font-semibold text-indigo-500">
+                  {eyebrow}
+                </p>
+              )}
+
               <h1 className="text-2xl font-semibold tracking-[-0.035em] text-slate-950 sm:text-3xl">
                 {title}
               </h1>
+
               <p className="text-sm leading-5 text-slate-500 sm:leading-6">
                 {description}
               </p>
             </header>
 
-            <div>{children}</div>
+            <>{children}</>
           </div>
 
           <p className="hidden text-center text-xs leading-5 text-slate-400 sm:block">
@@ -131,6 +137,6 @@ export function AuthPageLayout({
           </p>
         </div>
       </div>
-    </main>
+    </section>
   );
 }

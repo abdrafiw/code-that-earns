@@ -114,6 +114,14 @@ class SubmissionService {
       const challenge = challengeSnapshot.data();
       const developer = developerSnapshot.data();
 
+      if (challenge.status !== 'open') {
+        throw new Error('This challenge is no longer accepting submissions.');
+      }
+
+      if (challenge.deadline.toMillis() <= Date.now()) {
+        throw new Error('The submission deadline has passed.');
+      }
+
       if (developer.role !== 'DEVELOPER') {
         throw new Error('Only developers can submit solutions');
       }

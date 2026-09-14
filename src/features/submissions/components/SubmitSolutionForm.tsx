@@ -24,20 +24,29 @@ const initialValues: SubmissionFormValues = {
 
 type SubmitSolutionFormProps = {
   challengeID: string;
+  unavailableReason?: string;
 };
 
 export const SubmitSolutionForm = ({
   challengeID,
+  unavailableReason,
 }: SubmitSolutionFormProps) => {
   const form = useTypedForm(initialValues);
 
   const navigate = useNavigate();
 
   const submitSolutionMutation = useSubmitSolution();
-  const hasRequiredFields = Boolean(form.values.githubUrl.trim());
+  const hasRequiredFields = Boolean(
+    form.values.githubUrl.trim() && !unavailableReason,
+  );
 
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (unavailableReason) {
+      toast.error(unavailableReason);
+      return;
+    }
 
     const errors = validateSubmission(form.values);
     form.setErrors(errors);
@@ -89,6 +98,7 @@ export const SubmitSolutionForm = ({
               id="github-url"
               type="url"
               required
+              maxLength={2048}
               value={form.values.githubUrl}
               onChange={(e) => form.setField('githubUrl', e.target.value)}
               className="pl-10"
@@ -111,6 +121,7 @@ export const SubmitSolutionForm = ({
           <Input
             id="demo-url"
             type="url"
+            maxLength={2048}
             value={form.values.liveDemoUrl}
             onChange={(e) => form.setField('liveDemoUrl', e.target.value)}
             placeholder="https://example.com/demo"
@@ -144,6 +155,11 @@ export const SubmitSolutionForm = ({
         </label>
 
         <div className="flex flex-col gap-3">
+          {unavailableReason && (
+            <p role="status" className="text-sm text-amber-700">
+              {unavailableReason}
+            </p>
+          )}
           <Button
             type="submit"
             disabled={submitSolutionMutation.isPending || !hasRequiredFields}

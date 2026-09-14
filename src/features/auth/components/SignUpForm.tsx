@@ -184,7 +184,7 @@ export const SignUpForm = () => {
           >
             <SelectTrigger
               id="signup-role"
-              className="h-11 w-full bg-slate-50"
+              className="h-11 w-full bg-slate-50 data-[size=default]:h-11"
               aria-required="true"
               aria-invalid={!!form.errors.role}
               aria-describedby={

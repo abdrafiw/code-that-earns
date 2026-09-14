@@ -123,10 +123,28 @@ export const submissionDocumentSchema = z.object({
   challengeTitle: nullableString,
   challengeDescription: nullableString,
   challengeOutcome: challengeOutcomeSchema,
-  githubUrl: z.url().refine((url) => url.startsWith('https://github.com/'), {
-    message: 'Expected a GitHub repository URL',
-  }),
-  liveDemoUrl: z.url().optional(),
+  githubUrl: z
+    .string()
+    .max(2048)
+    .url()
+    .refine((value) => {
+      const url = new URL(value);
+      return (
+        url.protocol === 'https:' &&
+        url.hostname === 'github.com' &&
+        url.pathname.split('/').filter(Boolean).length === 2 &&
+        !url.search &&
+        !url.hash
+      );
+    }, 'Expected an HTTPS GitHub repository URL'),
+  liveDemoUrl: z
+    .string()
+    .max(2048)
+    .url()
+    .refine((value) => new URL(value).protocol === 'https:', {
+      message: 'Expected an HTTPS live demo URL',
+    })
+    .optional(),
   notes: z.string().trim().max(2000).optional(),
   publicWinnerConsent: z.boolean(),
   developerUid: z.string().min(1),

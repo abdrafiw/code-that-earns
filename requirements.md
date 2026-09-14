@@ -188,7 +188,7 @@ Acceptance criteria:
 - Recognition-only and rewarded challenges render correctly.
 - Currency display is locale-aware and stored values use integer arithmetic.
 
-### MVP-008 — Generalize submissions
+### [x] MVP-008 — Generalize submissions
 
 - Collect a Git repository URL, optional live-demo URL, and optional notes.
 - Do not collect reward-delivery details.

@@ -10,6 +10,7 @@ import { ChallengeNotFoundError } from '../../../services/challenges/challengeSe
 import { Button } from '../../../components/ui/button';
 import { normalizeChallengeFilter } from '../../challenges/utils/challengeFilters';
 import { ChallengeTerms } from '../../challenges/components/ChallengeTerms';
+import { isChallengeExpired } from '../../challenges/utils/challengeDeadline';
 
 const difficultyStyles: Record<string, string> = {
   beginner: 'bg-emerald-100 text-emerald-800',
@@ -43,6 +44,12 @@ export const SubmitSolutionPage = () => {
   if (!challenge) return <SubmitSolutionNotFoundState />;
 
   const difficulty = normalizeChallengeFilter(challenge.difficulty);
+  const submissionUnavailableReason =
+    challenge.status !== 'open'
+      ? 'This challenge is no longer accepting submissions.'
+      : isChallengeExpired(challenge.deadline)
+        ? 'The submission deadline has passed.'
+        : undefined;
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -127,7 +134,10 @@ export const SubmitSolutionPage = () => {
           </article>
 
           <aside className="lg:sticky lg:top-6">
-            <SubmitSolutionForm challengeID={challengeId} />
+            <SubmitSolutionForm
+              challengeID={challengeId}
+              unavailableReason={submissionUnavailableReason}
+            />
           </aside>
         </div>
       </div>

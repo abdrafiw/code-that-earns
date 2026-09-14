@@ -119,15 +119,24 @@ export function validateChallenge(values: ChallengeFormValues) {
 export function validateSubmission(values: SubmissionFormValues) {
   const errors: FormErrors<SubmissionFormValues> = {};
   try {
-    const url = new URL(values.githubUrl.trim());
-    if (url.protocol !== 'https:' || url.hostname !== 'github.com')
+    const value = values.githubUrl.trim();
+    const url = new URL(value);
+    const pathParts = url.pathname.split('/').filter(Boolean);
+    if (
+      value.length > 2048 ||
+      url.protocol !== 'https:' ||
+      url.hostname !== 'github.com' ||
+      pathParts.length !== 2 ||
+      Boolean(url.search || url.hash)
+    )
       throw Error();
   } catch {
     errors.githubUrl = 'Enter a valid HTTPS GitHub repository URL.';
   }
   if (values.liveDemoUrl.trim()) {
     try {
-      if (new URL(values.liveDemoUrl.trim()).protocol !== 'https:')
+      const value = values.liveDemoUrl.trim();
+      if (value.length > 2048 || new URL(value).protocol !== 'https:')
         throw Error();
     } catch {
       errors.liveDemoUrl = 'Enter a valid HTTPS demo URL.';

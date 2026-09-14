@@ -71,6 +71,30 @@ describe('SubmitSolutionForm', () => {
     expect(mockMutate).not.toHaveBeenCalled();
   });
 
+  it('explains why a closed challenge cannot accept a submission', async () => {
+    render(
+      <MemoryRouter>
+        <SubmitSolutionForm
+          challengeID="1"
+          unavailableReason="The submission deadline has passed."
+        />
+      </MemoryRouter>,
+    );
+    const user = userEvent.setup();
+
+    await user.type(
+      screen.getByLabelText(/github repository/i),
+      'https://github.com/user/repository',
+    );
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'The submission deadline has passed.',
+    );
+    expect(
+      screen.getByRole('button', { name: /submit solution/i }),
+    ).toBeDisabled();
+  });
+
   it('shows backend errors and retains entered values', async () => {
     RenderSubmitSolutionForm();
     const user = userEvent.setup();

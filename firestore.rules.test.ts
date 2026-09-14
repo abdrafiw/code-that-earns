@@ -76,6 +76,13 @@ beforeEach(async () => {
       name: 'Dev',
       createdAt: Timestamp.now(),
     });
+    await setDoc(doc(db, 'users/developer-2'), {
+      uid: 'developer-2',
+      email: 'other@example.com',
+      role: 'DEVELOPER',
+      name: 'Other developer',
+      createdAt: Timestamp.now(),
+    });
   });
 });
 
@@ -137,6 +144,79 @@ describe('Firestore marketplace rules', () => {
     await assertSucceeds(setDoc(submissionRef, submission));
     await assertFails(setDoc(doc(db, 'submissions/another-id'), submission));
     await assertFails(updateDoc(submissionRef, { status: 'winner' }));
+
+    const otherDeveloper = environment
+      .authenticatedContext('developer-2', { email: 'other@example.com' })
+      .firestore();
+    await assertFails(
+      getDoc(doc(otherDeveloper, 'submissions/challenge-1_developer-1')),
+    );
+    await assertFails(
+      updateDoc(doc(otherDeveloper, 'submissions/challenge-1_developer-1'), {
+        notes: 'Tampered',
+      }),
+    );
+  });
+
+  it('rejects invalid, excessive, closed, and expired submissions', async () => {
+    await environment.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, 'challenges/open'), {
+        ...challenge(),
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+      await setDoc(doc(db, 'challenges/closed'), {
+        ...challenge(),
+        status: 'in_review',
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+      await setDoc(doc(db, 'challenges/expired'), {
+        ...challenge(),
+        deadline: Timestamp.fromDate(new Date('2000-01-01T00:00:00Z')),
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+    });
+
+    const db = environment
+      .authenticatedContext('developer-1', { email: 'developer@example.com' })
+      .firestore();
+    const submission = (challengeId: string) => ({
+      schemaVersion: 2,
+      challengeId,
+      companyUid: 'company-1',
+      challengeTitle: 'Provider-neutral challenge',
+      challengeDescription: 'Build and document a useful working solution.',
+      challengeOutcome: challenge().outcome,
+      githubUrl: 'https://github.com/example/project',
+      publicWinnerConsent: false,
+      developerUid: 'developer-1',
+      developerName: 'Dev',
+      developerEmail: 'developer@example.com',
+      status: 'submitted',
+      createdAt: serverTimestamp(),
+    });
+
+    await assertFails(
+      setDoc(doc(db, 'submissions/open_developer-1'), {
+        ...submission('open'),
+        githubUrl: 'https://example.com/not-a-repository',
+      }),
+    );
+    await assertFails(
+      setDoc(doc(db, 'submissions/open_developer-1'), {
+        ...submission('open'),
+        notes: 'x'.repeat(2001),
+      }),
+    );
+    await assertFails(
+      setDoc(doc(db, 'submissions/closed_developer-1'), submission('closed')),
+    );
+    await assertFails(
+      setDoc(doc(db, 'submissions/expired_developer-1'), submission('expired')),
+    );
   });
 
   it('lets only the owner review a submission and blocks winner status', async () => {
