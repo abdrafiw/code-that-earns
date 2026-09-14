@@ -137,9 +137,14 @@ The application uses these collections:
 
 - users: Firebase user profile, role, email, developer name or company name, and timestamps.
 - challenges: challenge details, provider-neutral outcome, winner count, lifecycle status, company ownership, and timestamps.
-- submissions: challenge ID, repository/demo links, notes, developer ownership, lifecycle status, and timestamps.
+- submissions: challenge ID, submission/demo links, notes, developer ownership, lifecycle status, and timestamps.
 
-The deployed rules are in firestore.rules. Authenticated users can read user profiles and challenges. Companies can create, update, and delete their own challenges; developers can create submissions; and submission access is limited to the submitting developer or the company that owns the related challenge.
+The deployed rules are in firestore.rules. Authenticated users can read
+challenges, while private user profiles remain owner-readable. Challenge
+publication and winner finalization run through Firebase Functions; companies
+can only move their own open challenges into review or cancel them. Developers
+can create one submission per challenge, and submission access is limited to
+the submitting developer or the company that owns the related challenge.
 
 Keep role values consistent with the application’s uppercase values: DEVELOPER and COMPANY.
 
@@ -212,6 +217,14 @@ Tests live next to the implementation under src/ and use Jest with a jsdom envir
 
 ```bash
 npm test
+```
+
+The release checks also include Firestore emulator rules and trusted-backend
+transaction tests:
+
+```bash
+npm run test:rules
+npm run test:backend
 ```
 
 ## Contributing
