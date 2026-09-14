@@ -44,6 +44,10 @@ export const Header = () => {
   const name = user?.success
     ? user.user.companyName || user.user.name || 'User'
     : '';
+  const platformName =
+    user?.success && user.user.role === 'COMPANY'
+      ? user.user.companyName || 'Code That Earns'
+      : 'Code That Earns';
 
   const handleLogout = async () => {
     try {
@@ -70,7 +74,7 @@ export const Header = () => {
       }`}
     >
       <div
-        className={`flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8 ${
+        className={`flex min-h-16 w-full items-center justify-between px-4 py-2 sm:px-6 lg:px-8 ${
           user?.success ? 'lg:justify-end' : ''
         }`}
       >
@@ -80,6 +84,7 @@ export const Header = () => {
           className={`min-w-0 items-center gap-3 font-semibold text-gray-950 ${
             user?.success ? 'flex lg:hidden' : 'flex'
           }`}
+          title={platformName}
         >
           <span
             className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-[11px] font-bold tracking-tight text-white shadow-sm"
@@ -87,10 +92,8 @@ export const Header = () => {
           >
             CTE
           </span>
-          <span className="hidden max-w-[45vw] truncate text-sm font-bold tracking-wide uppercase sm:block lg:max-w-md">
-            {user?.success && user.user.role === 'COMPANY'
-              ? user.user.companyName || 'Code That Earns'
-              : 'Code That Earns'}
+          <span className="hidden max-w-[45vw] min-w-0 text-sm leading-5 font-bold tracking-wide break-words whitespace-normal uppercase sm:block lg:max-w-md">
+            {platformName}
           </span>
         </Link>
 

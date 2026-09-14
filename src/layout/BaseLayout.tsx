@@ -26,13 +26,13 @@ export const BaseLayout = () => {
           }`}
         >
           <div
-            className={`flex h-16 shrink-0 items-center justify-between border-b border-gray-200 ${
+            className={`flex min-h-16 shrink-0 items-center justify-between border-b border-gray-200 py-2 ${
               isSidebarCollapsed ? 'gap-1 px-1' : 'gap-3 px-4'
             }`}
           >
             <Link
               to="/"
-              className="flex min-w-0 items-center gap-3 font-semibold text-gray-950"
+              className="flex min-w-0 flex-1 items-center gap-3 font-semibold text-gray-950"
               title={isSidebarCollapsed ? platformName : undefined}
             >
               <span
@@ -42,7 +42,7 @@ export const BaseLayout = () => {
                 CTE
               </span>
               {!isSidebarCollapsed && (
-                <span className="truncate text-sm font-bold tracking-wide uppercase">
+                <span className="min-w-0 flex-1 text-sm leading-5 font-bold tracking-wide break-words whitespace-normal uppercase">
                   {platformName}
                 </span>
               )}
