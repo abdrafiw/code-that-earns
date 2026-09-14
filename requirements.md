@@ -202,7 +202,7 @@ Acceptance criteria:
 - Invalid URLs and excessive text are rejected.
 - Developers cannot read or change another developer's submission.
 
-### [x] MVP-009 — Complete review and winner selection
+### MVP-009 — Complete review and winner selection
 
 - Let companies view only submissions to their own challenges.
 - Show repository, demo, notes, developer display name, and status.
@@ -216,7 +216,7 @@ Acceptance criteria:
 - Non-winners are rejected when results are finalized.
 - A company cannot select a submission from another challenge.
 
-### [x] MVP-010 — Announce results and close the workflow
+### MVP-010 — Announce results and close the workflow
 
 - Show results on the completed challenge page.
 - Display consenting winners by display name; otherwise show `Private winner`.
@@ -230,7 +230,7 @@ Acceptance criteria:
 - No private contact, wallet, or payment information is public.
 - Completed challenges reject submissions and further winner selection.
 
-### MVP-011 — Verify the release
+### [x] MVP-011 — Verify the release
 
 - Add unit tests for outcomes, currency formatting, transitions, winner limits,
   and status display.
