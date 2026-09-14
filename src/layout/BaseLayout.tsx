@@ -22,12 +22,12 @@ export const BaseLayout = () => {
       {isAuthenticated && (
         <aside
           className={`dashboard-sidebar sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-gray-200 bg-white transition-[width] duration-200 lg:flex ${
-            isSidebarCollapsed ? 'w-18' : 'w-60'
+            isSidebarCollapsed ? 'w-20' : 'w-60'
           }`}
         >
           <div
-            className={`flex h-16 shrink-0 items-center border-b border-gray-200 ${
-              isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+            className={`flex h-16 shrink-0 items-center justify-between border-b border-gray-200 ${
+              isSidebarCollapsed ? 'gap-1 px-1' : 'gap-3 px-4'
             }`}
           >
             <Link
@@ -47,6 +47,24 @@ export const BaseLayout = () => {
                 </span>
               )}
             </Link>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0 text-gray-600 hover:bg-gray-100 hover:text-gray-950"
+              onClick={() => setIsSidebarCollapsed((collapsed) => !collapsed)}
+              aria-label={
+                isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
+              }
+              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isSidebarCollapsed ? (
+                <PanelLeftOpen aria-hidden="true" className="size-5" />
+              ) : (
+                <PanelLeftClose aria-hidden="true" className="size-5" />
+              )}
+            </Button>
           </div>
 
           <nav
@@ -55,32 +73,6 @@ export const BaseLayout = () => {
               isSidebarCollapsed ? 'px-2' : 'px-4'
             }`}
           >
-            <div
-              className={`mb-5 flex ${
-                isSidebarCollapsed ? 'justify-center' : 'justify-end'
-              }`}
-            >
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="text-gray-600 hover:bg-gray-100 hover:text-gray-950"
-                onClick={() => setIsSidebarCollapsed((collapsed) => !collapsed)}
-                aria-label={
-                  isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
-                }
-                title={
-                  isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
-                }
-              >
-                {isSidebarCollapsed ? (
-                  <PanelLeftOpen aria-hidden="true" className="size-5" />
-                ) : (
-                  <PanelLeftClose aria-hidden="true" className="size-5" />
-                )}
-              </Button>
-            </div>
-
             <NavigationLinks collapsed={isSidebarCollapsed} />
           </nav>
 
