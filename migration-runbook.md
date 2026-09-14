@@ -34,7 +34,8 @@ The second apply must report zero migrations. Verify that:
 
 - Source and destination record counts reconcile.
 - Sample BTC values match `amountMinor = BTC * 100,000,000` exactly.
-- Migrated documents use `schemaVersion: 2`.
+- Migrated challenge documents use `schemaVersion: 2`; migrated submissions
+  use `schemaVersion: 3` with `submissionUrl`.
 - Active submissions contain no `bitcoinAddress` or floating BTC fields.
 - Original challenge and submission documents exist under
   `migrationBackups/provider-neutral-v2/records`.

@@ -103,6 +103,7 @@ export function convertLegacySubmission(
 
   const {
     bitcoinAddress: _bitcoinAddress,
+    githubUrl: _githubUrl,
     bountyId: _bountyId,
     bountyTitle: _bountyTitle,
     bountyDescription: _bountyDescription,
@@ -110,15 +111,20 @@ export function convertLegacySubmission(
     challengeRewardBTC: _challengeRewardBTC,
     ...retained
   } = data;
+  const submissionUrl = data.submissionUrl ?? data.githubUrl;
+  if (typeof submissionUrl !== 'string' || !submissionUrl.trim()) {
+    throw new Error('Legacy submission has no submission URL.');
+  }
 
   return {
     ...retained,
-    schemaVersion: 2 as const,
+    schemaVersion: 3 as const,
     challengeId,
     challengeTitle: data.challengeTitle ?? data.bountyTitle ?? null,
     challengeDescription:
       data.challengeDescription ?? data.bountyDescription ?? null,
     challengeOutcome: outcome,
+    submissionUrl: submissionUrl.trim(),
     publicWinnerConsent: data.publicWinnerConsent === true,
     status: mapSubmissionStatus(data.status),
   };

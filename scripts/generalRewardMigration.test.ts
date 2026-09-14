@@ -60,13 +60,23 @@ describe('general reward migration transforms', () => {
     );
 
     expect(migrated).toMatchObject({
-      schemaVersion: 2,
+      schemaVersion: 3,
       challengeId: 'challenge-1',
       status: 'under_review',
       publicWinnerConsent: false,
+      submissionUrl: 'https://github.com/example/project',
     });
     expect(migrated).not.toHaveProperty('bitcoinAddress');
     expect(migrated).not.toHaveProperty('challengeRewardBTC');
+  });
+
+  it('rejects submissions without a usable submission URL', () => {
+    expect(() =>
+      convertLegacySubmission(
+        { challengeId: 'challenge-1' },
+        { type: 'recognition', recognitionLabel: 'Winner' },
+      ),
+    ).toThrow('Legacy submission has no submission URL.');
   });
 
   it('maps only supported lifecycle states', () => {
