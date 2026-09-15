@@ -28,6 +28,12 @@ import {
   normalizeChallengeFilter,
 } from '../../features/challenges/utils/challengeFilters';
 import { getErrorMessage } from '../../utils/getErrorMessage';
+import {
+  assertValidDate,
+  normalizePageSize,
+  normalizeRequiredId,
+  normalizeRequiredText,
+} from '../serviceGuards';
 
 export type CompanyChallengeFilters = {
   search?: string;
@@ -44,16 +50,34 @@ export class ChallengeNotFoundError extends Error {
   }
 }
 
+function assertCreateChallengeResponse(data: unknown): { id: string } {
+  if (
+    typeof data === 'object' &&
+    data !== null &&
+    'id' in data &&
+    typeof data.id === 'string' &&
+    data.id.trim()
+  ) {
+    return { id: data.id.trim() };
+  }
+
+  throw new Error('Challenge publication returned an invalid response.');
+}
+
 class ChallengeService {
   async getCompanyChallengeMetrics(companyUid: string) {
     try {
+      const normalizedCompanyUid = normalizeRequiredId(
+        companyUid,
+        'Company ID',
+      );
       const challengeCollection = collection(
         db,
         COLLECTIONS.CHALLENGES,
       ).withConverter(challengeConverter);
       const companyQuery = query(
         challengeCollection,
-        where('companyUid', '==', companyUid),
+        where('companyUid', '==', normalizedCompanyUid),
       );
       const categories = CHALLENGE_CATEGORIES;
 
@@ -99,22 +123,23 @@ class ChallengeService {
     if (!user) throw new Error('User not authenticated');
 
     try {
+      assertValidDate(deadline, 'Deadline');
       const publish = httpsCallable<Record<string, unknown>, { id: string }>(
         functions,
         'publishChallenge',
       );
       const result = await publish({
-        title,
-        description,
-        category,
-        difficulty,
+        title: normalizeRequiredText(title, 'Title'),
+        description: normalizeRequiredText(description, 'Description'),
+        category: normalizeRequiredText(category, 'Category'),
+        difficulty: normalizeRequiredText(difficulty, 'Difficulty'),
         outcome,
         winnerCount,
-        eligibility,
+        eligibility: normalizeRequiredText(eligibility, 'Eligibility'),
         responsibilityAccepted,
         deadline: deadline.toISOString(),
       });
-      return result.data;
+      return assertCreateChallengeResponse(result.data);
     } catch (error: unknown) {
       throw new Error(getErrorMessage(error));
     }
@@ -126,6 +151,7 @@ class ChallengeService {
     cursor?: QueryDocumentSnapshot<DocumentData>,
   ) {
     try {
+      const normalizedPageSize = normalizePageSize(pageSize);
       const constraints: QueryConstraint[] = [
         where('status', '==', 'open'),
         where('deadline', '>', Timestamp.now()),
@@ -147,7 +173,7 @@ class ChallengeService {
       constraints.push(
         orderBy('deadline', 'asc'),
         orderBy('createdAt', 'desc'),
-        limit(pageSize),
+        limit(normalizedPageSize),
       );
 
       let challengeQuery = query(
@@ -171,7 +197,7 @@ class ChallengeService {
       return {
         challenges,
         lastDoc,
-        hasMore: snapshot.docs.length === pageSize,
+        hasMore: snapshot.docs.length === normalizedPageSize,
       };
     } catch (error: unknown) {
       throw new Error(getErrorMessage(error));
@@ -180,10 +206,14 @@ class ChallengeService {
 
   async getChallengeByID(challengeID: string) {
     try {
+      const normalizedChallengeId = normalizeRequiredId(
+        challengeID,
+        'Challenge ID',
+      );
       const challengeDocRef = doc(
         db,
         COLLECTIONS.CHALLENGES,
-        challengeID,
+        normalizedChallengeId,
       ).withConverter(challengeConverter);
       const challengeSnap = await getDoc(challengeDocRef);
 
@@ -208,8 +238,12 @@ class ChallengeService {
     filters: CompanyChallengeFilters = {},
   ) {
     try {
+      const normalizedCompanyUid = normalizeRequiredId(
+        companyUid,
+        'Company ID',
+      );
       const constraints: QueryConstraint[] = [
-        where('companyUid', '==', companyUid),
+        where('companyUid', '==', normalizedCompanyUid),
       ];
       const search = normalizeChallengeFilter(filters.search ?? '');
       const category = filters.category ?? '';

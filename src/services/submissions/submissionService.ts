@@ -30,6 +30,12 @@ import type { SubmitSolutionPayload } from '../../features/submissions/types';
 import type { SubmissionDocument } from '../firestore-structure';
 import { isDesignChallenge } from '../../features/challenges/constants';
 import { isValidSubmissionUrl } from '../../utils/submissionUrl';
+import {
+  assertHttpsUrl,
+  normalizeOptionalText,
+  normalizePageSize,
+  normalizeRequiredId,
+} from '../serviceGuards';
 
 export type CompanySubmissionPage = {
   submissions: Array<{ id: string } & SubmissionDocument>;
@@ -40,10 +46,17 @@ export type CompanySubmissionPage = {
 class SubmissionService {
   async markUnderReview(submissionId: string) {
     try {
-      await updateDoc(doc(db, COLLECTIONS.SUBMISSIONS, submissionId), {
-        status: 'under_review',
-        reviewedAt: serverTimestamp(),
-      });
+      await updateDoc(
+        doc(
+          db,
+          COLLECTIONS.SUBMISSIONS,
+          normalizeRequiredId(submissionId, 'Submission ID'),
+        ),
+        {
+          status: 'under_review',
+          reviewedAt: serverTimestamp(),
+        },
+      );
     } catch (error: unknown) {
       throw new Error(getErrorMessage(error));
     }
@@ -51,7 +64,15 @@ class SubmissionService {
 
   async beginChallengeReview(challengeId: string) {
     try {
-      const challengeRef = doc(db, COLLECTIONS.CHALLENGES, challengeId);
+      const normalizedChallengeId = normalizeRequiredId(
+        challengeId,
+        'Challenge ID',
+      );
+      const challengeRef = doc(
+        db,
+        COLLECTIONS.CHALLENGES,
+        normalizedChallengeId,
+      );
       const challengeSnapshot = await getDoc(
         challengeRef.withConverter(challengeConverter),
       );
@@ -74,8 +95,20 @@ class SubmissionService {
     submissionIds: string[],
   ): Promise<void> {
     try {
+      if (submissionIds.length < 1) {
+        throw new Error('Select at least one winning submission.');
+      }
+      if (submissionIds.length > 10) {
+        throw new Error('You can select at most 10 winning submissions.');
+      }
+
       const finalize = httpsCallable(functions, 'finalizeWinners');
-      await finalize({ challengeId, submissionIds });
+      await finalize({
+        challengeId: normalizeRequiredId(challengeId, 'Challenge ID'),
+        submissionIds: submissionIds.map((submissionId) =>
+          normalizeRequiredId(submissionId, 'Submission ID'),
+        ),
+      });
     } catch (error: unknown) {
       throw new Error(getErrorMessage(error));
     }
@@ -92,10 +125,21 @@ class SubmissionService {
     if (!user) throw new Error('User not authenticated');
 
     try {
+      const normalizedChallengeId = normalizeRequiredId(
+        challengeID,
+        'Challenge ID',
+      );
+      const normalizedSubmissionUrl = submissionUrl.trim();
+      const normalizedLiveDemoUrl = normalizeOptionalText(liveDemoUrl);
+      const normalizedNotes = normalizeOptionalText(notes);
+      if (normalizedLiveDemoUrl) {
+        assertHttpsUrl(normalizedLiveDemoUrl, 'Live demo URL');
+      }
+
       const [challengeSnapshot, developerSnapshot, existingSubmissions] =
         await Promise.all([
           getDoc(
-            doc(db, COLLECTIONS.CHALLENGES, challengeID).withConverter(
+            doc(db, COLLECTIONS.CHALLENGES, normalizedChallengeId).withConverter(
               challengeConverter,
             ),
           ),
@@ -108,7 +152,7 @@ class SubmissionService {
                 submissionConverter,
               ),
               where('developerUid', '==', user.uid),
-              where('challengeId', '==', challengeID),
+              where('challengeId', '==', normalizedChallengeId),
               limit(1),
             ),
           ),
@@ -147,7 +191,7 @@ class SubmissionService {
         throw new Error('Complete your developer profile before submitting.');
       }
 
-      if (!isValidSubmissionUrl(submissionUrl, challenge.category)) {
+      if (!isValidSubmissionUrl(normalizedSubmissionUrl, challenge.category)) {
         throw new Error(
           isDesignChallenge(challenge.category)
             ? 'Submit a valid Figma, Behance, or Dribbble project URL.'
@@ -156,15 +200,15 @@ class SubmissionService {
       }
 
       const submissionData = {
-        challengeId: challengeID,
+        challengeId: normalizedChallengeId,
         companyUid: challenge.companyUid,
         challengeTitle: challenge.title ?? null,
         challengeDescription: challenge.description ?? null,
         schemaVersion: 3 as const,
         challengeOutcome: challenge.outcome,
-        submissionUrl,
-        ...(liveDemoUrl ? { liveDemoUrl } : {}),
-        ...(notes ? { notes } : {}),
+        submissionUrl: normalizedSubmissionUrl,
+        ...(normalizedLiveDemoUrl ? { liveDemoUrl: normalizedLiveDemoUrl } : {}),
+        ...(normalizedNotes ? { notes: normalizedNotes } : {}),
         publicWinnerConsent,
         developerUid: user.uid,
         developerName: developer.name,
@@ -173,7 +217,7 @@ class SubmissionService {
         createdAt: serverTimestamp(),
       };
 
-      const submissionId = `${challengeID}_${user.uid}`;
+      const submissionId = `${normalizedChallengeId}_${user.uid}`;
       await setDoc(
         doc(db, COLLECTIONS.SUBMISSIONS, submissionId).withConverter(
           submissionConverter,
@@ -187,11 +231,15 @@ class SubmissionService {
 
   async getSubmissionsByDeveloperId(developerUid: string) {
     try {
+      const normalizedDeveloperUid = normalizeRequiredId(
+        developerUid,
+        'Developer ID',
+      );
       const submissionsQuery = query(
         collection(db, COLLECTIONS.SUBMISSIONS).withConverter(
           submissionConverter,
         ),
-        where('developerUid', '==', developerUid),
+        where('developerUid', '==', normalizedDeveloperUid),
         orderBy('createdAt', 'desc'),
       );
 
@@ -218,12 +266,17 @@ class SubmissionService {
     cursor?: QueryDocumentSnapshot<DocumentData>;
   }): Promise<CompanySubmissionPage> {
     try {
+      const normalizedCompanyUid = normalizeRequiredId(
+        companyUid,
+        'Company ID',
+      );
+      const normalizedPageSize = normalizePageSize(pageSize);
       const constraints: QueryConstraint[] = [
-        where('companyUid', '==', companyUid),
+        where('companyUid', '==', normalizedCompanyUid),
         orderBy('createdAt', 'desc'),
       ];
       if (cursor) constraints.push(startAfter(cursor));
-      constraints.push(limit(pageSize));
+      constraints.push(limit(normalizedPageSize));
 
       const snapshot = await getDocs(
         query(
@@ -240,7 +293,7 @@ class SubmissionService {
           ...submission.data(),
         })),
         cursor: snapshot.docs[snapshot.docs.length - 1],
-        hasMore: snapshot.docs.length === pageSize,
+        hasMore: snapshot.docs.length === normalizedPageSize,
       };
     } catch (error: unknown) {
       throw new Error(getErrorMessage(error));
