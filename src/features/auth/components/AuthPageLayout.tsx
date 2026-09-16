@@ -12,7 +12,7 @@ type AuthPageLayoutProps = {
 
 const benefits = [
   'Clear coding challenges',
-  'GitHub-based submissions',
+  'Project-link submissions',
   'Transparent challenge outcomes',
 ];
 

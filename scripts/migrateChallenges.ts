@@ -9,6 +9,7 @@ import {
 import {
   convertLegacyChallenge,
   convertLegacySubmission,
+  hasReachedTargetSchema,
   MIGRATION_ID,
 } from './generalRewardMigration';
 
@@ -133,7 +134,7 @@ async function migrateCollection(
     for (const [index, item] of snapshot.docs.entries()) {
       stats.scanned += 1;
       const data = item.data();
-      if (data.schemaVersion === 2) {
+      if (hasReachedTargetSchema(collectionName, data)) {
         stats.skipped += 1;
         continue;
       }

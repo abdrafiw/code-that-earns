@@ -54,8 +54,8 @@ with these MVP constraints:
 - CTE records outcomes but does not process or guarantee rewards.
 - Reward-detail collection, fulfillment tracking, and disputes describe future
   behavior and are not implemented in the MVP.
-- Every challenge discloses its outcome, winner count, eligibility, geographic
-  restrictions, deadline, and relevant reward terms before submission.
+- Every challenge discloses its outcome, winner count, eligibility, deadline,
+  and relevant reward terms before submission.
 
 Acceptance criteria:
 

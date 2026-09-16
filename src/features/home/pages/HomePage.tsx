@@ -3,7 +3,7 @@ import {
   Award,
   Check,
   Code2,
-  Github,
+  Send,
   ShieldCheck,
   Trophy,
   Users,
@@ -19,10 +19,10 @@ const features = [
       'Browse focused engineering problems with clear requirements, rewards, and deadlines.',
   },
   {
-    icon: Github,
-    title: 'Submit from GitHub',
+    icon: Send,
+    title: 'Submit your work',
     description:
-      'Share your repository directly. Your code stays easy to review and simple to verify.',
+      'Share a supported repository or design project link for the organization to review.',
   },
   {
     icon: Award,
@@ -34,8 +34,8 @@ const features = [
 
 const steps = [
   'Choose a challenge that fits your skills',
-  'Build and submit your GitHub repository',
-  'Get selected and receive the challenge',
+  'Build and submit your project',
+  'See the results and receive the published outcome',
 ];
 
 export const HomePage = () => {
@@ -95,7 +95,7 @@ export const HomePage = () => {
               </span>
               <span className="inline-flex items-center gap-2">
                 <Check className="size-4 text-emerald-600" />
-                GitHub submissions
+                Project-link submissions
               </span>
               <span className="inline-flex items-center gap-2">
                 <Check className="size-4 text-emerald-600" />
@@ -193,7 +193,10 @@ export const HomePage = () => {
         <div className="mx-auto grid max-w-7xl divide-y divide-slate-200 px-5 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-8 lg:px-10">
           {[
             ['For developers', 'Turn your engineering skills into earnings'],
-            ['For organizations', 'Get focused solutions from capable builders'],
+            [
+              'For organizations',
+              'Get focused solutions from capable builders',
+            ],
             ['Built for trust', 'Clear challenges and transparent outcomes'],
           ].map(([title, text]) => (
             <div key={title} className="px-5 py-7 first:pl-0 last:pr-0">
@@ -210,7 +213,7 @@ export const HomePage = () => {
             Everything you need
           </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-slate-950 sm:text-4xl">
-            From challenge to payout, without the noise.
+            From challenge to outcome, without the noise.
           </h2>
           <p className="mt-4 text-base leading-7 text-slate-600">
             A focused workflow keeps organizations and developers aligned from

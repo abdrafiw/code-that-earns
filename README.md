@@ -2,7 +2,7 @@
 
 CTE (Code That Earns) is a role-based platform where organizations publish technical challenges, developers submit solutions, and organizations select winners for recognition or optional off-platform rewards.
 
-The project currently provides the core challenge, authentication, and submission workflows. Transaction history is read-only in the browser. Payment execution is intentionally unavailable until it can be implemented by a trusted backend.
+The project currently provides the core challenge, authentication, submission, review, and winner-selection workflows. CTE records published outcomes, while organizations and winners coordinate any reward delivery off-platform.
 
 ## Features
 
@@ -10,7 +10,7 @@ The project currently provides the core challenge, authentication, and submissio
 
 - Create an account as a developer and sign in with email and password.
 - Browse open challenges with pagination.
-- View a challenge and submit a GitHub repository URL.
+- View a challenge and submit a supported repository or design project URL.
 - Optionally include a live demo and submission notes.
 - Review personal submission history.
 
@@ -30,8 +30,8 @@ The project currently provides the core challenge, authentication, and submissio
 
 ## Current limitations
 
-- Payment execution is not implemented. A future implementation must run behind a trusted server or Firebase Cloud Function; payment-provider credentials must never be added to a Vite environment variable or browser bundle.
-- GitHub repositories are submitted as URLs. The app does not upload repository contents or verify repositories automatically.
+- CTE does not execute or verify reward delivery. Organizations and winners coordinate it outside the platform.
+- Solutions are submitted as supported external links. The app does not upload or independently verify project contents.
 - Firebase Analytics is initialized, so a configured Firebase project is required for the app to start successfully.
 
 ## Tech stack
@@ -43,7 +43,7 @@ The project currently provides the core challenge, authentication, and submissio
 - Firebase 11: Authentication, Firestore, and Analytics
 - Tailwind CSS 4 with the Tailwind Vite plugin
 - Radix UI primitives and Lucide/React Icons
-- Jest 30, Testing Library, and ts-jest
+- Jest 29, Testing Library, and ts-jest
 - Firebase Hosting
 
 ## Requirements
@@ -121,15 +121,15 @@ indexes before deploying the provider-neutral client.
 
 ## Application routes
 
-| Route                    | Purpose                                                     |
-| ------------------------ | ----------------------------------------------------------- |
-| /                        | Home page                                                   |
-| /login                   | Sign in                                                     |
-| /sign-up                 | Create a developer or company account                       |
-| /challenges              | Role-aware challenge marketplace or company management page |
-| /challenges/:challengeId | View challenge details and submit a solution                |
-| /submissions             | View developer submissions                                  |
-| /company-submissions     | View submissions for company challenges                     |
+| Route                    | Purpose                                                |
+| ------------------------ | ------------------------------------------------------ |
+| /                        | Home page                                              |
+| /login                   | Sign in                                                |
+| /sign-up                 | Create a developer or organization account             |
+| /challenges              | Role-aware marketplace or organization management page |
+| /challenges/:challengeId | View challenge details and submit a solution           |
+| /submissions             | View developer submissions                             |
+| /company-submissions     | View submissions for organization challenges           |
 
 ## Firestore
 
@@ -154,8 +154,8 @@ Follow [`migration-runbook.md`](migration-runbook.md) for backup, dry-run,
 verification, and rollback requirements.
 
 The application now stores challenges in the `challenges` collection. Existing
-documents in the legacy collection and their submission/transaction references
-must be migrated before deploying the renamed application. Authenticate with
+documents in the legacy collection and their submission references must be
+migrated before deploying the renamed application. Authenticate with
 Application Default Credentials, preview the migration, and only then apply it:
 
 ```bash

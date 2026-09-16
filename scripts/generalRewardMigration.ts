@@ -8,6 +8,23 @@ import {
 export const BTC_BASE_UNITS = 100_000_000;
 export const MIGRATION_ID = 'provider-neutral-v2';
 
+type MigratedCollection = 'challenges' | 'submissions';
+
+const TARGET_SCHEMA_VERSIONS: Record<MigratedCollection, number> = {
+  challenges: 2,
+  submissions: 3,
+};
+
+export function hasReachedTargetSchema(
+  collectionName: MigratedCollection,
+  data: DocumentData,
+) {
+  return (
+    typeof data.schemaVersion === 'number' &&
+    data.schemaVersion >= TARGET_SCHEMA_VERSIONS[collectionName]
+  );
+}
+
 export function btcToBaseUnits(value: unknown) {
   if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
     throw new Error('Legacy BTC reward must be a positive finite number.');

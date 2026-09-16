@@ -139,9 +139,11 @@ class SubmissionService {
       const [challengeSnapshot, developerSnapshot, existingSubmissions] =
         await Promise.all([
           getDoc(
-            doc(db, COLLECTIONS.CHALLENGES, normalizedChallengeId).withConverter(
-              challengeConverter,
-            ),
+            doc(
+              db,
+              COLLECTIONS.CHALLENGES,
+              normalizedChallengeId,
+            ).withConverter(challengeConverter),
           ),
           getDoc(
             doc(db, COLLECTIONS.USERS, user.uid).withConverter(userConverter),
@@ -207,7 +209,9 @@ class SubmissionService {
         schemaVersion: 3 as const,
         challengeOutcome: challenge.outcome,
         submissionUrl: normalizedSubmissionUrl,
-        ...(normalizedLiveDemoUrl ? { liveDemoUrl: normalizedLiveDemoUrl } : {}),
+        ...(normalizedLiveDemoUrl
+          ? { liveDemoUrl: normalizedLiveDemoUrl }
+          : {}),
         ...(normalizedNotes ? { notes: normalizedNotes } : {}),
         publicWinnerConsent,
         developerUid: user.uid,

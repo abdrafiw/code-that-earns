@@ -4,11 +4,27 @@ import {
   btcToBaseUnits,
   convertLegacyChallenge,
   convertLegacySubmission,
+  hasReachedTargetSchema,
   mapChallengeStatus,
   mapSubmissionStatus,
 } from './generalRewardMigration';
 
 describe('general reward migration transforms', () => {
+  it('uses the target schema for each migrated collection', () => {
+    expect(hasReachedTargetSchema('challenges', { schemaVersion: 2 })).toBe(
+      true,
+    );
+    expect(hasReachedTargetSchema('submissions', { schemaVersion: 2 })).toBe(
+      false,
+    );
+    expect(hasReachedTargetSchema('submissions', { schemaVersion: 3 })).toBe(
+      true,
+    );
+    expect(hasReachedTargetSchema('submissions', { schemaVersion: 4 })).toBe(
+      true,
+    );
+  });
+
   it.each([
     [0.00000001, 1],
     [0.1, 10_000_000],
