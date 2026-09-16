@@ -1,0 +1,4 @@
+interface:
+  display_name: "Firebase Security"
+  short_description: "Protect Firebase authorization and data integrity"
+  default_prompt: "Use $firebase-security to review and safely update this Firebase change."

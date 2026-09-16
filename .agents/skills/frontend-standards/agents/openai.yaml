@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend Standards"
+  short_description: "Apply repository frontend implementation standards"
+  default_prompt: "Use $frontend-standards to review and update this frontend change."

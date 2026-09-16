@@ -1,0 +1,4 @@
+interface:
+  display_name: "Challenge Workflow"
+  short_description: "Preserve challenge and winner workflow rules"
+  default_prompt: "Use $challenge-workflow to implement this CTE domain change safely."
