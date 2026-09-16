@@ -75,8 +75,8 @@ export function ChallengeTerms({ challenge }: { challenge: TChallenge }) {
 
       {outcome.type !== 'recognition' && (
         <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-          Rewards are delivered directly by the company outside CTE. CTE does
-          not verify or guarantee delivery.
+          Rewards are delivered directly by the organization outside CTE. CTE
+          does not verify or guarantee delivery.
         </p>
       )}
     </section>

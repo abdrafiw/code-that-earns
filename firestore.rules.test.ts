@@ -64,7 +64,7 @@ beforeEach(async () => {
     await setDoc(doc(db, 'users/company-1'), {
       uid: 'company-1',
       email: 'company@example.com',
-      role: 'COMPANY',
+      role: 'ORGANIZATION',
       companyName: 'Acme',
       createdAt: Timestamp.now(),
     });
@@ -94,7 +94,7 @@ describe('Firestore marketplace rules', () => {
     await assertFails(setDoc(doc(db, 'challenges/challenge-1'), challenge()));
   });
 
-  it('prevents companies from bypassing trusted publication', async () => {
+  it('prevents organizations from bypassing trusted publication', async () => {
     const db = environment
       .authenticatedContext('company-1', { email: 'company@example.com' })
       .firestore();

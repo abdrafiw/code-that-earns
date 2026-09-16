@@ -302,8 +302,10 @@ export function getPageSkeletonVariant(pathname: string): PageSkeletonVariant {
   const pages: Record<string, PageSkeletonVariant> = {
     '/challenges': 'dev-challenges',
     '/company-challenges': 'company-challenges',
+    '/organization-challenges': 'company-challenges',
     '/dev-challenges': 'dev-challenges',
     '/company-submissions': 'company-submissions',
+    '/organization-submissions': 'company-submissions',
     '/submissions': 'submissions',
   };
   return pages[path] || 'home';

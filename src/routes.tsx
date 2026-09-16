@@ -69,10 +69,10 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        element: <ProtectedRoute allowedRoles={['COMPANY']} />,
+        element: <ProtectedRoute allowedRoles={['ORGANIZATION']} />,
         children: [
           {
-            path: 'company-submissions',
+            path: 'organization-submissions',
             lazy: async () => {
               const { CompanySubmissionsPage } =
                 await import('./features/submissions/pages/CompanySubmissionsPage');
@@ -98,6 +98,14 @@ export const router = createBrowserRouter([
           },
           {
             path: 'company-challenges',
+            element: <Navigate to="/challenges" replace />,
+          },
+          {
+            path: 'company-submissions',
+            element: <Navigate to="/organization-submissions" replace />,
+          },
+          {
+            path: 'organization-challenges',
             element: <Navigate to="/challenges" replace />,
           },
         ],

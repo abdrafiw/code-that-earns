@@ -119,7 +119,7 @@ export const CompanyChallengesPage = () => {
             <div className="space-y-4 pt-6 sm:pt-8">
               <div className="flex justify-start sm:justify-end">
                 <Link
-                  to="/company-submissions"
+                  to="/organization-submissions"
                   className="inline-flex min-h-11 items-center rounded-md px-1 text-sm font-medium text-indigo-600 hover:text-indigo-700"
                 >
                   Review submissions

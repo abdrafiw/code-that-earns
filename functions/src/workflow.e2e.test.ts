@@ -16,7 +16,7 @@ async function clearFirestore() {
     { method: 'DELETE' },
   );
   await db.collection('users').doc('company-1').set({
-    role: 'COMPANY',
+    role: 'ORGANIZATION',
     companyName: 'Acme',
   });
 }

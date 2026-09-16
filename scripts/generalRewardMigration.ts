@@ -56,7 +56,7 @@ export function convertLegacyChallenge(data: DocumentData) {
       amountMinor: btcToBaseUnits(reward),
       currency: 'BTC',
       deliveryTerms:
-        'Legacy Bitcoin reward arranged directly with the company.',
+        'Legacy Bitcoin reward arranged directly with the organization.',
     },
     winnerCount:
       Number.isInteger(data.winnerCount) && data.winnerCount >= 1
@@ -96,7 +96,7 @@ export function convertLegacySubmission(
           ),
           currency: 'BTC',
           deliveryTerms:
-            'Legacy Bitcoin reward arranged directly with the company.',
+            'Legacy Bitcoin reward arranged directly with the organization.',
         }
       : undefined);
   if (!outcome) throw new Error('Legacy submission reward cannot be resolved.');

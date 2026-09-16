@@ -92,9 +92,9 @@ export function CompanySubmissionsPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <PageEmptyState
           title="No submissions found"
-          description="Submissions made to your company's challenges will appear here."
+          description="Submissions made to your organization's challenges will appear here."
           actionHref="/challenges"
-          actionLabel="View company challenges"
+          actionLabel="View organization challenges"
         />
       </div>
     );

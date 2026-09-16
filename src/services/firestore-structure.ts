@@ -13,7 +13,7 @@ export const COLLECTIONS = {
   SUBMISSIONS: 'submissions',
 } as const;
 
-export const USER_ROLES = ['DEVELOPER', 'COMPANY'] as const;
+export const USER_ROLES = ['DEVELOPER', 'ORGANIZATION'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
 const timestampSchema = z.instanceof(Timestamp);
@@ -107,7 +107,8 @@ const normalizeLegacyChallenge = (value: unknown) => {
             type: 'monetary',
             amountMinor,
             currency: 'BTC',
-            deliveryTerms: 'Legacy reward arranged directly with the company.',
+            deliveryTerms:
+              'Legacy reward arranged directly with the organization.',
           }
         : { type: 'recognition', recognitionLabel: 'Winner' }),
     winnerCount: data.winnerCount ?? 1,

@@ -146,7 +146,7 @@ export const SignUpForm = () => {
               htmlFor="company-name"
               className="text-sm font-medium text-slate-700"
             >
-              Company name
+              Organization name
             </Label>
             <Input
               id="company-name"
@@ -155,7 +155,7 @@ export const SignUpForm = () => {
               required
               value={form.values.companyName}
               onChange={(e) => form.setField('companyName', e.target.value)}
-              placeholder="Your Company Inc."
+              placeholder="Your organization"
               className="h-11 bg-slate-50 focus-visible:bg-white"
               aria-invalid={!!form.errors.companyName}
               aria-describedby={
@@ -197,7 +197,7 @@ export const SignUpForm = () => {
             <SelectContent className="">
               {roleOptions.map((role) => (
                 <SelectItem key={role} value={role}>
-                  {role.charAt(0) + role.slice(1).toLowerCase()}
+                  {role === 'ORGANIZATION' ? 'Organization' : 'Developer'}
                 </SelectItem>
               ))}
             </SelectContent>

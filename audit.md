@@ -27,7 +27,7 @@ Solution: Make role assignment server-controlled. In rules, permit only an expli
 
 [x] Challenge ownership can be forged during creation
 
-Evidence: the challenge create rule checks that the caller's profile says `COMPANY`, but does not require `request.resource.data.companyUid == request.auth.uid`. A company can create a challenge owned by another UID.
+Evidence: the challenge create rule checks that the caller's profile says `ORGANIZATION`, but does not require `request.resource.data.companyUid == request.auth.uid`. An organization can create a challenge owned by another UID.
 
 Solution: Validate `companyUid`, required fields, allowed category/difficulty values, positive reward, timestamps, and deadline in the create rule. Set ownership fields in a trusted Cloud Function for stronger guarantees.
 
@@ -45,7 +45,7 @@ Solution: Restrict company updates to review fields such as `status`, `reviewNot
 
 [x] Transaction creation is insecure for a financial record
 
-Evidence: any user whose editable profile says `COMPANY` can create any transaction payload, including arbitrary sender, recipient, amount, and status.
+Evidence: any user whose editable profile says `ORGANIZATION` can create any transaction payload, including arbitrary sender, recipient, amount, and status.
 
 Solution: prohibit transaction writes from browser clients. Create and update transactions only through a trusted backend using the Admin SDK after payment-provider verification. Keep clients read-only for authorized records.
 

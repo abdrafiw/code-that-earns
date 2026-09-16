@@ -69,7 +69,7 @@ class ChallengeService {
     try {
       const normalizedCompanyUid = normalizeRequiredId(
         companyUid,
-        'Company ID',
+        'Organization ID',
       );
       const challengeCollection = collection(
         db,
@@ -240,7 +240,7 @@ class ChallengeService {
     try {
       const normalizedCompanyUid = normalizeRequiredId(
         companyUid,
-        'Company ID',
+        'Organization ID',
       );
       const constraints: QueryConstraint[] = [
         where('companyUid', '==', normalizedCompanyUid),

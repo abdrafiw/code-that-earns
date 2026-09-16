@@ -44,7 +44,7 @@ export const useLogin = () => {
         return;
       }
 
-      if (data.role === 'COMPANY' || data.role === 'DEVELOPER') {
+      if (data.role === 'ORGANIZATION' || data.role === 'DEVELOPER') {
         navigate('/challenges', { replace: true });
       } else {
         navigate('/', { replace: true });

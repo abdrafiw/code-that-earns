@@ -1,6 +1,6 @@
 # CTE — Code That Earns
 
-CTE (Code That Earns) is a role-based platform where companies publish technical challenges, developers submit solutions, and companies select winners for recognition or optional off-platform rewards.
+CTE (Code That Earns) is a role-based platform where organizations publish technical challenges, developers submit solutions, and organizations select winners for recognition or optional off-platform rewards.
 
 The project currently provides the core challenge, authentication, and submission workflows. Transaction history is read-only in the browser. Payment execution is intentionally unavailable until it can be implemented by a trusted backend.
 
@@ -14,12 +14,12 @@ The project currently provides the core challenge, authentication, and submissio
 - Optionally include a live demo and submission notes.
 - Review personal submission history.
 
-### Companies
+### Organizations
 
-- Create an account as a company and sign in with email and password.
+- Create an account as an organization and sign in with email and password.
 - Create provider-neutral recognition, monetary, or non-monetary challenges.
-- View challenges created by the company.
-- Review submissions associated with company challenges.
+- View challenges created by the organization.
+- Review submissions associated with organization challenges.
 
 ### Shared
 
@@ -135,18 +135,18 @@ indexes before deploying the provider-neutral client.
 
 The application uses these collections:
 
-- users: Firebase user profile, role, email, developer name or company name, and timestamps.
-- challenges: challenge details, provider-neutral outcome, winner count, lifecycle status, company ownership, and timestamps.
+- users: Firebase user profile, role, email, developer name or organization name, and timestamps.
+- challenges: challenge details, provider-neutral outcome, winner count, lifecycle status, organization ownership, and timestamps.
 - submissions: challenge ID, submission/demo links, notes, developer ownership, lifecycle status, and timestamps.
 
 The deployed rules are in firestore.rules. Authenticated users can read
 challenges, while private user profiles remain owner-readable. Challenge
-publication and winner finalization run through Firebase Functions; companies
+publication and winner finalization run through Firebase Functions; organizations
 can only move their own open challenges into review or cancel them. Developers
 can create one submission per challenge, and submission access is limited to
-the submitting developer or the company that owns the related challenge.
+the submitting developer or the organization that owns the related challenge.
 
-Keep role values consistent with the application’s uppercase values: DEVELOPER and COMPANY.
+Keep role values consistent with the application’s uppercase values: DEVELOPER and ORGANIZATION.
 
 ### Legacy challenge migration
 

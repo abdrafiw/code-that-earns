@@ -26,8 +26,8 @@ async function clearFirestore() {
 
 async function seedChallenge(winnerCount = 1) {
   await Promise.all([
-    db.collection('users').doc('company-1').set({ role: 'COMPANY' }),
-    db.collection('users').doc('company-2').set({ role: 'COMPANY' }),
+    db.collection('users').doc('company-1').set({ role: 'ORGANIZATION' }),
+    db.collection('users').doc('company-2').set({ role: 'ORGANIZATION' }),
     db.collection('users').doc('developer-1').set({ role: 'DEVELOPER' }),
     db.collection('challenges').doc('challenge-1').set({
       companyUid: 'company-1',

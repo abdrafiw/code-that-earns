@@ -12,7 +12,7 @@ service cloud.firestore {
     }
 
     function hasValidRole(role) {
-      return role == 'DEVELOPER' || role == 'COMPANY';
+      return role == 'DEVELOPER' || role == 'ORGANIZATION';
     }
 
     function hasValidProfileName(data) {
@@ -20,7 +20,7 @@ service cloud.firestore {
           && data.name is string
           && data.name.size() > 0
           && !data.keys().hasAny(['companyName']))
-        || (data.role == 'COMPANY'
+        || (data.role == 'ORGANIZATION'
           && data.companyName is string
           && data.companyName.size() > 0
           && !data.keys().hasAny(['name']));
@@ -30,7 +30,7 @@ service cloud.firestore {
       return (resource.data.role == 'DEVELOPER'
           && request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['name', 'updatedAt']))
-        || (resource.data.role == 'COMPANY'
+        || (resource.data.role == 'ORGANIZATION'
           && request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['companyName', 'updatedAt']));
     }

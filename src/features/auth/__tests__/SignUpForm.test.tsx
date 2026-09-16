@@ -96,17 +96,19 @@ describe('SignUp Form', () => {
     await user.selectOptions(select, 'DEVELOPER');
 
     expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/company name/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(/organization name/i),
+    ).not.toBeInTheDocument();
   });
 
-  it('shows company name field when company is selected', async () => {
+  it('shows organization name field when organization is selected', async () => {
     renderSignUpForm();
 
     const user = userEvent.setup();
     const select = screen.getByRole('combobox', { name: /role/i });
-    await user.selectOptions(select, 'COMPANY');
+    await user.selectOptions(select, 'ORGANIZATION');
 
-    expect(screen.getByLabelText(/company name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/organization name/i)).toBeInTheDocument();
     expect(screen.queryByLabelText(/full name/i)).not.toBeInTheDocument();
   });
 });

@@ -28,7 +28,7 @@ const features = [
     icon: Award,
     title: 'Earn recognition and rewards',
     description:
-      'Win a challenge and receive recognition or an optional reward directly from the company.',
+      'Win a challenge and receive recognition or an optional reward directly from the organization.',
   },
 ];
 
@@ -67,7 +67,7 @@ export const HomePage = () => {
             </h1>
 
             <p className="mt-7 max-w-xl text-lg leading-8 text-slate-600">
-              CTE connects skilled developers with companies that need ideas
+              CTE connects skilled developers with organizations that need ideas
               shipped. Pick a challenge, submit your solution, and get rewarded
               for excellent work.
             </p>
@@ -193,7 +193,7 @@ export const HomePage = () => {
         <div className="mx-auto grid max-w-7xl divide-y divide-slate-200 px-5 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-8 lg:px-10">
           {[
             ['For developers', 'Turn your engineering skills into earnings'],
-            ['For companies', 'Get focused solutions from capable builders'],
+            ['For organizations', 'Get focused solutions from capable builders'],
             ['Built for trust', 'Clear challenges and transparent outcomes'],
           ].map(([title, text]) => (
             <div key={title} className="px-5 py-7 first:pl-0 last:pr-0">
@@ -213,8 +213,8 @@ export const HomePage = () => {
             From challenge to payout, without the noise.
           </h2>
           <p className="mt-4 text-base leading-7 text-slate-600">
-            A focused workflow keeps companies and developers aligned from the
-            first line of the brief to the final submission.
+            A focused workflow keeps organizations and developers aligned from
+            the first line of the brief to the final submission.
           </p>
         </div>
 

@@ -304,9 +304,9 @@ export const CreateChallengeDialog = ({
               }
             />
             <span>
-              I confirm that my company is responsible for delivering any stated
-              reward directly to selected winners outside CTE. CTE does not
-              process or guarantee rewards.
+              I confirm that my organization is responsible for delivering any
+              stated reward directly to selected winners outside CTE. CTE does
+              not process or guarantee rewards.
             </span>
           </label>
           <DialogFooter>

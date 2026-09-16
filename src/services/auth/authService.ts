@@ -42,7 +42,7 @@ class AuthService {
 
       try {
         await updateProfile(user, {
-          displayName: role === 'COMPANY' ? companyName : name,
+          displayName: role === 'ORGANIZATION' ? companyName : name,
         });
 
         const userData: UserData = {
@@ -52,7 +52,7 @@ class AuthService {
           createdAt: serverTimestamp(),
         };
 
-        if (role === 'COMPANY') {
+        if (role === 'ORGANIZATION') {
           userData.companyName = companyName;
         } else if (role === 'DEVELOPER') {
           userData.name = name;

@@ -19,8 +19,8 @@ async function getCompanySubmissions(
     throw new Error('You must be signed in to view submissions.');
   }
 
-  if (currentUser.role !== 'COMPANY') {
-    throw new Error('Only companies can view submissions.');
+  if (currentUser.role !== 'ORGANIZATION') {
+    throw new Error('Only organizations can view submissions.');
   }
 
   return submissionService.getSubmissionsForCompany({
@@ -56,7 +56,7 @@ export function useGetCompanySubmissions() {
   const currentUser = user?.success ? user.user : null;
   return useInfiniteQuery({
     queryKey: submissionKeys.companyList(currentUser?.uid),
-    enabled: !!currentUser && currentUser.role === 'COMPANY',
+    enabled: !!currentUser && currentUser.role === 'ORGANIZATION',
     queryFn: ({ pageParam }) => getCompanySubmissions(currentUser, pageParam),
     initialPageParam: undefined as
       QueryDocumentSnapshot<DocumentData> | undefined,

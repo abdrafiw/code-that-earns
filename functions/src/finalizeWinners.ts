@@ -27,10 +27,10 @@ export async function finalizeWinnersTransaction(
     if (!challengeSnapshot.exists) {
       throw new HttpsError('not-found', 'Challenge not found.');
     }
-    if (!profileSnapshot.exists || profileSnapshot.data()?.role !== 'COMPANY') {
+    if (!profileSnapshot.exists || profileSnapshot.data()?.role !== 'ORGANIZATION') {
       throw new HttpsError(
         'permission-denied',
-        'Only companies can finalize winners.',
+        'Only organizations can finalize winners.',
       );
     }
 

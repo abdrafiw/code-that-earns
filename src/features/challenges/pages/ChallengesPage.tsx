@@ -7,7 +7,7 @@ export function ChallengesPage() {
 
   if (authState.status !== 'authenticated') return null;
 
-  return authState.user.user.role === 'COMPANY' ? (
+  return authState.user.user.role === 'ORGANIZATION' ? (
     <CompanyChallengesPage />
   ) : (
     <DevChallengesPage />

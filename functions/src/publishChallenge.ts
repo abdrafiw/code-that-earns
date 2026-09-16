@@ -43,16 +43,16 @@ export async function publishChallengeOperation(
   input: PublishChallengeInput,
 ) {
   const profile = await db.collection('users').doc(actorUid).get();
-  if (!profile.exists || profile.data()?.role !== 'COMPANY') {
+  if (!profile.exists || profile.data()?.role !== 'ORGANIZATION') {
     throw new HttpsError(
       'permission-denied',
-      'Only companies can publish challenges.',
+      'Only organizations can publish challenges.',
     );
   }
   if (input.responsibilityAccepted !== true) {
     throw new HttpsError(
       'failed-precondition',
-      'The company must accept responsibility for the stated outcome.',
+      'The organization must accept responsibility for the stated outcome.',
     );
   }
 

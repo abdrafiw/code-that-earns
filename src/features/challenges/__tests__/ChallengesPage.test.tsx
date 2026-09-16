@@ -10,13 +10,13 @@ jest.mock('../../../config/firebase', () => ({
   db: {},
 }));
 jest.mock('../pages/CompanyChallengesPage', () => ({
-  CompanyChallengesPage: () => <p>Company challenges</p>,
+  CompanyChallengesPage: () => <p>Organization challenges</p>,
 }));
 jest.mock('../pages/DevChallengesPage', () => ({
   DevChallengesPage: () => <p>Developer challenges</p>,
 }));
 
-function renderForRole(role: 'COMPANY' | 'DEVELOPER') {
+function renderForRole(role: 'ORGANIZATION' | 'DEVELOPER') {
   const authState: AuthState = {
     status: 'authenticated',
     user: {
@@ -39,9 +39,9 @@ function renderForRole(role: 'COMPANY' | 'DEVELOPER') {
 }
 
 describe('ChallengesPage', () => {
-  it('shows challenge management to companies', () => {
-    renderForRole('COMPANY');
-    expect(screen.getByText('Company challenges')).toBeInTheDocument();
+  it('shows challenge management to organizations', () => {
+    renderForRole('ORGANIZATION');
+    expect(screen.getByText('Organization challenges')).toBeInTheDocument();
   });
 
   it('shows the challenge marketplace to developers', () => {

@@ -20,7 +20,9 @@ export const NavigationLinks = ({
   const pathname = location.pathname;
   const isChallenges = pathname.startsWith('/challenges');
   const isSubmissions = pathname === '/submissions';
-  const isCompanySubmissions = pathname === '/company-submissions';
+  const isOrganizationSubmissions =
+    pathname === '/organization-submissions' ||
+    pathname === '/company-submissions';
 
   const linkClass = (active: boolean) =>
     `flex w-full items-center gap-3.5 text-[15px] transition-colors ${
@@ -55,13 +57,15 @@ export const NavigationLinks = ({
       <li>
         <Link
           to={
-            userRole === 'DEVELOPER' ? '/submissions' : '/company-submissions'
+            userRole === 'DEVELOPER'
+              ? '/submissions'
+              : '/organization-submissions'
           }
           onClick={onLinkClick}
           aria-current={
-            isSubmissions || isCompanySubmissions ? 'page' : undefined
+            isSubmissions || isOrganizationSubmissions ? 'page' : undefined
           }
-          className={linkClass(isSubmissions || isCompanySubmissions)}
+          className={linkClass(isSubmissions || isOrganizationSubmissions)}
           title={collapsed ? 'Submissions' : undefined}
         >
           <FileCheck2 className="size-5 shrink-0" strokeWidth={1.8} />

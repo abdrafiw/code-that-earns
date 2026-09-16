@@ -43,7 +43,7 @@ export function SettingsMenu() {
               ['Email', profile.email],
               [
                 'Account type',
-                profile.role === 'COMPANY' ? 'Company' : 'Developer',
+                profile.role === 'ORGANIZATION' ? 'Organization' : 'Developer',
               ],
             ].map(([label, value]) => (
               <div key={label} className="py-3">

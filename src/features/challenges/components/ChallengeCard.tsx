@@ -80,7 +80,7 @@ export const ChallengeCard = ({ challenge }: { challenge: TChallenge }) => {
         <p className="text-xs wrap-break-word text-gray-500">
           Posted by{' '}
           <span className="font-medium text-gray-700">
-            {challenge.company || 'Company'}
+            {challenge.company || 'Organization'}
           </span>
         </p>
       </CardContent>

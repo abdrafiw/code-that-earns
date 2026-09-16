@@ -7,25 +7,25 @@ export const RoleIndicator = () => {
   if (!user?.success) return null;
 
   const userRole = user.user.role;
-  const isCompany = userRole === 'COMPANY';
+  const isOrganization = userRole === 'ORGANIZATION';
   const isDeveloper = userRole === 'DEVELOPER';
 
-  if (!isCompany && !isDeveloper) return null;
+  if (!isOrganization && !isDeveloper) return null;
 
   return (
     <div
       className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium ring-1 ring-inset ${
-        isCompany
+        isOrganization
           ? 'bg-violet-50 text-violet-700 ring-violet-200'
           : 'bg-emerald-50 text-emerald-700 ring-emerald-200'
       }`}
     >
-      {isCompany ? (
+      {isOrganization ? (
         <Building2 className="size-3.5" aria-hidden="true" />
       ) : (
         <Code className="size-3.5" aria-hidden="true" />
       )}
-      <span>{isCompany ? 'Organisation' : 'Developer'}</span>
+      <span>{isOrganization ? 'Organization' : 'Developer'}</span>
     </div>
   );
 };

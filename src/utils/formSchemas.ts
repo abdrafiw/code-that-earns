@@ -53,8 +53,8 @@ export function validateSignUp(values: SignUpFormValues) {
   if (!values.role) errors.role = 'Select an account type.';
   if (values.role === 'DEVELOPER' && !values.name.trim())
     errors.name = 'Enter your full name.';
-  if (values.role === 'COMPANY' && !values.companyName.trim())
-    errors.companyName = 'Enter your company name.';
+  if (values.role === 'ORGANIZATION' && !values.companyName.trim())
+    errors.companyName = 'Enter your organization name.';
   if (values.password.length < 6)
     errors.password = 'Password must contain at least 6 characters.';
   if (values.confirmPassword !== values.password)
@@ -106,10 +106,10 @@ export function validateChallenge(values: ChallengeFormValues) {
     !values.deliveryTerms.trim()
   )
     errors.deliveryTerms =
-      'Describe how and when the company will deliver the reward.';
+      'Describe how and when the organization will deliver the reward.';
   if (!values.acceptsOffPlatformResponsibility)
     errors.acceptsOffPlatformResponsibility =
-      'Confirm that your company is responsible for the stated outcome.';
+      'Confirm that your organization is responsible for the stated outcome.';
   if (!values.deadline || values.deadline < new Date())
     errors.deadline = 'Select a future deadline.';
   return errors;

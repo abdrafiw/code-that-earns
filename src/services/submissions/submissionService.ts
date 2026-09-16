@@ -268,7 +268,7 @@ class SubmissionService {
     try {
       const normalizedCompanyUid = normalizeRequiredId(
         companyUid,
-        'Company ID',
+        'Organization ID',
       );
       const normalizedPageSize = normalizePageSize(pageSize);
       const constraints: QueryConstraint[] = [

@@ -57,7 +57,7 @@ export function AuthPageLayout({
           </h2>
 
           <p className="max-w-md text-base leading-7 text-slate-300">
-            Join companies and developers working together through focused
+            Join organizations and developers working together through focused
             challenges and transparent rewards.
           </p>
 

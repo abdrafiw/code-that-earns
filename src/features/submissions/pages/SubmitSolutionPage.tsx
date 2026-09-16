@@ -90,7 +90,7 @@ export const SubmitSolutionPage = () => {
                 <Building2 className="size-4" />
                 Posted by{' '}
                 <span className="font-medium text-gray-700">
-                  {challenge.company || 'Company'}
+                  {challenge.company || 'Organization'}
                 </span>
               </div>
             </header>
@@ -124,8 +124,8 @@ export const SubmitSolutionPage = () => {
                   </ul>
                   {challenge.outcome.type !== 'recognition' && (
                     <p className="mt-3 text-xs text-emerald-800">
-                      Any reward is delivered directly by the company outside
-                      CTE and is not verified or guaranteed by CTE.
+                      Any reward is delivered directly by the organization
+                      outside CTE and is not verified or guaranteed by CTE.
                     </p>
                   )}
                 </section>

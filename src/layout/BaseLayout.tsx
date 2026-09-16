@@ -11,7 +11,7 @@ export const BaseLayout = () => {
   const { user } = useAppContext();
   const isAuthenticated = user?.success === true;
   const platformName =
-    user?.success && user.user.role === 'COMPANY'
+    user?.success && user.user.role === 'ORGANIZATION'
       ? user.user.companyName || 'Code That Earns'
       : 'Code That Earns';
 

@@ -3,12 +3,12 @@
 ## Objective
 
 Expand CTE from a Bitcoin-only bounty app into a provider-neutral challenge
-platform. Companies publish challenges, developers submit solutions, and
-companies select and recognize one or more winners.
+platform. Organizations publish challenges, developers submit solutions, and
+organizations select and recognize one or more winners.
 
 A challenge may offer recognition, a monetary reward, a non-monetary reward, or
 recognition plus a reward. CTE records the promised outcome but never collects,
-holds, transfers, escrows, refunds, verifies, or guarantees a reward. Companies
+holds, transfers, escrows, refunds, verifies, or guarantees a reward. Organizations
 and winners arrange any delivery outside CTE.
 
 This is the smallest useful release. Items under "Deferred work" are not required
@@ -18,9 +18,9 @@ for the MVP.
 
 The MVP is complete when:
 
-1. A company can create and publish a valid challenge.
+1. An organization can create and publish a valid challenge.
 2. A developer can find an open challenge and submit before its deadline.
-3. The company can review submissions and select no more than the published
+3. The organization can review submissions and select no more than the published
    winner count.
 4. Finalization marks winners and rejected submissions, completes the challenge,
    and publishes the result.
@@ -29,13 +29,13 @@ The MVP is complete when:
 
 ## MVP decisions
 
-- Keep the existing `DEVELOPER` and `COMPANY` roles.
+- Keep the existing `DEVELOPER` and `ORGANIZATION` roles.
 - Require authentication for marketplace actions.
 - Support one submission per developer per challenge.
 - Support 1–10 winners, with the same reward offered to each winner.
 - Store monetary amounts as integer minor units with an ISO 4217 currency code.
 - Do not collect bank, mobile-money, payment-service, or wallet details. Winners
-  and companies coordinate delivery outside CTE using their existing contact
+  and organizations coordinate delivery outside CTE using their existing contact
   channels.
 - Publish challenges directly as `open`; drafts and previews are deferred.
 - Use challenge states `open`, `in_review`, `completed`, and `cancelled`.
@@ -111,7 +111,7 @@ Acceptance criteria:
 
 - Unauthenticated users cannot write marketplace data.
 - Developers cannot create challenges or review submissions.
-- Companies cannot submit or modify another company's challenge.
+- Organizations cannot submit or modify another organization's challenge.
 - Clients cannot assign winner status or reopen terminal records.
 - Rule tests cover both roles, owners, non-owners, and unauthenticated users.
 
@@ -163,7 +163,7 @@ count, and eligibility. Conditionally collect:
 - Integer amount and currency when money is offered.
 - Description and delivery terms for a non-monetary reward.
 
-Publish directly as `open` after the company confirms responsibility for any
+Publish directly as `open` after the organization confirms responsibility for any
 off-platform reward.
 
 Acceptance criteria:
@@ -176,7 +176,7 @@ Acceptance criteria:
 ### [x] MVP-007 — Update discovery and challenge details
 
 - Remove Bitcoin-specific wording and visuals.
-- Show company, deadline, status, outcome, per-winner reward, winner count,
+- Show organization, deadline, status, outcome, per-winner reward, winner count,
   eligibility, and delivery terms.
 - List only open, unexpired challenges by default.
 - Retain search, category, difficulty, and stable pagination.
@@ -204,17 +204,17 @@ Acceptance criteria:
 
 ### [x] MVP-009 — Complete review and winner selection
 
-- Let companies view only submissions to their own challenges.
+- Let organizations view only submissions to their own challenges.
 - Show repository, demo, notes, developer display name, and status.
 - Allow submissions to be marked `under_review`.
-- Let the company choose up to the winner count and explicitly confirm
+- Let the organization choose up to the winner count and explicitly confirm
   finalization through the trusted backend.
 
 Acceptance criteria:
 
 - Finalization is atomic and cannot be reversed from the client.
 - Non-winners are rejected when results are finalized.
-- A company cannot select a submission from another challenge.
+- An organization cannot select a submission from another challenge.
 
 ### [x] MVP-010 — Announce results and close the workflow
 

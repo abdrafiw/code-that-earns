@@ -25,14 +25,14 @@ const developerState: AuthState = {
   },
 };
 
-const companyState: AuthState = {
+const organizationState: AuthState = {
   status: 'authenticated',
   user: {
     success: true,
     user: {
       uid: 'company-1',
       email: 'company@example.com',
-      role: 'COMPANY',
+      role: 'ORGANIZATION',
     },
   },
 };
@@ -56,8 +56,11 @@ function renderRoutes(authState: AuthState, initialPath: string) {
             <Route path="/protected" element={<p>Protected page</p>} />
             <Route path="/challenges" element={<p>Challenges page</p>} />
           </Route>
-          <Route element={<ProtectedRoute allowedRoles={['COMPANY']} />}>
-            <Route path="/company-only" element={<p>Company dashboard</p>} />
+          <Route element={<ProtectedRoute allowedRoles={['ORGANIZATION']} />}>
+            <Route
+              path="/organization-only"
+              element={<p>Organization dashboard</p>}
+            />
           </Route>
         </Routes>
       </MemoryRouter>
@@ -73,19 +76,19 @@ describe('route guards', () => {
   });
 
   it('redirects users away from routes for another role', () => {
-    renderRoutes(developerState, '/company-only');
+    renderRoutes(developerState, '/organization-only');
 
     expect(screen.getByText('Challenges page')).toBeInTheDocument();
   });
 
   it('renders routes allowed for the authenticated role', () => {
-    renderRoutes(companyState, '/company-only');
+    renderRoutes(organizationState, '/organization-only');
 
-    expect(screen.getByText('Company dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Organization dashboard')).toBeInTheDocument();
   });
 
   it('redirects authenticated users away from guest-only routes', () => {
-    renderRoutes(companyState, '/login');
+    renderRoutes(organizationState, '/login');
 
     expect(screen.getByText('Challenges page')).toBeInTheDocument();
   });
