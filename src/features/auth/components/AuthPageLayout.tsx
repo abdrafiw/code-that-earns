@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ArrowLeft, Award, Check, Code2, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Award, Check, Code2, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 type AuthPageLayoutProps = {
@@ -11,7 +11,7 @@ type AuthPageLayoutProps = {
 };
 
 const benefits = [
-  'Clear coding challenges',
+  'Clear coding and design challenges',
   'Project-link submissions',
   'Transparent challenge outcomes',
 ];
@@ -48,17 +48,13 @@ export function AuthPageLayout({
         </Link>
 
         <div className="relative max-w-lg space-y-6 lg:my-auto">
-          <p className="text-sm font-semibold text-indigo-400">
-            Build. Submit. Earn.
-          </p>
-
           <h2 className="text-4xl leading-tight font-semibold tracking-[-0.04em] sm:text-5xl">
-            Great code should open real opportunities.
+            Great work should open real opportunities.
           </h2>
 
           <p className="max-w-md text-base leading-7 text-slate-300">
-            Join organizations and developers working together through focused
-            challenges and transparent rewards.
+            Join developers, designers, and organizations working together
+            through focused challenges and transparent rewards.
           </p>
 
           <ul className="grid gap-3 text-sm text-slate-300 sm:grid-cols-3 lg:grid-cols-1">
@@ -73,13 +69,10 @@ export function AuthPageLayout({
           </ul>
         </div>
 
-        <div className="relative hidden items-center gap-4 border-t border-white/10 text-xs text-slate-400 lg:flex">
+        <div className="relative hidden flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/10 pt-6 text-xs text-slate-400 lg:flex">
           <span className="inline-flex items-center gap-2">
-            <ShieldCheck
-              aria-hidden="true"
-              className="size-4 text-emerald-400"
-            />
-            Secure Firebase authentication
+            <Users aria-hidden="true" className="size-4 text-emerald-400" />
+            Built for developers, designers, and organizations
           </span>
           <span className="inline-flex items-center gap-2">
             <Award aria-hidden="true" className="size-4 text-emerald-400" />
