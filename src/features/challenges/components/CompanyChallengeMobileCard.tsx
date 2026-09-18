@@ -11,11 +11,13 @@ const difficultyStyles: Record<string, string> = {
   advanced: 'bg-red-50 text-red-700',
 };
 
+type CompanyChallengeMobileCardProps = {
+  challenge: TChallenge;
+};
+
 export function CompanyChallengeMobileCard({
   challenge,
-}: {
-  challenge: TChallenge;
-}) {
+}: CompanyChallengeMobileCardProps) {
   const difficulty = normalizeChallengeFilter(challenge.difficulty);
 
   return (

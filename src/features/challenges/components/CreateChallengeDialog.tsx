@@ -69,21 +69,24 @@ const initialForm: ChallengeFormValues = {
 
 export const CreateChallengeDialog = ({
   triggerClassName,
-}: {
-  triggerClassName?: string;
-} = {}) => {
+}: { triggerClassName?: string } = {}) => {
   const [open, setOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+
   const form = useTypedForm(initialForm);
   const createChallengeMutation = useCreateChallenge();
+
   const offersRecognition =
     form.values.outcomeType === 'recognition' ||
     form.values.outcomeType === 'recognition_and_reward';
+
   const offersMoney =
     form.values.outcomeType === 'monetary' ||
     form.values.outcomeType === 'recognition_and_reward';
+
   const offersNonMonetaryReward = form.values.outcomeType === 'non_monetary';
   const offersReward = form.values.outcomeType !== 'recognition';
+
   const hasRequiredFields = Boolean(
     form.values.title.trim() &&
     form.values.description.trim() &&
@@ -259,6 +262,7 @@ export const CreateChallengeDialog = ({
               }
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="challenge-deadline">Deadline</Label>
             <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
@@ -292,6 +296,7 @@ export const CreateChallengeDialog = ({
               </PopoverContent>
             </Popover>
           </div>
+
           <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
             <input
               type="checkbox"
@@ -309,6 +314,7 @@ export const CreateChallengeDialog = ({
               not process or guarantee rewards.
             </span>
           </label>
+
           <DialogFooter>
             <Button
               type="button"

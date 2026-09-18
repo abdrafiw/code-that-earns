@@ -28,6 +28,17 @@ async function getChallenges(
   };
 }
 
+export function useGetChallenges(filters: PublicChallengeFilters = {}) {
+  return useInfiniteQuery({
+    queryKey: challengeKeys.publicList(filters),
+    queryFn: ({ pageParam }) => getChallenges(filters, pageParam),
+    initialPageParam: undefined as
+      QueryDocumentSnapshot<DocumentData> | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.lastDoc : undefined,
+  });
+}
+
 async function getCompanyChallenges(
   companyUid: string,
   filters: CompanyChallengeFilters,
@@ -48,17 +59,6 @@ export function useGetCompanyChallenges(
     queryFn: () => getCompanyChallenges(companyUid!, filters),
     enabled: Boolean(companyUid),
     placeholderData: keepPreviousData,
-  });
-}
-
-export function useGetChallenges(filters: PublicChallengeFilters = {}) {
-  return useInfiniteQuery({
-    queryKey: challengeKeys.publicList(filters),
-    queryFn: ({ pageParam }) => getChallenges(filters, pageParam),
-    initialPageParam: undefined as
-      QueryDocumentSnapshot<DocumentData> | undefined,
-    getNextPageParam: (lastPage) =>
-      lastPage.hasMore ? lastPage.lastDoc : undefined,
   });
 }
 

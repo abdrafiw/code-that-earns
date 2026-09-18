@@ -10,15 +10,13 @@ const outcomeLabels = {
   recognition_and_reward: 'Recognition and reward',
 } as const;
 
-function Term({
-  icon: Icon,
-  label,
-  children,
-}: {
+type TermProp = {
   icon: typeof Award;
   label: string;
   children: React.ReactNode;
-}) {
+};
+
+const Term = ({ icon: Icon, label, children }: TermProp) => {
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
       <dt className="flex items-center gap-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -30,7 +28,7 @@ function Term({
       </dd>
     </div>
   );
-}
+};
 
 export function ChallengeTerms({ challenge }: { challenge: TChallenge }) {
   const { outcome } = challenge;
