@@ -5,16 +5,12 @@ import type { SignInPayload, SignUpPayload } from '../types';
 import { useMutation } from '@tanstack/react-query';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 
-async function login(payload: SignInPayload) {
-  const user = await authService.signIn(payload);
-  return user;
-}
-
-function getRequestedPath(state: unknown) {
+const getRequestedPath = (state: unknown) => {
   if (typeof state !== 'object' || state === null || !('from' in state))
     return null;
 
   const from = state.from;
+
   if (
     typeof from !== 'object' ||
     from === null ||
@@ -25,8 +21,14 @@ function getRequestedPath(state: unknown) {
 
   const search =
     'search' in from && typeof from.search === 'string' ? from.search : '';
+
   const hash = 'hash' in from && typeof from.hash === 'string' ? from.hash : '';
   return `${from.pathname}${search}${hash}`;
+};
+
+async function login(payload: SignInPayload) {
+  const user = await authService.signIn(payload);
+  return user;
 }
 
 export const useLogin = () => {
@@ -68,7 +70,6 @@ export const useSignUp = () => {
     mutationFn: signUp,
     onSuccess: () => {
       toast.success('Signup successful');
-
       navigate('/challenges');
     },
     onError: (error: Error) => {
