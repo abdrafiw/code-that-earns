@@ -35,4 +35,4 @@ Recent history follows Conventional Commit prefixes such as `feat:`, `fix:`, `re
 
 ## Security & Agent Instructions
 
-Never commit `.env` files, credentials, or private reward details. Treat browser input as untrusted and keep privileged writes in Firebase Functions. Before relevant work, follow the project skills in `.agents/skills/`: `frontend-standards`, `firebase-security`, and `challenge-workflow`.
+Never commit `.env` files, credentials, or private reward details. Treat browser input as untrusted and keep privileged writes in Firebase Functions. Before relevant work, follow the project skills in `.agents/skills/`: `branch-workflow`, `frontend-standards`, `firebase-security`, and `challenge-workflow`.
