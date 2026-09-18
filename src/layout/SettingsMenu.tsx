@@ -11,6 +11,7 @@ import {
 } from '../components/ui/dialog';
 
 import { useAppContext } from '../hooks/useAppContext';
+import { USER_ROLE_LABELS } from '../utils/userRole';
 
 export function SettingsMenu() {
   const { user } = useAppContext();
@@ -41,10 +42,7 @@ export function SettingsMenu() {
             {[
               ['Name', profile.companyName || profile.name || 'Not provided'],
               ['Email', profile.email],
-              [
-                'Account type',
-                profile.role === 'ORGANIZATION' ? 'Organization' : 'Developer',
-              ],
+              ['Account type', USER_ROLE_LABELS[profile.role]],
             ].map(([label, value]) => (
               <div key={label} className="py-3">
                 <dt className="text-gray-500">{label}</dt>

@@ -78,6 +78,16 @@ describe('SignUp Form', () => {
     expect(screen.getByRole('combobox', { name: /role/i })).toHaveTextContent(
       /select your role/i,
     );
+    expect(
+      screen.getByRole('option', {
+        name: 'Contributor (find challenges and submit work)',
+      }),
+    ).toHaveValue('DEVELOPER');
+    expect(
+      screen.getByRole('option', {
+        name: 'Organization (publish challenges and review submissions)',
+      }),
+    ).toHaveValue('ORGANIZATION');
 
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
 
@@ -88,7 +98,7 @@ describe('SignUp Form', () => {
     expect(screen.getByRole('link', { name: /sign in/i })).toBeInTheDocument();
   });
 
-  it('shows full name field when developer is selected', async () => {
+  it('shows full name field when contributor is selected', async () => {
     renderSignUpForm();
 
     const user = userEvent.setup();

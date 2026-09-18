@@ -1,5 +1,6 @@
 import { Building2, Code } from 'lucide-react';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { USER_ROLE_LABELS } from '../../../utils/userRole';
 
 export const RoleIndicator = () => {
   const { user } = useAppContext();
@@ -25,7 +26,7 @@ export const RoleIndicator = () => {
       ) : (
         <Code className="size-3.5" aria-hidden="true" />
       )}
-      <span>{isOrganization ? 'Organization' : 'Developer'}</span>
+      <span>{USER_ROLE_LABELS[userRole]}</span>
     </div>
   );
 };

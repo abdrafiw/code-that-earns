@@ -23,6 +23,7 @@ import {
   validateSignUp,
   type SignUpFormValues,
 } from '../../../utils/formSchemas';
+import { USER_ROLE_OPTION_LABELS } from '../../../utils/userRole';
 
 const initialValues: SignUpFormValues = {
   name: '',
@@ -197,7 +198,7 @@ export const SignUpForm = () => {
             <SelectContent className="">
               {roleOptions.map((role) => (
                 <SelectItem key={role} value={role}>
-                  {role === 'ORGANIZATION' ? 'Organization' : 'Developer'}
+                  {USER_ROLE_OPTION_LABELS[role]}
                 </SelectItem>
               ))}
             </SelectContent>
